@@ -54,9 +54,16 @@ class _TechnicianJobsPageState extends ConsumerState<TechnicianJobsPage> {
     
     // Filter bookings - show ALL jobs to ALL technicians (no assignment filter)
     final filteredBookings = bookingState.bookings.where((booking) {
-      // Show ALL jobs regardless of assignment - any technician can see any job
-      // This allows technicians to see all available work and collaborate
-      
+      // Apply date range filter
+      if (_dateRange != null) {
+        final d = booking.scheduledDate;
+        final start = DateTime(
+            _dateRange!.start.year, _dateRange!.start.month, _dateRange!.start.day);
+        final end = DateTime(
+            _dateRange!.end.year, _dateRange!.end.month, _dateRange!.end.day, 23, 59, 59);
+        if (d.isBefore(start) || d.isAfter(end)) return false;
+      }
+
       // Apply status filter
       if (_filterStatus == 'all') return true;
       if (_filterStatus == 'pending') return booking.status == BookingStatus.pending || booking.status == BookingStatus.confirmed;

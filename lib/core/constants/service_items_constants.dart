@@ -1,256 +1,322 @@
 import 'package:car_maintenance_system_new/core/models/service_item_model.dart';
 import 'package:car_maintenance_system_new/features/booking/domain/entities/booking_entity.dart';
 
+/// Predefined service catalog for an Egyptian car maintenance center.
+/// Prices are in Egyptian Pounds (EGP).
 class ServiceItemsConstants {
-  // Predefined service items for Regular Maintenance
+  ServiceItemsConstants._();
+
+  // ────────────────────────────────────────────────────────────
+  // REGULAR MAINTENANCE (صيانة دورية)
+  // ────────────────────────────────────────────────────────────
   static final List<ServiceItemEntity> regularMaintenanceItems = [
     ServiceItemEntity(
       id: 'oil_change',
-      name: 'Oil Change',
+      name: 'تغيير الزيت',
       type: ServiceItemType.service,
-      price: 35.00,
-      description: 'Engine oil replacement',
+      price: 150,
+      category: 'regular',
+      description: 'تغيير زيت المحرك مع الفلتر',
     ),
     ServiceItemEntity(
       id: 'oil_filter',
-      name: 'Oil Filter',
+      name: 'فلتر الزيت',
       type: ServiceItemType.part,
-      price: 12.99,
-      description: 'Standard oil filter',
+      price: 60,
+      category: 'regular',
+      description: 'استبدال فلتر الزيت',
     ),
     ServiceItemEntity(
       id: 'air_filter',
-      name: 'Air Filter',
+      name: 'فلتر الهواء',
       type: ServiceItemType.part,
-      price: 18.50,
-      description: 'Engine air filter replacement',
+      price: 80,
+      category: 'regular',
+      description: 'استبدال فلتر الهواء',
     ),
     ServiceItemEntity(
-      id: 'cabin_filter',
-      name: 'Cabin Air Filter',
+      id: 'ac_filter',
+      name: 'فلتر التكييف (كابينة)',
       type: ServiceItemType.part,
-      price: 22.00,
-      description: 'AC cabin filter',
-    ),
-    ServiceItemEntity(
-      id: 'tire_rotation',
-      name: 'Tire Rotation',
-      type: ServiceItemType.service,
-      price: 25.00,
-      description: 'Rotate all four tires',
-    ),
-    ServiceItemEntity(
-      id: 'fluid_top_up',
-      name: 'Fluid Top-Up',
-      type: ServiceItemType.service,
-      price: 15.00,
-      description: 'Check and top up all fluids',
-    ),
-  ];
-
-  // Predefined service items for Inspection
-  static final List<ServiceItemEntity> inspectionItems = [
-    ServiceItemEntity(
-      id: 'basic_inspection',
-      name: 'Basic Inspection',
-      type: ServiceItemType.service,
-      price: 50.00,
-      description: 'Visual inspection of major components',
-    ),
-    ServiceItemEntity(
-      id: 'comprehensive_inspection',
-      name: 'Comprehensive Inspection',
-      type: ServiceItemType.service,
-      price: 120.00,
-      description: 'Detailed 100-point inspection',
-    ),
-    ServiceItemEntity(
-      id: 'brake_inspection',
-      name: 'Brake System Inspection',
-      type: ServiceItemType.service,
-      price: 30.00,
-      description: 'Inspect brake pads, rotors, and fluid',
-    ),
-    ServiceItemEntity(
-      id: 'tire_inspection',
-      name: 'Tire Inspection',
-      type: ServiceItemType.service,
-      price: 20.00,
-      description: 'Check tire tread depth and pressure',
-    ),
-    ServiceItemEntity(
-      id: 'battery_test',
-      name: 'Battery Test',
-      type: ServiceItemType.service,
-      price: 15.00,
-      description: 'Battery health check',
-    ),
-    ServiceItemEntity(
-      id: 'diagnostic_scan',
-      name: 'Computer Diagnostic Scan',
-      type: ServiceItemType.service,
-      price: 75.00,
-      description: 'OBD-II system scan',
-    ),
-  ];
-
-  // Predefined service items for Repair
-  static final List<ServiceItemEntity> repairItems = [
-    ServiceItemEntity(
-      id: 'brake_pads_front',
-      name: 'Brake Pads (Front)',
-      type: ServiceItemType.part,
-      price: 85.00,
-      description: 'Front brake pad set',
-    ),
-    ServiceItemEntity(
-      id: 'brake_pads_rear',
-      name: 'Brake Pads (Rear)',
-      type: ServiceItemType.part,
-      price: 75.00,
-      description: 'Rear brake pad set',
-    ),
-    ServiceItemEntity(
-      id: 'brake_rotors',
-      name: 'Brake Rotors',
-      type: ServiceItemType.part,
-      price: 120.00,
-      description: 'Brake rotor replacement (per pair)',
-    ),
-    ServiceItemEntity(
-      id: 'battery',
-      name: 'Car Battery',
-      type: ServiceItemType.part,
-      price: 150.00,
-      description: 'Standard car battery',
-    ),
-    ServiceItemEntity(
-      id: 'alternator',
-      name: 'Alternator',
-      type: ServiceItemType.part,
-      price: 280.00,
-      description: 'Alternator replacement',
-    ),
-    ServiceItemEntity(
-      id: 'starter_motor',
-      name: 'Starter Motor',
-      type: ServiceItemType.part,
-      price: 220.00,
-      description: 'Starter motor replacement',
+      price: 100,
+      category: 'regular',
+      description: 'فلتر هواء المقصورة',
     ),
     ServiceItemEntity(
       id: 'spark_plugs',
-      name: 'Spark Plugs (Set)',
+      name: 'بواجي (طقم)',
       type: ServiceItemType.part,
-      price: 45.00,
-      description: 'Set of 4 spark plugs',
+      price: 200,
+      category: 'regular',
+      description: 'طقم بواجي للمحرك',
     ),
     ServiceItemEntity(
-      id: 'serpentine_belt',
-      name: 'Serpentine Belt',
-      type: ServiceItemType.part,
-      price: 35.00,
-      description: 'Engine serpentine belt',
+      id: 'tire_rotation',
+      name: 'تبديل الكفرات',
+      type: ServiceItemType.service,
+      price: 80,
+      category: 'regular',
+      description: 'تبديل وتوازن الكفرات الأربع',
     ),
     ServiceItemEntity(
-      id: 'timing_belt',
-      name: 'Timing Belt',
-      type: ServiceItemType.part,
-      price: 180.00,
-      description: 'Timing belt replacement',
+      id: 'fluid_check',
+      name: 'تعبئة السوائل',
+      type: ServiceItemType.service,
+      price: 50,
+      category: 'regular',
+      description: 'فحص وتعبئة السوائل (تبريد، فرامل، تروس)',
     ),
+    ServiceItemEntity(
+      id: 'coolant_flush',
+      name: 'تغيير سائل التبريد',
+      type: ServiceItemType.service,
+      price: 180,
+      category: 'regular',
+      description: 'صرف وتعبئة سائل التبريد',
+    ),
+  ];
+
+  // ────────────────────────────────────────────────────────────
+  // INSPECTION (فحص وكشف)
+  // ────────────────────────────────────────────────────────────
+  static final List<ServiceItemEntity> inspectionItems = [
+    ServiceItemEntity(
+      id: 'computer_scan',
+      name: 'فحص كمبيوتر (سكانر)',
+      type: ServiceItemType.service,
+      price: 150,
+      category: 'inspection',
+      description: 'قراءة أعطال الكمبيوتر OBD-II',
+    ),
+    ServiceItemEntity(
+      id: 'full_inspection',
+      name: 'كشف شامل',
+      type: ServiceItemType.service,
+      price: 300,
+      category: 'inspection',
+      description: 'فحص شامل لجميع أجزاء السيارة',
+    ),
+    ServiceItemEntity(
+      id: 'brake_inspection',
+      name: 'فحص الفرامل',
+      type: ServiceItemType.service,
+      price: 100,
+      category: 'inspection',
+      description: 'فحص تيل، أقراص، وسائل الفرامل',
+    ),
+    ServiceItemEntity(
+      id: 'battery_test',
+      name: 'فحص البطارية',
+      type: ServiceItemType.service,
+      price: 50,
+      category: 'inspection',
+      description: 'اختبار حالة البطارية والشحن',
+    ),
+    ServiceItemEntity(
+      id: 'suspension_check',
+      name: 'فحص السوسبنشن',
+      type: ServiceItemType.service,
+      price: 120,
+      category: 'inspection',
+      description: 'فحص الهوادي والمساعدين والأرمات',
+    ),
+    ServiceItemEntity(
+      id: 'ac_check',
+      name: 'فحص التكييف',
+      type: ServiceItemType.service,
+      price: 100,
+      category: 'inspection',
+      description: 'فحص ضغط الفريون وكفاءة التكييف',
+    ),
+  ];
+
+  // ────────────────────────────────────────────────────────────
+  // REPAIR (إصلاح)
+  // ────────────────────────────────────────────────────────────
+  static final List<ServiceItemEntity> repairItems = [
+    // فرامل
+    ServiceItemEntity(
+      id: 'brake_pads_front',
+      name: 'تيل فرامل أمامي',
+      type: ServiceItemType.part,
+      price: 350,
+      category: 'repair',
+      description: 'طقم تيل فرامل أمامي',
+    ),
+    ServiceItemEntity(
+      id: 'brake_pads_rear',
+      name: 'تيل فرامل خلفي',
+      type: ServiceItemType.part,
+      price: 300,
+      category: 'repair',
+      description: 'طقم تيل فرامل خلفي',
+    ),
+    ServiceItemEntity(
+      id: 'brake_disc',
+      name: 'قرص فرامل',
+      type: ServiceItemType.part,
+      price: 500,
+      category: 'repair',
+      description: 'قرص فرامل (الواحد)',
+    ),
+    ServiceItemEntity(
+      id: 'brake_labor',
+      name: 'أجرة تركيب الفرامل',
+      type: ServiceItemType.labor,
+      price: 200,
+      category: 'repair',
+      description: 'أجرة تركيب وضبط منظومة الفرامل',
+    ),
+    // بطارية وكهرباء
+    ServiceItemEntity(
+      id: 'battery',
+      name: 'بطارية سيارة',
+      type: ServiceItemType.part,
+      price: 1200,
+      category: 'repair',
+      description: 'بطارية سيارة جديدة',
+    ),
+    ServiceItemEntity(
+      id: 'alternator',
+      name: 'دينامو (أولترنيتور)',
+      type: ServiceItemType.part,
+      price: 2500,
+      category: 'repair',
+      description: 'استبدال الدينامو',
+    ),
+    ServiceItemEntity(
+      id: 'starter_motor',
+      name: 'ماتور تشغيل (ستارتر)',
+      type: ServiceItemType.part,
+      price: 1800,
+      category: 'repair',
+      description: 'استبدال ماتور التشغيل',
+    ),
+    // تعليق وتوجيه
+    ServiceItemEntity(
+      id: 'shock_absorber',
+      name: 'مساعد (الواحد)',
+      type: ServiceItemType.part,
+      price: 800,
+      category: 'repair',
+      description: 'استبدال مساعد تعليق',
+    ),
+    ServiceItemEntity(
+      id: 'control_arm',
+      name: 'ذراع معلق',
+      type: ServiceItemType.part,
+      price: 600,
+      category: 'repair',
+      description: 'استبدال ذراع معلق (لوبريكة)',
+    ),
+    ServiceItemEntity(
+      id: 'wheel_alignment',
+      name: 'ضبط زوايا الكفرات',
+      type: ServiceItemType.service,
+      price: 200,
+      category: 'repair',
+      description: 'ضبط زوايا الإطارات الأربع',
+    ),
+    // تبريد
     ServiceItemEntity(
       id: 'radiator',
-      name: 'Radiator',
+      name: 'رادياتير',
       type: ServiceItemType.part,
-      price: 250.00,
-      description: 'Radiator replacement',
+      price: 2000,
+      category: 'repair',
+      description: 'استبدال رادياتير التبريد',
     ),
     ServiceItemEntity(
       id: 'water_pump',
-      name: 'Water Pump',
+      name: 'طلمبة مياه',
       type: ServiceItemType.part,
-      price: 120.00,
-      description: 'Coolant water pump',
+      price: 900,
+      category: 'repair',
+      description: 'استبدال طلمبة تبريد المحرك',
     ),
     ServiceItemEntity(
-      id: 'brake_installation',
-      name: 'Brake Installation',
-      type: ServiceItemType.labor,
-      price: 100.00,
-      description: 'Install brake pads/rotors',
+      id: 'timing_belt',
+      name: 'تايمنج بلت',
+      type: ServiceItemType.part,
+      price: 500,
+      category: 'repair',
+      description: 'استبدال سير التايمنج',
     ),
     ServiceItemEntity(
-      id: 'electrical_repair',
-      name: 'Electrical Repair',
+      id: 'serpentine_belt',
+      name: 'سير الماكينة',
+      type: ServiceItemType.part,
+      price: 250,
+      category: 'repair',
+      description: 'استبدال سير الأكسسوارات',
+    ),
+    // عام
+    ServiceItemEntity(
+      id: 'repair_labor',
+      name: 'أجرة إصلاح',
       type: ServiceItemType.labor,
-      price: 120.00,
-      description: 'Electrical system repair work',
+      price: 300,
+      category: 'repair',
+      description: 'أجرة عمالة إصلاح',
     ),
   ];
 
-  // Predefined service items for Emergency
+  // ────────────────────────────────────────────────────────────
+  // EMERGENCY (طوارئ)
+  // ────────────────────────────────────────────────────────────
   static final List<ServiceItemEntity> emergencyItems = [
     ServiceItemEntity(
-      id: 'towing_service',
-      name: 'Towing Service',
+      id: 'towing',
+      name: 'سطحة (نقل السيارة)',
       type: ServiceItemType.service,
-      price: 100.00,
-      description: 'Emergency towing (base rate)',
-    ),
-    ServiceItemEntity(
-      id: 'roadside_assistance',
-      name: 'Roadside Assistance',
-      type: ServiceItemType.service,
-      price: 75.00,
-      description: 'On-site emergency assistance',
+      price: 300,
+      category: 'emergency',
+      description: 'نقل السيارة للمركز بالسطحة',
     ),
     ServiceItemEntity(
       id: 'jump_start',
-      name: 'Jump Start Service',
+      name: 'تشغيل بالبوستر',
       type: ServiceItemType.service,
-      price: 40.00,
-      description: 'Battery jump start',
+      price: 80,
+      category: 'emergency',
+      description: 'تشغيل السيارة عن طريق البوستر',
     ),
     ServiceItemEntity(
-      id: 'tire_change',
-      name: 'Flat Tire Change',
+      id: 'flat_tire',
+      name: 'تغيير كفر مثقوب',
       type: ServiceItemType.service,
-      price: 50.00,
-      description: 'Change flat tire with spare',
-    ),
-    ServiceItemEntity(
-      id: 'lockout_service',
-      name: 'Car Lockout Service',
-      type: ServiceItemType.service,
-      price: 60.00,
-      description: 'Unlock car door',
-    ),
-    ServiceItemEntity(
-      id: 'fuel_delivery',
-      name: 'Fuel Delivery',
-      type: ServiceItemType.service,
-      price: 45.00,
-      description: 'Emergency fuel delivery',
+      price: 50,
+      category: 'emergency',
+      description: 'تركيب كفر الاستبيد أو تلحيم',
     ),
     ServiceItemEntity(
       id: 'emergency_diagnostic',
-      name: 'Emergency Diagnostic',
+      name: 'كشف طوارئ',
       type: ServiceItemType.service,
-      price: 90.00,
-      description: 'Quick diagnostic for breakdown',
+      price: 200,
+      category: 'emergency',
+      description: 'تشخيص سريع لعطل مفاجئ',
+    ),
+    ServiceItemEntity(
+      id: 'fuel_delivery',
+      name: 'توصيل بنزين',
+      type: ServiceItemType.service,
+      price: 100,
+      category: 'emergency',
+      description: 'توصيل بنزين للسيارة المتوقفة',
     ),
   ];
 
-  // Labor cost presets
-  static final Map<MaintenanceType, double> defaultLaborCosts = {
-    MaintenanceType.regular: 50.00,
-    MaintenanceType.inspection: 40.00,
-    MaintenanceType.repair: 80.00,
-    MaintenanceType.emergency: 100.00,
+  // ────────────────────────────────────────────────────────────
+  // Default labor costs (EGP)
+  // ────────────────────────────────────────────────────────────
+  static const Map<MaintenanceType, double> defaultLaborCosts = {
+    MaintenanceType.regular: 150.0,
+    MaintenanceType.inspection: 100.0,
+    MaintenanceType.repair: 300.0,
+    MaintenanceType.emergency: 200.0,
   };
 
-  // Get items for a specific maintenance type
   static List<ServiceItemEntity> getItemsForType(MaintenanceType type) {
     switch (type) {
       case MaintenanceType.regular:
@@ -264,11 +330,15 @@ class ServiceItemsConstants {
     }
   }
 
-  // Get default labor cost for maintenance type
   static double getDefaultLaborCost(MaintenanceType type) {
-    return defaultLaborCosts[type] ?? 60.00;
+    return defaultLaborCosts[type] ?? 150.0;
   }
+
+  /// All services flattened — for full migration to Firestore
+  static List<ServiceItemEntity> get all => [
+        ...regularMaintenanceItems,
+        ...inspectionItems,
+        ...repairItems,
+        ...emergencyItems,
+      ];
 }
-
-
-

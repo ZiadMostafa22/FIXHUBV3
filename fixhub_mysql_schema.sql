@@ -1,521 +1,522 @@
--- ============================================
--- FIX-HUB DATABASE - MySQL Schema
--- Car Maintenance Management System
--- ============================================
--- Version: 1.0
--- Created: December 2024
--- ============================================
+-- =====================================================
+-- Fix-Hub MySQL Database Schema
+-- Complete relational database schema with all tables and relationships
+-- =====================================================
 
--- Create Database
-CREATE DATABASE IF NOT EXISTS fixhub_db
-CHARACTER SET utf8mb4
-COLLATE utf8mb4_unicode_ci;
-
+-- Drop existing database if exists
+DROP DATABASE IF EXISTS fixhub_db;
+CREATE DATABASE fixhub_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE fixhub_db;
 
--- ============================================
+-- =====================================================
 -- 1. USERS TABLE
--- ============================================
+-- =====================================================
 CREATE TABLE users (
-    id VARCHAR(36) PRIMARY KEY,                          -- Firebase UID or UUID
+    id VARCHAR(255) PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
-    name VARCHAR(100) NOT NULL,
+    name VARCHAR(255) NOT NULL,
     phone VARCHAR(20) NOT NULL,
-    role ENUM('customer', 'technician', 'admin', 'cashier') NOT NULL DEFAULT 'customer',
-    profile_image_url VARCHAR(500) NULL,
+    role ENUM('customer', 'technician', 'admin', 'cashier') NOT NULL,
+    profile_image_url VARCHAR(500),
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    preferences JSON NULL,                               -- User preferences as JSON
-    invite_code_id VARCHAR(36) NULL,                     -- FK to invite_codes
-    invite_code VARCHAR(20) NULL,                        -- The actual code used
+    preferences JSON,
+    invite_code_id VARCHAR(255),
+    invite_code VARCHAR(8),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    INDEX idx_users_email (email),
-    INDEX idx_users_role (role),
-    INDEX idx_users_is_active (is_active),
-    INDEX idx_users_invite_code_id (invite_code_id)
+    INDEX idx_email (email),
+    INDEX idx_role (role),
+    INDEX idx_invite_code_id (invite_code_id)
 ) ENGINE=InnoDB;
 
--- ============================================
+-- =====================================================
 -- 2. INVITE CODES TABLE
--- ============================================
+-- =====================================================
 CREATE TABLE invite_codes (
-    id VARCHAR(36) PRIMARY KEY,
-    code VARCHAR(20) NOT NULL UNIQUE,                    -- 8-character unique code
+    id VARCHAR(255) PRIMARY KEY,
+    code VARCHAR(8) NOT NULL UNIQUE,
     role ENUM('technician', 'cashier', 'admin') NOT NULL,
-    max_uses INT NOT NULL DEFAULT 1,
+    max_uses INT NOT NULL,
     used_count INT NOT NULL DEFAULT 0,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    created_by VARCHAR(36) NOT NULL,                     -- FK to users (admin)
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    
-    INDEX idx_invite_codes_code (code),
-    INDEX idx_invite_codes_is_active (is_active),
-    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT
+    created_by VARCHAR(255) NOT NULL,
+    INDEX idx_code (code),
+    INDEX idx_created_by (created_by),
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- Add FK constraint to users table after invite_codes is created
-ALTER TABLE users
-ADD CONSTRAINT fk_users_invite_code
+-- =====================================================
+-- 3. INVITE CODE USAGE TRACKING (Many-to-Many)
+-- =====================================================
+CREATE TABLE invite_code_usage (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    invite_code_id VARCHAR(255) NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
+    used_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (invite_code_id) REFERENCES invite_codes(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_code_user (invite_code_id, user_id)
+) ENGINE=InnoDB;
+
+-- Add foreign key constraint to users table
+ALTER TABLE users 
+ADD CONSTRAINT fk_users_invite_code 
 FOREIGN KEY (invite_code_id) REFERENCES invite_codes(id) ON DELETE SET NULL;
 
--- ============================================
--- 3. INVITE CODE USAGE TABLE (Many-to-Many)
--- ============================================
-CREATE TABLE invite_code_usage (
-    id VARCHAR(36) PRIMARY KEY,
-    invite_code_id VARCHAR(36) NOT NULL,
-    user_id VARCHAR(36) NOT NULL,
-    used_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    
-    UNIQUE KEY uk_invite_user (invite_code_id, user_id),
-    FOREIGN KEY (invite_code_id) REFERENCES invite_codes(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB;
-
--- ============================================
+-- =====================================================
 -- 4. CARS TABLE
--- ============================================
+-- =====================================================
 CREATE TABLE cars (
-    id VARCHAR(36) PRIMARY KEY,
-    user_id VARCHAR(36) NOT NULL,                        -- FK to users (owner)
-    make VARCHAR(50) NOT NULL,                           -- Toyota, Honda, etc.
-    model VARCHAR(50) NOT NULL,
+    id VARCHAR(255) PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
+    make VARCHAR(100) NOT NULL,
+    model VARCHAR(100) NOT NULL,
     year INT NOT NULL,
-    color VARCHAR(30) NOT NULL,
-    license_plate VARCHAR(20) NOT NULL,
-    type ENUM('sedan', 'suv', 'hatchback', 'coupe', 'convertible', 'truck', 'van') NOT NULL DEFAULT 'sedan',
-    vin VARCHAR(50) NULL,                                -- Vehicle Identification Number
-    engine_type VARCHAR(50) NULL,
-    mileage INT NULL,
+    color VARCHAR(50) NOT NULL,
+    license_plate VARCHAR(50) NOT NULL UNIQUE,
+    type ENUM('sedan', 'suv', 'hatchback', 'coupe', 'convertible', 'truck', 'van') NOT NULL,
+    vin VARCHAR(17),
+    engine_type VARCHAR(100),
+    mileage INT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    INDEX idx_cars_user_id (user_id),
-    INDEX idx_cars_license_plate (license_plate),
+    INDEX idx_user_id (user_id),
+    INDEX idx_license_plate (license_plate),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- ============================================
+-- =====================================================
 -- 5. CAR IMAGES TABLE (One-to-Many)
--- ============================================
+-- =====================================================
 CREATE TABLE car_images (
-    id VARCHAR(36) PRIMARY KEY,
-    car_id VARCHAR(36) NOT NULL,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    car_id VARCHAR(255) NOT NULL,
     image_url VARCHAR(500) NOT NULL,
-    is_primary BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    
-    INDEX idx_car_images_car_id (car_id),
-    FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE
+    uploaded_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE,
+    INDEX idx_car_id (car_id)
 ) ENGINE=InnoDB;
 
--- ============================================
+-- =====================================================
 -- 6. SERVICES CATALOG TABLE
--- ============================================
+-- =====================================================
 CREATE TABLE services (
-    id VARCHAR(36) PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
+    id VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
     type ENUM('part', 'labor', 'service') NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
-    description TEXT NULL,
-    category VARCHAR(50) NULL,                           -- Oil Change, Brake Service, etc.
+    description TEXT,
+    category VARCHAR(100),
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    INDEX idx_services_type (type),
-    INDEX idx_services_category (category),
-    INDEX idx_services_is_active (is_active)
+    INDEX idx_type (type),
+    INDEX idx_category (category),
+    INDEX idx_is_active (is_active)
 ) ENGINE=InnoDB;
 
--- ============================================
+-- =====================================================
 -- 7. OFFERS TABLE
--- ============================================
+-- =====================================================
 CREATE TABLE offers (
-    id VARCHAR(36) PRIMARY KEY,
-    title VARCHAR(200) NOT NULL,
+    id VARCHAR(255) PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     type ENUM('announcement', 'discount', 'promotion', 'news') NOT NULL,
-    image_url VARCHAR(500) NULL,
-    start_date DATE NOT NULL,
-    end_date DATE NULL,
+    image_url VARCHAR(500),
+    start_date TIMESTAMP NOT NULL,
+    end_date TIMESTAMP,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    created_by VARCHAR(36) NOT NULL,                     -- FK to users (admin)
-    discount_percentage INT NULL CHECK (discount_percentage >= 0 AND discount_percentage <= 100),
-    code VARCHAR(50) NULL UNIQUE,                        -- Offer code
-    terms TEXT NULL,
+    created_by VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    INDEX idx_offers_is_active (is_active),
-    INDEX idx_offers_code (code),
-    INDEX idx_offers_dates (start_date, end_date),
-    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT
+    discount_percentage INT,
+    code VARCHAR(50) UNIQUE,
+    terms TEXT,
+    INDEX idx_code (code),
+    INDEX idx_is_active (is_active),
+    INDEX idx_created_by (created_by),
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
+    CHECK (discount_percentage >= 0 AND discount_percentage <= 100)
 ) ENGINE=InnoDB;
 
--- ============================================
+-- =====================================================
 -- 8. BOOKINGS TABLE
--- ============================================
+-- =====================================================
 CREATE TABLE bookings (
-    id VARCHAR(36) PRIMARY KEY,
-    user_id VARCHAR(36) NOT NULL,                        -- FK to users (customer)
-    car_id VARCHAR(36) NOT NULL,                         -- FK to cars
-    service_id VARCHAR(36) NULL,                         -- FK to services
+    id VARCHAR(255) PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
+    car_id VARCHAR(255) NOT NULL,
+    service_id VARCHAR(255),
     maintenance_type ENUM('regular', 'repair', 'inspection', 'emergency') NOT NULL,
-    scheduled_date DATE NOT NULL,
-    time_slot VARCHAR(50) NOT NULL,                      -- e.g., "09:00 AM - 10:00 AM"
+    scheduled_date TIMESTAMP NOT NULL,
+    time_slot VARCHAR(50) NOT NULL,
     status ENUM('pending', 'confirmed', 'inProgress', 'completedPendingPayment', 'completed', 'cancelled') NOT NULL DEFAULT 'pending',
-    description TEXT NULL,
-    notes TEXT NULL,
-    
-    -- Timestamps
+    description TEXT,
+    notes TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    started_at TIMESTAMP NULL,                           -- When technician started
-    completed_at TIMESTAMP NULL,                         -- When service completed
+    started_at TIMESTAMP NULL,
+    completed_at TIMESTAMP NULL,
     
-    -- Service/Invoice Details
-    labor_cost DECIMAL(10, 2) NULL DEFAULT 0.00,
-    tax DECIMAL(10, 2) NULL,
-    total_cost DECIMAL(10, 2) NULL,                      -- Saved on payment
-    technician_notes TEXT NULL,
+    -- Service Details
+    labor_cost DECIMAL(10, 2),
+    tax DECIMAL(10, 2),
+    total_cost DECIMAL(10, 2),
+    technician_notes TEXT,
     
     -- Discount/Offer
-    offer_code VARCHAR(50) NULL,
-    offer_title VARCHAR(200) NULL,
-    discount_percentage INT NULL DEFAULT 0,
+    offer_code VARCHAR(50),
+    offer_title VARCHAR(255),
+    discount_percentage INT,
     
     -- Rating
-    rating DECIMAL(2, 1) NULL CHECK (rating >= 1.0 AND rating <= 5.0),
-    rating_comment TEXT NULL,
+    rating DECIMAL(2, 1),
+    rating_comment TEXT,
     rated_at TIMESTAMP NULL,
     
     -- Payment
     is_paid BOOLEAN NOT NULL DEFAULT FALSE,
     paid_at TIMESTAMP NULL,
-    cashier_id VARCHAR(36) NULL,                         -- FK to users (cashier)
-    payment_method ENUM('cash', 'card', 'digital') NULL,
+    cashier_id VARCHAR(255),
+    payment_method ENUM('cash', 'card', 'digital'),
     
-    INDEX idx_bookings_user_id (user_id),
-    INDEX idx_bookings_car_id (car_id),
-    INDEX idx_bookings_status (status),
-    INDEX idx_bookings_scheduled_date (scheduled_date),
-    INDEX idx_bookings_is_paid (is_paid),
-    INDEX idx_bookings_cashier_id (cashier_id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_car_id (car_id),
+    INDEX idx_status (status),
+    INDEX idx_scheduled_date (scheduled_date),
+    INDEX idx_cashier_id (cashier_id),
+    INDEX idx_offer_code (offer_code),
     
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT,
-    FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE RESTRICT,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE,
     FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE SET NULL,
-    FOREIGN KEY (cashier_id) REFERENCES users(id) ON DELETE SET NULL
-) ENGINE=InnoDB;
-
--- ============================================
--- 9. BOOKING TECHNICIANS TABLE (Many-to-Many)
--- ============================================
-CREATE TABLE booking_technicians (
-    id VARCHAR(36) PRIMARY KEY,
-    booking_id VARCHAR(36) NOT NULL,
-    technician_id VARCHAR(36) NOT NULL,
-    assigned_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (cashier_id) REFERENCES users(id) ON DELETE SET NULL,
     
-    UNIQUE KEY uk_booking_technician (booking_id, technician_id),
-    FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
-    FOREIGN KEY (technician_id) REFERENCES users(id) ON DELETE CASCADE
+    CHECK (rating >= 1.0 AND rating <= 5.0),
+    CHECK (discount_percentage >= 0 AND discount_percentage <= 100)
 ) ENGINE=InnoDB;
 
--- ============================================
--- 10. BOOKING SERVICE ITEMS TABLE (One-to-Many)
--- ============================================
+-- =====================================================
+-- 9. BOOKING SERVICE ITEMS (Many-to-Many with details)
+-- =====================================================
 CREATE TABLE booking_service_items (
-    id VARCHAR(36) PRIMARY KEY,
-    booking_id VARCHAR(36) NOT NULL,
-    service_id VARCHAR(36) NULL,                         -- FK to services (optional)
-    name VARCHAR(100) NOT NULL,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    booking_id VARCHAR(255) NOT NULL,
+    service_item_id VARCHAR(255),
+    name VARCHAR(255) NOT NULL,
     type ENUM('part', 'labor', 'service') NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
     quantity INT NOT NULL DEFAULT 1,
-    description TEXT NULL,
-    category VARCHAR(50) NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    
-    INDEX idx_booking_items_booking_id (booking_id),
+    description TEXT,
+    category VARCHAR(100),
     FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
-    FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE SET NULL
+    FOREIGN KEY (service_item_id) REFERENCES services(id) ON DELETE SET NULL,
+    INDEX idx_booking_id (booking_id)
 ) ENGINE=InnoDB;
 
--- ============================================
+-- =====================================================
+-- 10. ASSIGNED TECHNICIANS (Many-to-Many)
+-- =====================================================
+CREATE TABLE booking_technicians (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    booking_id VARCHAR(255) NOT NULL,
+    technician_id VARCHAR(255) NOT NULL,
+    assigned_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
+    FOREIGN KEY (technician_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_booking_tech (booking_id, technician_id),
+    INDEX idx_booking_id (booking_id),
+    INDEX idx_technician_id (technician_id)
+) ENGINE=InnoDB;
+
+-- =====================================================
 -- 11. REFUNDS TABLE
--- ============================================
+-- =====================================================
 CREATE TABLE refunds (
-    id VARCHAR(36) PRIMARY KEY,
-    booking_id VARCHAR(36) NOT NULL,                     -- FK to bookings
+    id VARCHAR(255) PRIMARY KEY,
+    booking_id VARCHAR(255) NOT NULL UNIQUE,
     original_amount DECIMAL(10, 2) NOT NULL,
     refund_amount DECIMAL(10, 2) NOT NULL,
     reason TEXT NOT NULL,
-    customer_notes TEXT NULL,
+    customer_notes TEXT,
     status ENUM('requested', 'approved', 'rejected', 'processed') NOT NULL DEFAULT 'requested',
-    requested_by VARCHAR(36) NOT NULL,                   -- FK to users (cashier)
+    requested_by VARCHAR(255) NOT NULL,
     requested_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    approved_by VARCHAR(36) NULL,                        -- FK to users (admin)
+    approved_by VARCHAR(255),
     approved_at TIMESTAMP NULL,
     processed_at TIMESTAMP NULL,
-    original_payment_method VARCHAR(50) NULL,
-    refund_method VARCHAR(50) NULL,
-    
-    INDEX idx_refunds_booking_id (booking_id),
-    INDEX idx_refunds_status (status),
-    INDEX idx_refunds_requested_by (requested_by),
-    
-    FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE RESTRICT,
-    FOREIGN KEY (requested_by) REFERENCES users(id) ON DELETE RESTRICT,
+    original_payment_method VARCHAR(50),
+    refund_method VARCHAR(50),
+    INDEX idx_booking_id (booking_id),
+    INDEX idx_status (status),
+    INDEX idx_requested_by (requested_by),
+    INDEX idx_approved_by (approved_by),
+    FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
+    FOREIGN KEY (requested_by) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
--- ============================================
+-- =====================================================
 -- 12. INVENTORY TABLE
--- ============================================
+-- =====================================================
 CREATE TABLE inventory (
-    id VARCHAR(36) PRIMARY KEY,
-    service_item_id VARCHAR(36) NULL,                    -- FK to services
-    name VARCHAR(100) NOT NULL,
-    sku VARCHAR(50) NOT NULL UNIQUE,                     -- Stock Keeping Unit
+    id VARCHAR(255) PRIMARY KEY,
+    service_item_id VARCHAR(255),
+    name VARCHAR(255) NOT NULL,
+    sku VARCHAR(100) NOT NULL UNIQUE,
     category ENUM('parts', 'supplies', 'tools') NOT NULL,
     current_stock INT NOT NULL DEFAULT 0,
     low_stock_threshold INT NOT NULL DEFAULT 10,
     reorder_point INT NOT NULL DEFAULT 15,
-    unit_cost DECIMAL(10, 2) NOT NULL,                   -- Purchase price
-    unit_price DECIMAL(10, 2) NOT NULL,                  -- Selling price
-    location VARCHAR(100) NULL,
-    supplier VARCHAR(100) NULL,
-    supplier_contact VARCHAR(100) NULL,
+    unit_cost DECIMAL(10, 2) NOT NULL,
+    unit_price DECIMAL(10, 2) NOT NULL,
+    location VARCHAR(255),
+    supplier VARCHAR(255),
+    supplier_contact VARCHAR(255),
     last_restocked TIMESTAMP NULL,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    INDEX idx_inventory_sku (sku),
-    INDEX idx_inventory_category (category),
-    INDEX idx_inventory_current_stock (current_stock),
-    INDEX idx_inventory_is_active (is_active),
-    
+    INDEX idx_sku (sku),
+    INDEX idx_category (category),
+    INDEX idx_service_item_id (service_item_id),
     FOREIGN KEY (service_item_id) REFERENCES services(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
--- ============================================
+-- =====================================================
 -- 13. INVENTORY TRANSACTIONS TABLE
--- ============================================
+-- =====================================================
 CREATE TABLE inventory_transactions (
-    id VARCHAR(36) PRIMARY KEY,
-    inventory_item_id VARCHAR(36) NOT NULL,              -- FK to inventory
-    type ENUM('in', 'out', 'adjustment') NOT NULL,       -- in=restock, out=usage
+    id VARCHAR(255) PRIMARY KEY,
+    inventory_item_id VARCHAR(255) NOT NULL,
+    type ENUM('in', 'out', 'adjustment') NOT NULL,
     quantity INT NOT NULL,
     quantity_before INT NOT NULL,
     quantity_after INT NOT NULL,
-    booking_id VARCHAR(36) NULL,                         -- FK to bookings (for usage)
-    technician_id VARCHAR(36) NULL,                      -- FK to users
-    reason VARCHAR(200) NULL,
-    notes TEXT NULL,
+    booking_id VARCHAR(255),
+    technician_id VARCHAR(255),
+    reason TEXT,
+    notes TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by VARCHAR(36) NOT NULL,                     -- FK to users
-    
-    INDEX idx_inv_trans_item_id (inventory_item_id),
-    INDEX idx_inv_trans_type (type),
-    INDEX idx_inv_trans_created_at (created_at),
-    
-    FOREIGN KEY (inventory_item_id) REFERENCES inventory(id) ON DELETE RESTRICT,
+    created_by VARCHAR(255) NOT NULL,
+    INDEX idx_inventory_item_id (inventory_item_id),
+    INDEX idx_booking_id (booking_id),
+    INDEX idx_created_by (created_by),
+    INDEX idx_type (type),
+    FOREIGN KEY (inventory_item_id) REFERENCES inventory(id) ON DELETE CASCADE,
     FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE SET NULL,
     FOREIGN KEY (technician_id) REFERENCES users(id) ON DELETE SET NULL,
-    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- ============================================
+-- =====================================================
 -- 14. LOW STOCK ALERTS TABLE
--- ============================================
+-- =====================================================
 CREATE TABLE low_stock_alerts (
-    id VARCHAR(36) PRIMARY KEY,
-    inventory_item_id VARCHAR(36) NOT NULL,              -- FK to inventory
+    id VARCHAR(255) PRIMARY KEY,
+    inventory_item_id VARCHAR(255) NOT NULL,
     current_stock INT NOT NULL,
     threshold INT NOT NULL,
     is_resolved BOOLEAN NOT NULL DEFAULT FALSE,
     resolved_at TIMESTAMP NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    
-    INDEX idx_alerts_item_id (inventory_item_id),
-    INDEX idx_alerts_is_resolved (is_resolved),
-    
+    INDEX idx_inventory_item_id (inventory_item_id),
+    INDEX idx_is_resolved (is_resolved),
     FOREIGN KEY (inventory_item_id) REFERENCES inventory(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- ============================================
+-- =====================================================
 -- 15. USER NOTIFICATIONS TABLE
--- ============================================
+-- =====================================================
 CREATE TABLE user_notifications (
-    id VARCHAR(36) PRIMARY KEY,
-    user_id VARCHAR(36) NOT NULL,                        -- FK to users
-    type ENUM('push', 'inApp') NOT NULL DEFAULT 'inApp',
+    id VARCHAR(255) PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
+    type ENUM('push', 'inApp') NOT NULL,
     category ENUM('booking', 'payment', 'reminder', 'system') NOT NULL,
-    title VARCHAR(200) NOT NULL,
+    title VARCHAR(255) NOT NULL,
     message TEXT NOT NULL,
     is_read BOOLEAN NOT NULL DEFAULT FALSE,
     sent_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    booking_id VARCHAR(36) NULL,                         -- FK to bookings
-    car_id VARCHAR(36) NULL,                             -- FK to cars
-    metadata JSON NULL,
-    
-    INDEX idx_notifications_user_id (user_id),
-    INDEX idx_notifications_is_read (is_read),
-    INDEX idx_notifications_sent_at (sent_at),
-    INDEX idx_notifications_category (category),
-    
+    booking_id VARCHAR(255),
+    car_id VARCHAR(255),
+    metadata JSON,
+    INDEX idx_user_id (user_id),
+    INDEX idx_is_read (is_read),
+    INDEX idx_category (category),
+    INDEX idx_sent_at (sent_at),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE SET NULL,
     FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
--- ============================================
--- VIEWS
--- ============================================
+-- =====================================================
+-- SAMPLE DATA INSERTION (Optional)
+-- =====================================================
 
--- View: Active Bookings with Customer and Car Info
-CREATE VIEW v_active_bookings AS
+-- Insert sample admin user
+INSERT INTO users (id, email, name, phone, role, is_active) 
+VALUES ('admin-001', 'admin@fixhub.com', 'System Admin', '+201234567890', 'admin', TRUE);
+
+-- Insert sample invite code
+INSERT INTO invite_codes (id, code, role, max_uses, used_count, is_active, created_by)
+VALUES ('code-001', 'TECH2024', 'technician', 10, 0, TRUE, 'admin-001');
+
+-- Insert sample service
+INSERT INTO services (id, name, type, price, description, category, is_active)
+VALUES ('service-001', 'Oil Change', 'service', 150.00, 'Full synthetic oil change', 'Maintenance', TRUE);
+
+-- =====================================================
+-- USEFUL VIEWS
+-- =====================================================
+
+-- View: Active Bookings with Customer and Car Details
+CREATE VIEW active_bookings_view AS
 SELECT 
-    b.id,
-    b.scheduled_date,
-    b.time_slot,
+    b.id AS booking_id,
     b.status,
+    b.scheduled_date,
     b.maintenance_type,
-    b.is_paid,
-    b.total_cost,
     u.name AS customer_name,
     u.phone AS customer_phone,
-    c.make,
-    c.model,
-    c.year,
+    c.make AS car_make,
+    c.model AS car_model,
     c.license_plate,
-    CONCAT(c.year, ' ', c.make, ' ', c.model) AS car_display_name
+    b.total_cost,
+    b.is_paid
 FROM bookings b
 JOIN users u ON b.user_id = u.id
 JOIN cars c ON b.car_id = c.id
-WHERE b.status NOT IN ('completed', 'cancelled');
-
--- View: Daily Revenue Report
-CREATE VIEW v_daily_revenue AS
-SELECT 
-    DATE(paid_at) AS payment_date,
-    COUNT(*) AS transaction_count,
-    SUM(total_cost) AS total_revenue,
-    SUM(labor_cost) AS total_labor,
-    SUM(CASE WHEN payment_method = 'cash' THEN total_cost ELSE 0 END) AS cash_total,
-    SUM(CASE WHEN payment_method = 'card' THEN total_cost ELSE 0 END) AS card_total,
-    SUM(CASE WHEN payment_method = 'digital' THEN total_cost ELSE 0 END) AS digital_total
-FROM bookings
-WHERE is_paid = TRUE AND paid_at IS NOT NULL
-GROUP BY DATE(paid_at)
-ORDER BY payment_date DESC;
+WHERE b.status IN ('pending', 'confirmed', 'inProgress', 'completedPendingPayment');
 
 -- View: Low Stock Items
-CREATE VIEW v_low_stock_items AS
+CREATE VIEW low_stock_items_view AS
 SELECT 
     i.id,
     i.name,
     i.sku,
-    i.category,
     i.current_stock,
     i.low_stock_threshold,
     i.reorder_point,
-    i.unit_cost,
-    i.unit_price,
-    i.supplier
+    i.supplier,
+    i.supplier_contact
 FROM inventory i
 WHERE i.current_stock <= i.low_stock_threshold
-  AND i.is_active = TRUE;
+AND i.is_active = TRUE;
 
 -- View: Pending Refunds
-CREATE VIEW v_pending_refunds AS
+CREATE VIEW pending_refunds_view AS
 SELECT 
-    r.id,
-    r.booking_id,
+    r.id AS refund_id,
     r.refund_amount,
     r.reason,
     r.status,
     r.requested_at,
-    req.name AS requested_by_name,
-    b.total_cost AS original_booking_total,
-    cust.name AS customer_name
+    b.id AS booking_id,
+    u.name AS customer_name,
+    cashier.name AS requested_by_name
 FROM refunds r
-JOIN users req ON r.requested_by = req.id
 JOIN bookings b ON r.booking_id = b.id
-JOIN users cust ON b.user_id = cust.id
-WHERE r.status IN ('requested', 'approved');
+JOIN users u ON b.user_id = u.id
+JOIN users cashier ON r.requested_by = cashier.id
+WHERE r.status = 'requested';
 
--- ============================================
--- TRIGGERS
--- ============================================
+-- =====================================================
+-- STORED PROCEDURES
+-- =====================================================
 
 DELIMITER //
 
--- Trigger: Update invite code usage count
-CREATE TRIGGER tr_invite_code_usage_insert
+-- Procedure: Update Inventory Stock
+CREATE PROCEDURE update_inventory_stock(
+    IN p_inventory_id VARCHAR(255),
+    IN p_quantity INT,
+    IN p_type ENUM('in', 'out', 'adjustment'),
+    IN p_booking_id VARCHAR(255),
+    IN p_created_by VARCHAR(255),
+    IN p_reason TEXT
+)
+BEGIN
+    DECLARE v_current_stock INT;
+    DECLARE v_new_stock INT;
+    DECLARE v_transaction_id VARCHAR(255);
+    
+    -- Get current stock
+    SELECT current_stock INTO v_current_stock 
+    FROM inventory 
+    WHERE id = p_inventory_id;
+    
+    -- Calculate new stock
+    IF p_type = 'in' THEN
+        SET v_new_stock = v_current_stock + p_quantity;
+    ELSEIF p_type = 'out' THEN
+        SET v_new_stock = v_current_stock - p_quantity;
+    ELSE
+        SET v_new_stock = p_quantity;
+    END IF;
+    
+    -- Update inventory
+    UPDATE inventory 
+    SET current_stock = v_new_stock,
+        last_restocked = IF(p_type = 'in', NOW(), last_restocked),
+        updated_at = NOW()
+    WHERE id = p_inventory_id;
+    
+    -- Create transaction record
+    SET v_transaction_id = UUID();
+    INSERT INTO inventory_transactions (
+        id, inventory_item_id, type, quantity, 
+        quantity_before, quantity_after, booking_id, 
+        created_by, reason, created_at
+    ) VALUES (
+        v_transaction_id, p_inventory_id, p_type, p_quantity,
+        v_current_stock, v_new_stock, p_booking_id,
+        p_created_by, p_reason, NOW()
+    );
+    
+    -- Check if low stock alert needed
+    IF v_new_stock <= (SELECT low_stock_threshold FROM inventory WHERE id = p_inventory_id) THEN
+        INSERT INTO low_stock_alerts (id, inventory_item_id, current_stock, threshold, created_at)
+        SELECT UUID(), p_inventory_id, v_new_stock, low_stock_threshold, NOW()
+        FROM inventory 
+        WHERE id = p_inventory_id;
+    END IF;
+END //
+
+DELIMITER ;
+
+-- =====================================================
+-- TRIGGERS
+-- =====================================================
+
+DELIMITER //
+
+-- Trigger: Auto-increment invite code usage count
+CREATE TRIGGER after_invite_code_usage_insert
 AFTER INSERT ON invite_code_usage
 FOR EACH ROW
 BEGIN
     UPDATE invite_codes 
-    SET used_count = used_count + 1 
+    SET used_count = used_count + 1
     WHERE id = NEW.invite_code_id;
-END//
+END //
 
--- Trigger: Create low stock alert when inventory drops
-CREATE TRIGGER tr_inventory_low_stock_alert
-AFTER UPDATE ON inventory
+-- Trigger: Validate booking rating
+CREATE TRIGGER before_booking_rating_update
+BEFORE UPDATE ON bookings
 FOR EACH ROW
 BEGIN
-    IF NEW.current_stock <= NEW.low_stock_threshold 
-       AND OLD.current_stock > OLD.low_stock_threshold THEN
-        INSERT INTO low_stock_alerts (id, inventory_item_id, current_stock, threshold)
-        VALUES (UUID(), NEW.id, NEW.current_stock, NEW.low_stock_threshold);
+    IF NEW.rating IS NOT NULL THEN
+        IF NEW.rating < 1.0 OR NEW.rating > 5.0 THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Rating must be between 1.0 and 5.0';
+        END IF;
     END IF;
-END//
-
--- Trigger: Auto-resolve low stock alert when restocked
-CREATE TRIGGER tr_inventory_resolve_alert
-AFTER UPDATE ON inventory
-FOR EACH ROW
-BEGIN
-    IF NEW.current_stock > NEW.low_stock_threshold 
-       AND OLD.current_stock <= OLD.low_stock_threshold THEN
-        UPDATE low_stock_alerts 
-        SET is_resolved = TRUE, resolved_at = CURRENT_TIMESTAMP
-        WHERE inventory_item_id = NEW.id AND is_resolved = FALSE;
-    END IF;
-END//
+END //
 
 DELIMITER ;
 
--- ============================================
--- SAMPLE DATA (Optional - for testing)
--- ============================================
-
--- Insert Admin User
-INSERT INTO users (id, email, name, phone, role, is_active) VALUES
-('admin-001', 'admin@fixhub.com', 'System Administrator', '+201234567890', 'admin', TRUE);
-
--- Insert Sample Services
-INSERT INTO services (id, name, type, price, category, is_active) VALUES
-(UUID(), 'Oil Change', 'service', 49.99, 'Oil Change', TRUE),
-(UUID(), 'Brake Pad Replacement', 'part', 89.99, 'Brake Service', TRUE),
-(UUID(), 'Engine Diagnostic', 'service', 75.00, 'Engine Service', TRUE),
-(UUID(), 'Tire Rotation', 'service', 29.99, 'Tire Center', TRUE),
-(UUID(), 'AC Recharge', 'service', 120.00, 'Air Conditioning', TRUE),
-(UUID(), 'Battery Replacement', 'part', 150.00, 'Electrical', TRUE),
-(UUID(), 'Labor - Per Hour', 'labor', 60.00, 'General Maintenance', TRUE);
-
--- ============================================
--- INDEXES SUMMARY
--- ============================================
--- All important indexes are defined inline with table creation
--- Additional composite indexes can be added based on query patterns
-
--- ============================================
+-- =====================================================
 -- END OF SCHEMA
--- ============================================
+-- =====================================================

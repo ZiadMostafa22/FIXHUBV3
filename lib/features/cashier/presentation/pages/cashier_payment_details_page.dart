@@ -716,7 +716,18 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
               child: const Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
+              onPressed: () {
+                if (reasonController.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please enter a reason for the refund'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+                Navigator.pop(dialogContext, true);
+              },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
               child: const Text('Submit Request'),
             ),
@@ -725,7 +736,7 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
       },
     );
 
-    if (result == true && reasonController.text.isNotEmpty) {
+    if (result == true) {
       try {
         final user = ref.read(authViewModelProvider).user;
         final refundAmount = double.tryParse(refundAmountController.text) ?? booking.totalCost;
@@ -734,7 +745,7 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
           bookingId: booking.id,
           originalAmount: booking.totalCost,
           refundAmount: refundAmount,
-          reason: reasonController.text,
+          reason: reasonController.text.trim(),
           requestedBy: user?.id ?? 'cashier',
           originalPaymentMethod: booking.paymentMethod?.toString().split('.').last,
         );

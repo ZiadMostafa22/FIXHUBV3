@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:car_maintenance_system_new/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/car/presentation/viewmodels/car_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/car/domain/entities/car_entity.dart';
+import 'package:car_maintenance_system_new/core/constants/egyptian_cars.dart';
 
 class AddCarPage extends ConsumerStatefulWidget {
   const AddCarPage({super.key});
@@ -14,21 +15,20 @@ class AddCarPage extends ConsumerStatefulWidget {
 
 class _AddCarPageState extends ConsumerState<AddCarPage> {
   final _formKey = GlobalKey<FormState>();
-  final _makeController = TextEditingController();
-  final _modelController = TextEditingController();
-  final _yearController = TextEditingController();
-  final _colorController = TextEditingController();
-  final _plateNumberController = TextEditingController();
-  final _vinController = TextEditingController();
+
+  String? _selectedMake;
+  String? _selectedModel;
+  int? _selectedYear;
+  String? _selectedColor;
+  CarType _selectedType = CarType.sedan;
+  final _plateController = TextEditingController();
+
+  List<String> get _availableModels =>
+      _selectedMake != null ? EgyptianCars.modelsFor(_selectedMake!) : [];
 
   @override
   void dispose() {
-    _makeController.dispose();
-    _modelController.dispose();
-    _yearController.dispose();
-    _colorController.dispose();
-    _plateNumberController.dispose();
-    _vinController.dispose();
+    _plateController.dispose();
     super.dispose();
   }
 
@@ -40,13 +40,12 @@ class _AddCarPageState extends ConsumerState<AddCarPage> {
       final car = CarEntity(
         id: '',
         userId: user.id,
-        make: _makeController.text.trim(),
-        model: _modelController.text.trim(),
-        year: int.parse(_yearController.text.trim()),
-        color: _colorController.text.trim(),
-        licensePlate: _plateNumberController.text.trim(),
-        type: CarType.sedan, // Default type, can be enhanced with a dropdown
-        vin: _vinController.text.trim().isEmpty ? null : _vinController.text.trim(),
+        make: _selectedMake!,
+        model: _selectedModel!,
+        year: _selectedYear!,
+        color: _selectedColor!,
+        licensePlate: _plateController.text.trim(),
+        type: _selectedType,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
@@ -56,13 +55,17 @@ class _AddCarPageState extends ConsumerState<AddCarPage> {
       if (mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Car added successfully!')),
+            const SnackBar(
+              content: Text('✅ Car added successfully!'),
+              backgroundColor: Colors.green,
+            ),
           );
           context.pop();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(ref.read(carViewModelProvider).error ?? 'Failed to add car'),
+              content: Text(
+                  ref.read(carViewModelProvider).error ?? 'Failed to add car'),
               backgroundColor: Colors.red,
             ),
           );
@@ -74,156 +77,174 @@ class _AddCarPageState extends ConsumerState<AddCarPage> {
   @override
   Widget build(BuildContext context) {
     final carState = ref.watch(carViewModelProvider);
+    final theme = Theme.of(context);
+
+    const inputDecoration = InputDecoration(
+      border: OutlineInputBorder(),
+      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      isDense: true,
+    );
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add New Car'),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Vehicle Information',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _makeController,
-                        decoration: const InputDecoration(
-                          labelText: 'Make *',
-                          hintText: 'e.g., Toyota, Honda, Ford',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                          isDense: true,
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter the car make';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _modelController,
-                        decoration: const InputDecoration(
-                          labelText: 'Model *',
-                          hintText: 'e.g., Camry, Accord, F-150',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                          isDense: true,
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter the car model';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _yearController,
-                        decoration: const InputDecoration(
-                          labelText: 'Year *',
-                          hintText: 'e.g., 2020',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                          isDense: true,
-                        ),
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter the car year';
-                          }
-                          final year = int.tryParse(value);
-                          if (year == null || year < 1900 || year > DateTime.now().year + 1) {
-                            return 'Please enter a valid year';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _colorController,
-                        decoration: const InputDecoration(
-                          labelText: 'Color *',
-                          hintText: 'e.g., Red, Blue, Black',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                          isDense: true,
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter the car color';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _plateNumberController,
-                        decoration: const InputDecoration(
-                          labelText: 'Plate Number *',
-                          hintText: 'e.g., ABC-1234',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                          isDense: true,
-                        ),
-                        textCapitalization: TextCapitalization.characters,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter the plate number';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _vinController,
-                        decoration: const InputDecoration(
-                          labelText: 'VIN (Optional)',
-                          hintText: 'Vehicle Identification Number',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                          isDense: true,
-                        ),
-                        textCapitalization: TextCapitalization.characters,
-                      ),
-                    ],
+              // Header icon
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.directions_car,
+                    size: 48,
+                    color: theme.colorScheme.primary,
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-              ElevatedButton(
+
+              // ─── Make ───────────────────────────────────────
+              Text('Car Make', style: theme.textTheme.labelLarge),
+              const SizedBox(height: 6),
+              DropdownButtonFormField<String>(
+                value: _selectedMake,
+                decoration:
+                    inputDecoration.copyWith(hintText: 'Select car brand'),
+                isExpanded: true,
+                items: EgyptianCars.makes
+                    .map((make) =>
+                        DropdownMenuItem(value: make, child: Text(make)))
+                    .toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedMake = value;
+                    _selectedModel = null; // Reset model when make changes
+                  });
+                },
+                validator: (v) => v == null ? 'Please select the car brand' : null,
+              ),
+
+              const SizedBox(height: 16),
+
+              // ─── Model ──────────────────────────────────────
+              Text('Model', style: theme.textTheme.labelLarge),
+              const SizedBox(height: 6),
+              DropdownButtonFormField<String>(
+                value: _selectedModel,
+                decoration: inputDecoration.copyWith(
+                  hintText: _selectedMake == null
+                      ? 'Select brand first'
+                      : 'Select model',
+                ),
+                isExpanded: true,
+                items: _availableModels
+                    .map((model) =>
+                        DropdownMenuItem(value: model, child: Text(model)))
+                    .toList(),
+                onChanged:
+                    _selectedMake == null ? null : (v) => setState(() => _selectedModel = v),
+                validator: (v) => v == null ? 'Please select the model' : null,
+              ),
+
+              const SizedBox(height: 16),
+
+              // ─── Year ───────────────────────────────────────
+              Text('Year', style: theme.textTheme.labelLarge),
+              const SizedBox(height: 6),
+              DropdownButtonFormField<int>(
+                value: _selectedYear,
+                decoration: inputDecoration.copyWith(hintText: 'Select year'),
+                isExpanded: true,
+                menuMaxHeight: 250,
+                items: EgyptianCars.years
+                    .map((y) =>
+                        DropdownMenuItem(value: y, child: Text(y.toString())))
+                    .toList(),
+                onChanged: (v) => setState(() => _selectedYear = v),
+                validator: (v) => v == null ? 'Please select the year' : null,
+              ),
+
+              const SizedBox(height: 16),
+
+              // ─── Color ──────────────────────────────────────
+              Text('Color', style: theme.textTheme.labelLarge),
+              const SizedBox(height: 6),
+              DropdownButtonFormField<String>(
+                value: _selectedColor,
+                decoration: inputDecoration.copyWith(hintText: 'Select color'),
+                isExpanded: true,
+                items: EgyptianCars.colors
+                    .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                    .toList(),
+                onChanged: (v) => setState(() => _selectedColor = v),
+                validator: (v) => v == null ? 'Please select the color' : null,
+              ),
+
+              const SizedBox(height: 16),
+
+              // ─── Type ───────────────────────────────────────
+              Text('Car Type', style: theme.textTheme.labelLarge),
+              const SizedBox(height: 6),
+              DropdownButtonFormField<CarType>(
+                value: _selectedType,
+                decoration: inputDecoration.copyWith(hintText: 'Select type'),
+                isExpanded: true,
+                items: const [
+                  DropdownMenuItem(value: CarType.sedan, child: Text('Sedan')),
+                  DropdownMenuItem(value: CarType.suv, child: Text('SUV')),
+                  DropdownMenuItem(value: CarType.truck, child: Text('Truck / Pickup')),
+                  DropdownMenuItem(value: CarType.hatchback, child: Text('Hatchback')),
+                  DropdownMenuItem(value: CarType.coupe, child: Text('Coupe')),
+                  DropdownMenuItem(value: CarType.van, child: Text('Van / Minivan')),
+                ],
+                onChanged: (v) => setState(() => _selectedType = v!),
+              ),
+
+              const SizedBox(height: 16),
+
+              // ─── Plate Number ───────────────────────────────
+              Text('Plate Number *', style: theme.textTheme.labelLarge),
+              const SizedBox(height: 6),
+              TextFormField(
+                controller: _plateController,
+                decoration: inputDecoration.copyWith(
+                  hintText: 'e.g., 123 أ ب ج',
+                  prefixIcon: const Icon(Icons.credit_card),
+                ),
+                textCapitalization: TextCapitalization.characters,
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Please enter plate number' : null,
+              ),
+
+              const SizedBox(height: 24),
+
+              // ─── Submit ─────────────────────────────────────
+              ElevatedButton.icon(
                 onPressed: carState.isLoading ? null : _submitCar,
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.all(14),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-                child: carState.isLoading
+                icon: carState.isLoading
                     ? const SizedBox(
-                        height: 20,
-                        width: 20,
+                        width: 18,
+                        height: 18,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text(
-                        'Add Car',
-                        style: TextStyle(fontSize: 16),
-                      ),
+                    : const Icon(Icons.add),
+                label: const Text('Add Car', style: TextStyle(fontSize: 16)),
               ),
-              const SizedBox(height: 16), // Bottom padding
+
+              const SizedBox(height: 16),
             ],
           ),
         ),
@@ -231,4 +252,3 @@ class _AddCarPageState extends ConsumerState<AddCarPage> {
     );
   }
 }
-

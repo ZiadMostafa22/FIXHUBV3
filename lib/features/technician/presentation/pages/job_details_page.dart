@@ -10,8 +10,15 @@ import 'package:car_maintenance_system_new/core/models/service_item_model.dart';
 import 'package:car_maintenance_system_new/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/booking/presentation/viewmodels/booking_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/car/presentation/viewmodels/car_viewmodel.dart';
-import 'package:car_maintenance_system_new/core/constants/service_items_constants.dart';
+
 import 'package:car_maintenance_system_new/core/services/notification_service.dart';
+import 'package:car_maintenance_system_new/core/repositories/service_repository.dart';
+import 'package:car_maintenance_system_new/core/constants/service_items_constants.dart';
+
+/// Read-only stream provider for available services (used by technician)
+final availableServicesProvider = StreamProvider<List<ServiceItemEntity>>((ref) {
+  return ServiceRepository().getServices();
+});
 
 class JobDetailsPage extends ConsumerStatefulWidget {
   final String bookingId;
@@ -39,44 +46,103 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
     });
   }
 
-  void _loadBookingDetails() {
-    final bookingState = ref.read(bookingViewModelProvider);
-    final carState = ref.read(carViewModelProvider);
+  Future<void> _loadBookingDetails() async {
+    try {
+      // Try to find booking in current state first (fast path)
+      final bookingState = ref.read(bookingViewModelProvider);
+      BookingEntity? found = bookingState.bookings
+          .where((b) => b.id == widget.bookingId)
+          .firstOrNull;
 
-    _booking = bookingState.bookings.firstWhere((b) => b.id == widget.bookingId);
-    _car = carState.cars.where((c) => c.id == _booking!.carId).firstOrNull;
-    
-    // If car not found, fetch it
-    if (_car == null && _booking!.carId.isNotEmpty) {
-      ref.read(carViewModelProvider.notifier).getCarById(_booking!.carId).then((fetchedCar) {
-        if (mounted && fetchedCar != null) {
-          setState(() {
-            _car = fetchedCar;
-          });
+      // If not in state yet, reload from server
+      if (found == null) {
+        final user = ref.read(authViewModelProvider).user;
+        if (user != null) {
+          await ref
+              .read(bookingViewModelProvider.notifier)
+              .loadBookings(user.id, role: 'technician');
+          if (!mounted) return;
+          found = ref
+              .read(bookingViewModelProvider)
+              .bookings
+              .where((b) => b.id == widget.bookingId)
+              .firstOrNull;
         }
-      });
-    }
+      }
 
-    // Load existing service items if any
-    if (_booking!.serviceItems != null) {
-      _serviceItems.clear();
-      _serviceItems.addAll(_booking!.serviceItems as Iterable<ServiceItemEntity>);
+      if (!mounted) return;
+      if (found == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not load job details. Please try again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        context.pop();
+        return;
+      }
+
+      _booking = found;
+
+      // Load car
+      final carState = ref.read(carViewModelProvider);
+      _car = carState.cars
+          .where((c) => c.id == _booking!.carId)
+          .firstOrNull;
+      if (_car == null && _booking!.carId.isNotEmpty) {
+        ref
+            .read(carViewModelProvider.notifier)
+            .getCarById(_booking!.carId)
+            .then((fetchedCar) {
+          if (mounted && fetchedCar != null) {
+            setState(() => _car = fetchedCar);
+          }
+        });
+      }
+
+      // Safely load service items — BookingEntity.serviceItems uses domain
+      // ServiceItemEntity which may differ from core/models ServiceItemEntity.
+      // Convert via map to be safe.
+      if (_booking!.serviceItems != null &&
+          _booking!.serviceItems!.isNotEmpty) {
+        _serviceItems.clear();
+        for (final raw in _booking!.serviceItems!) {
+          try {
+            // raw is domain ServiceItemEntity; convert via map round-trip
+            final map = <String, dynamic>{
+              'id': raw.id,
+              'name': raw.name,
+              'type': raw.type.toString().split('.').last,
+              'price': raw.price,
+              'quantity': raw.quantity,
+              'description': raw.description,
+            };
+            _serviceItems.add(ServiceItemEntity.fromMap(map));
+          } catch (_) {
+            // skip malformed item
+          }
+        }
+      }
+
+      // Set labor cost
+      if (_booking!.laborCost != null) {
+        _laborCostController.text =
+            _booking!.laborCost!.toStringAsFixed(2);
+      } else if (_booking!.status == BookingStatus.inProgress) {
+        final defaultLabor = ServiceItemsConstants.getDefaultLaborCost(
+            _booking!.maintenanceType);
+        _laborCostController.text = defaultLabor.toStringAsFixed(2);
+      }
+
+      if (_booking!.technicianNotes != null) {
+        _technicianNotesController.text = _booking!.technicianNotes!;
+      }
+    } catch (e, stack) {
+      debugPrint('❌ _loadBookingDetails error: $e\n$stack');
+    } finally {
+      // Always rebuild — even on error, so we don't hang on loading screen
+      if (mounted) setState(() {});
     }
-    
-    // Set labor cost with default if empty
-    if (_booking!.laborCost != null) {
-      _laborCostController.text = _booking!.laborCost!.toStringAsFixed(2);
-    } else if (_booking!.status == BookingStatus.inProgress) {
-      // Set default labor cost for this maintenance type
-      final defaultLabor = ServiceItemsConstants.getDefaultLaborCost(_booking!.maintenanceType);
-      _laborCostController.text = defaultLabor.toStringAsFixed(2);
-    }
-    
-    if (_booking!.technicianNotes != null) {
-      _technicianNotesController.text = _booking!.technicianNotes!;
-    }
-    
-    setState(() {});
   }
 
   Future<Map<String, String>> _getUserInfo(String userId) async {
@@ -475,16 +541,13 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
   }
 
   void _addServiceItem() {
-    // Get predefined items for this maintenance type
-    final predefinedItems = ServiceItemsConstants.getItemsForType(_booking!.maintenanceType);
-    
     showDialog(
       context: context,
       builder: (context) => _ServiceItemDialog(
-        predefinedItems: predefinedItems,
-        onAdd: (item) {
+        maintenanceCategory: _booking!.maintenanceType.toString().split('.').last,
+        onAddAll: (items) {
           setState(() {
-            _serviceItems.add(item);
+            _serviceItems.addAll(items);
             _hasUnsavedChanges = true;
           });
         },
@@ -690,151 +753,259 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
   }
 }
 
-// Dialog for adding service items with predefined items dropdown
-class _ServiceItemDialog extends StatefulWidget {
-  final Function(ServiceItemEntity) onAdd;
-  final List<ServiceItemEntity> predefinedItems;
+// ─────────────────────────────────────────────────────────────
+// Multi-item dialog — technician selects multiple items at once
+// ─────────────────────────────────────────────────────────────
+class _ServiceItemDialog extends ConsumerStatefulWidget {
+  final String maintenanceCategory;
+  final Function(List<ServiceItemEntity>) onAddAll;
 
   const _ServiceItemDialog({
-    required this.onAdd,
-    required this.predefinedItems,
+    required this.maintenanceCategory,
+    required this.onAddAll,
   });
 
   @override
-  State<_ServiceItemDialog> createState() => _ServiceItemDialogState();
+  ConsumerState<_ServiceItemDialog> createState() => _ServiceItemDialogState();
 }
 
-class _ServiceItemDialogState extends State<_ServiceItemDialog> {
-  final _formKey = GlobalKey<FormState>();
-  final _quantityController = TextEditingController(text: '1');
-  ServiceItemEntity? _selectedItem;
+/// Tracks per-item selection state inside the dialog
+class _ItemSelection {
+  final ServiceItemEntity item;
+  bool selected;
+  int quantity;
+  _ItemSelection({required this.item, required this.selected, required this.quantity});
+}
+
+class _ServiceItemDialogState extends ConsumerState<_ServiceItemDialog> {
+  List<_ItemSelection> _selections = [];
+  bool _initialized = false;
+
+  void _initSelections(List<ServiceItemEntity> items) {
+    if (_initialized) return;
+    _initialized = true;
+    _selections = items
+        .map((item) => _ItemSelection(item: item, selected: false, quantity: 1))
+        .toList();
+  }
+
+  int get _selectedCount => _selections.where((s) => s.selected).length;
 
   @override
   Widget build(BuildContext context) {
+    final servicesAsync = ref.watch(availableServicesProvider);
+
     return AlertDialog(
-      title: Text('Add Service Item', style: TextStyle(fontSize: 18.sp)),
-      contentPadding: EdgeInsets.all(20.w),
+      title: Text('Add Items to Invoice', style: TextStyle(fontSize: 18.sp)),
+      contentPadding: EdgeInsets.fromLTRB(12.w, 16.h, 12.w, 0),
       content: SizedBox(
-        width: 0.85.sw,
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                DropdownButtonFormField<ServiceItemEntity>(
-                  value: _selectedItem,
-                  isExpanded: true,
-                  decoration: InputDecoration(
-                    labelText: 'Select Service/Part',
-                    labelStyle: TextStyle(fontSize: 14.sp),
-                    border: const OutlineInputBorder(),
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-                  ),
-                  menuMaxHeight: 0.5.sh,
-                  selectedItemBuilder: (BuildContext context) {
-                    return widget.predefinedItems.map<Widget>((ServiceItemEntity item) {
-                      return Container(
-                        width: double.infinity,
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          item.name,
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      );
-                    }).toList();
-                  },
-                  items: widget.predefinedItems.map((item) {
-                    return DropdownMenuItem(
-                      value: item,
-                      child: Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.symmetric(vertical: 8.h),
-                        child: Text(
-                          item.name,
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedItem = value;
-                  });
-                },
-                validator: (value) {
-                  if (value == null) {
-                    return 'Please select an item';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 16.h),
-              TextFormField(
-                controller: _quantityController,
-                keyboardType: TextInputType.number,
-                style: TextStyle(fontSize: 14.sp),
-                decoration: InputDecoration(
-                  labelText: 'Quantity',
-                  labelStyle: TextStyle(fontSize: 14.sp),
-                  border: const OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+        width: 0.9.sw,
+        height: 0.6.sh,
+        child: servicesAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(child: Text('Error: $e')),
+          data: (allItems) {
+            final items = allItems
+                .where((s) =>
+                    s.category == widget.maintenanceCategory ||
+                    s.category == null)
+                .toList();
+
+            if (items.isEmpty) {
+              return Center(
+                child: Text(
+                  'No catalog items available for this maintenance type.\nAsk admin to add services.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13.sp),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a quantity';
-                  }
-                  if (int.tryParse(value) == null || int.parse(value) < 1) {
-                    return 'Please enter a valid quantity';
-                  }
-                  return null;
-                },
-              ),
+              );
+            }
+
+            _initSelections(items);
+
+            // Group by type label
+            final groups = <String, List<_ItemSelection>>{};
+            for (final sel in _selections) {
+              final label = sel.item.type.toString().split('.').last;
+              groups.putIfAbsent(label, () => []).add(sel);
+            }
+
+            return ListView(
+              children: [
+                for (final entry in groups.entries) ...[
+                  // Group header
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(4.w, 8.h, 4.w, 4.h),
+                    child: Text(
+                      entry.key.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ),
+                  // Items in group
+                  for (final sel in entry.value)
+                    _ItemRow(
+                      sel: sel,
+                      onToggle: (v) => setState(() => sel.selected = v),
+                      onQtyChanged: (q) => setState(() => sel.quantity = q),
+                    ),
+                ],
               ],
-            ),
-          ),
+            );
+          },
         ),
       ),
+      actionsPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          style: TextButton.styleFrom(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-          ),
           child: Text('Cancel', style: TextStyle(fontSize: 14.sp)),
         ),
-        ElevatedButton(
-          onPressed: () {
-            if (_formKey.currentState!.validate()) {
-              final item = ServiceItemEntity(
-                id: DateTime.now().millisecondsSinceEpoch.toString(),
-                name: _selectedItem!.name,
-                type: _selectedItem!.type,
-                price: _selectedItem!.price,
-                quantity: int.parse(_quantityController.text),
-                description: _selectedItem!.description,
-              );
-              widget.onAdd(item);
-              Navigator.pop(context);
-            }
-          },
-          style: ElevatedButton.styleFrom(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+        ElevatedButton.icon(
+          onPressed: _selectedCount == 0
+              ? null
+              : () {
+                  final selected = _selections
+                      .where((s) => s.selected)
+                      .map((s) => ServiceItemEntity(
+                            id: '${DateTime.now().millisecondsSinceEpoch}_${s.item.id}',
+                            name: s.item.name,
+                            type: s.item.type,
+                            price: s.item.price,
+                            quantity: s.quantity,
+                            description: s.item.description,
+                            category: s.item.category,
+                          ))
+                      .toList();
+                  widget.onAddAll(selected);
+                  Navigator.pop(context);
+                },
+          icon: const Icon(Icons.check),
+          label: Text(
+            _selectedCount == 0
+                ? 'Add Selected'
+                : 'Add $_selectedCount Item${_selectedCount > 1 ? 's' : ''}',
+            style: TextStyle(fontSize: 14.sp),
           ),
-          child: Text('Add', style: TextStyle(fontSize: 14.sp)),
         ),
       ],
     );
   }
+}
+
+/// Single row inside the multi-item dialog
+class _ItemRow extends StatelessWidget {
+  final _ItemSelection sel;
+  final ValueChanged<bool> onToggle;
+  final ValueChanged<int> onQtyChanged;
+
+  const _ItemRow({
+    required this.sel,
+    required this.onToggle,
+    required this.onQtyChanged,
+  });
 
   @override
-  void dispose() {
-    _quantityController.dispose();
-    super.dispose();
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
+      margin: EdgeInsets.symmetric(vertical: 3.h),
+      decoration: BoxDecoration(
+        color: sel.selected
+            ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.07)
+            : null,
+        border: Border.all(
+          color: sel.selected
+              ? Theme.of(context).colorScheme.primary
+              : Colors.grey.shade300,
+          width: sel.selected ? 1.5 : 1,
+        ),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: InkWell(
+        onTap: () => onToggle(!sel.selected),
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+          child: Row(
+            children: [
+              Checkbox(
+                value: sel.selected,
+                onChanged: (v) => onToggle(v ?? false),
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                visualDensity: VisualDensity.compact,
+              ),
+              SizedBox(width: 4.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      sel.item.name,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13.sp,
+                      ),
+                    ),
+                    Text(
+                      '${sel.item.price.toStringAsFixed(0)} EGP / unit',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (sel.selected) ...[
+                SizedBox(width: 8.w),
+                // Quantity controls
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    GestureDetector(
+                      onTap: sel.quantity > 1
+                          ? () => onQtyChanged(sel.quantity - 1)
+                          : null,
+                      child: CircleAvatar(
+                        radius: 12.r,
+                        backgroundColor: sel.quantity > 1
+                            ? Theme.of(context).colorScheme.primary
+                            : Colors.grey.shade300,
+                        child: Icon(Icons.remove,
+                            size: 14.sp, color: Colors.white),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.w),
+                      child: Text(
+                        '${sel.quantity}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => onQtyChanged(sel.quantity + 1),
+                      child: CircleAvatar(
+                        radius: 12.r,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        child: Icon(Icons.add,
+                            size: 14.sp, color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

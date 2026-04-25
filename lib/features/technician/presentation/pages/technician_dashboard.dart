@@ -36,14 +36,10 @@ class _TechnicianDashboardState extends ConsumerState<TechnicianDashboard> {
 
   @override
   void dispose() {
-    // Stop listening when dashboard is disposed
-    // Wrap in try-catch to handle cases where widget is already disposed during logout
-    try {
-      ref.read(bookingViewModelProvider.notifier).stopListening();
-    } catch (e) {
-      // Widget was already disposed, safe to ignore
-      debugPrint('Dashboard disposed, listener cleanup skipped: $e');
-    }
+    // NOTE: Do NOT call stopListening() here.
+    // The listener lifecycle is managed by TechnicianJobsPage.
+    // Stopping it here would trigger a listener restart when the user
+    // navigates to Jobs, causing the first real-time batch to be silently skipped.
     super.dispose();
   }
 

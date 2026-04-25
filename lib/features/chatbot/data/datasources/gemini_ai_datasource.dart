@@ -5,7 +5,7 @@ import 'package:car_maintenance_system_new/features/chatbot/domain/entities/chat
 class GeminiAIDatasource {
   final String apiKey;
   static const String _openRouterUrl = 'https://openrouter.ai/api/v1/chat/completions';
-  static const String _model = 'google/gemini-2.5-flash-preview-09-2025';
+  static const String _model = 'google/gemini-2.5-flash';
 
   GeminiAIDatasource({required this.apiKey}) {
     // Trim API key to remove any whitespace

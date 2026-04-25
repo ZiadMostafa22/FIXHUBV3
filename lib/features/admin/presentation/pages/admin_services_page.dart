@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:car_maintenance_system_new/core/models/service_item_model.dart';
 import 'package:car_maintenance_system_new/core/repositories/service_repository.dart';
+import 'package:car_maintenance_system_new/core/constants/service_items_constants.dart';
 
 final serviceRepositoryProvider = Provider((ref) => ServiceRepository());
 
@@ -106,7 +107,7 @@ class _AdminServicesPageState extends ConsumerState<AdminServicesPage> {
                           children: [
                             Text('${service.type.toString().split('.').last} • ${service.category ?? 'N/A'}'),
                             Text(
-                              '\$${service.price.toStringAsFixed(2)}',
+                              '${service.price.toStringAsFixed(0)} EGP',
                               style: TextStyle(
                                 color: Theme.of(context).primaryColor,
                                 fontWeight: FontWeight.bold,
@@ -249,8 +250,8 @@ class _AdminServicesPageState extends ConsumerState<AdminServicesPage> {
                   controller: priceController,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                    labelText: 'Price',
-                    prefixText: '\$',
+                    labelText: 'Price (EGP)',
+                    suffixText: 'EGP',
                     border: OutlineInputBorder(),
                   ),
                 ),
@@ -371,8 +372,8 @@ class _AdminServicesPageState extends ConsumerState<AdminServicesPage> {
                 controller: priceController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  labelText: 'Price',
-                  prefixText: '\$',
+                  labelText: 'Price (EGP)',
+                  suffixText: 'EGP',
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -457,33 +458,35 @@ class _AdminServicesPageState extends ConsumerState<AdminServicesPage> {
   Future<void> _migrateServices() async {
     try {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Migrating services... Please wait.')),
+        const SnackBar(content: Text('جاري استيراد الخدمات...')),
       );
 
-      // Import the constants and migrate
-      // For now, we'll create sample services
-      final sampleServices = [
-        ServiceItemEntity(id: '', name: 'Oil Change', type: ServiceItemType.service, price: 35.0, category: 'regular', description: 'Full synthetic oil change'),
-        ServiceItemEntity(id: '', name: 'Oil Filter', type: ServiceItemType.part, price: 12.0, category: 'regular', description: 'Premium oil filter'),
-        ServiceItemEntity(id: '', name: 'Brake Inspection', type: ServiceItemType.service, price: 25.0, category: 'inspection', description: 'Complete brake system check'),
-        ServiceItemEntity(id: '', name: 'Brake Pads', type: ServiceItemType.part, price: 85.0, category: 'repair', description: 'Front brake pads replacement'),
-        ServiceItemEntity(id: '', name: 'Tire Rotation', type: ServiceItemType.service, price: 20.0, category: 'regular', description: 'Rotate all four tires'),
-        ServiceItemEntity(id: '', name: 'Battery Check', type: ServiceItemType.service, price: 15.0, category: 'inspection', description: 'Battery health check'),
-        ServiceItemEntity(id: '', name: 'Engine Diagnostic', type: ServiceItemType.labor, price: 50.0, category: 'inspection', description: 'Full computer diagnostic'),
-        ServiceItemEntity(id: '', name: 'Emergency Towing', type: ServiceItemType.service, price: 150.0, category: 'emergency', description: 'Emergency towing service'),
-      ];
+      // Seed all services from constants (Arabic names, EGP prices)
+      final allServices = ServiceItemsConstants.all
+          .map((s) => ServiceItemEntity(
+                id: '',
+                name: s.name,
+                type: s.type,
+                price: s.price,
+                category: s.category,
+                description: s.description,
+              ))
+          .toList();
 
-      await ref.read(serviceRepositoryProvider).bulkCreateServices(sampleServices);
+      await ref.read(serviceRepositoryProvider).bulkCreateServices(allServices);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('✅ Services migrated successfully!')),
+          SnackBar(
+            content: Text('✅ تم استيراد ${allServices.length} خدمة بنجاح!'),
+            backgroundColor: Colors.green,
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error migrating services: $e')),
+          SnackBar(content: Text('خطأ في الاستيراد: $e')),
         );
       }
     }

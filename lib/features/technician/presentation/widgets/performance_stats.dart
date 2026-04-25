@@ -13,31 +13,45 @@ class PerformanceStats extends ConsumerWidget {
     final bookingState = ref.watch(bookingViewModelProvider);
     final user = ref.watch(authViewModelProvider).user;
 
-    // Calculate stats from bookings - ONLY show jobs where technician is explicitly assigned
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
+    final todayEnd = todayStart.add(const Duration(days: 1));
+
+    // Calculate stats from bookings
     final completedJobs = bookingState.bookings.where((b) =>
       b.status == BookingStatus.completed &&
-      b.assignedTechnicians != null && 
-      b.assignedTechnicians!.isNotEmpty && 
+      b.assignedTechnicians != null &&
+      b.assignedTechnicians!.isNotEmpty &&
       b.assignedTechnicians!.contains(user?.id)
+    ).length;
+
+    final completedToday = bookingState.bookings.where((b) =>
+      b.status == BookingStatus.completed &&
+      b.assignedTechnicians != null &&
+      b.assignedTechnicians!.isNotEmpty &&
+      b.assignedTechnicians!.contains(user?.id) &&
+      b.completedAt != null &&
+      b.completedAt!.isAfter(todayStart) &&
+      b.completedAt!.isBefore(todayEnd)
     ).length;
 
     final inProgressJobs = bookingState.bookings.where((b) =>
       b.status == BookingStatus.inProgress &&
-      b.assignedTechnicians != null && 
-      b.assignedTechnicians!.isNotEmpty && 
+      b.assignedTechnicians != null &&
+      b.assignedTechnicians!.isNotEmpty &&
       b.assignedTechnicians!.contains(user?.id)
     ).length;
 
     // Calculate total hours worked from completed bookings - ONLY assigned jobs
     final totalHoursWorked = bookingState.bookings
-        .where((b) => 
+        .where((b) =>
           b.status == BookingStatus.completed &&
-          b.assignedTechnicians != null && 
-          b.assignedTechnicians!.isNotEmpty && 
+          b.assignedTechnicians != null &&
+          b.assignedTechnicians!.isNotEmpty &&
           b.assignedTechnicians!.contains(user?.id)
         )
         .fold<double>(0, (sum, booking) => sum + booking.hoursWorked);
-    
+
     return GridView.count(
       crossAxisCount: 2,
       shrinkWrap: true,
@@ -48,10 +62,17 @@ class PerformanceStats extends ConsumerWidget {
       children: [
         _buildStatCard(
           context,
-          title: 'Completed Jobs',
+          title: 'Completed Today',
+          value: completedToday.toString(),
+          icon: Icons.today,
+          color: Colors.green,
+        ),
+        _buildStatCard(
+          context,
+          title: 'Total Completed',
           value: completedJobs.toString(),
           icon: Icons.check_circle,
-          color: Colors.green,
+          color: Colors.teal,
         ),
         _buildStatCard(
           context,
@@ -59,18 +80,6 @@ class PerformanceStats extends ConsumerWidget {
           value: inProgressJobs.toString(),
           icon: Icons.work,
           color: Colors.blue,
-        ),
-        _buildStatCard(
-          context,
-          title: 'Pending',
-          value: bookingState.bookings.where((b) =>
-            (b.status == BookingStatus.pending || b.status == BookingStatus.confirmed) &&
-            b.assignedTechnicians != null && 
-            b.assignedTechnicians!.isNotEmpty && 
-            b.assignedTechnicians!.contains(user?.id)
-          ).length.toString(),
-          icon: Icons.pending_actions,
-          color: Colors.orange,
         ),
         _buildStatCard(
           context,

@@ -236,13 +236,6 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                 ),
                 _buildQuickActionCard(
                   context,
-                  icon: Icons.inventory_2,
-                  label: 'Inventory',
-                  color: Colors.green,
-                  onTap: () => context.push('/admin/inventory'),
-                ),
-                _buildQuickActionCard(
-                  context,
                   icon: Icons.receipt_long,
                   label: 'Refunds',
                   color: Colors.orange,

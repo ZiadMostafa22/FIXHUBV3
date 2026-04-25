@@ -24,7 +24,6 @@ import 'package:car_maintenance_system_new/features/admin/presentation/pages/adm
 import 'package:car_maintenance_system_new/features/admin/presentation/pages/admin_analytics_page.dart';
 import 'package:car_maintenance_system_new/features/admin/presentation/pages/admin_invite_codes_page.dart';
 import 'package:car_maintenance_system_new/features/admin/presentation/pages/admin_services_page.dart';
-import 'package:car_maintenance_system_new/features/admin/presentation/pages/admin_inventory_page.dart';
 import 'package:car_maintenance_system_new/features/admin/presentation/pages/admin_refunds_page.dart';
 import 'package:car_maintenance_system_new/features/admin/presentation/pages/admin_reports_page.dart';
 import 'package:car_maintenance_system_new/features/cashier/presentation/pages/cashier_dashboard.dart';
@@ -268,9 +267,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: 'services',
             builder: (context, state) => const AdminServicesPage(),
           ),
+
           GoRoute(
-            path: 'inventory',
-            builder: (context, state) => const AdminInventoryPage(),
+            path: 'notifications',
+            builder: (context, state) => const NotificationsPage(),
           ),
           GoRoute(
             path: 'refunds',
@@ -279,14 +279,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'reports',
             builder: (context, state) => const AdminReportsPage(),
-          ),
-          GoRoute(
-            path: 'notifications',
-            builder: (context, state) => const NotificationsPage(),
-          ),
-          GoRoute(
-            path: 'reports',
-            builder: (context, state) => const CashierReportsPage(),
           ),
         ],
       ),
