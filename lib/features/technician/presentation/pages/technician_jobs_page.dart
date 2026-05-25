@@ -7,6 +7,7 @@ import 'package:car_maintenance_system_new/features/booking/presentation/viewmod
 import 'package:car_maintenance_system_new/features/car/presentation/viewmodels/car_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/booking/domain/entities/booking_entity.dart';
 import 'package:car_maintenance_system_new/core/widgets/unified_filter_widget.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 
 class TechnicianJobsPage extends ConsumerStatefulWidget {
   const TechnicianJobsPage({super.key});
@@ -77,7 +78,7 @@ class _TechnicianJobsPageState extends ConsumerState<TechnicianJobsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Jobs'),
+        title: Text('my_jobs'.tr(ref)),
       ),
       body: Column(
         children: [
@@ -115,7 +116,7 @@ class _TechnicianJobsPageState extends ConsumerState<TechnicianJobsPage> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        _filterStatus == 'all' ? 'No jobs assigned' : 'No $_filterStatus jobs',
+                        _filterStatus == 'all' ? 'no_jobs_assigned'.tr(ref) : 'no_status_jobs'.tr(ref),
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -123,9 +124,9 @@ class _TechnicianJobsPageState extends ConsumerState<TechnicianJobsPage> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Your assigned jobs will appear here',
-                        style: TextStyle(
+                      Text(
+                        'assigned_jobs_appear_here'.tr(ref),
+                        style: const TextStyle(
                           color: Colors.grey,
                         ),
                       ),
@@ -140,7 +141,7 @@ class _TechnicianJobsPageState extends ConsumerState<TechnicianJobsPage> {
                     
                     // Get car info
                     final car = carState.cars.where((c) => c.id == booking.carId).firstOrNull;
-                    final carName = car != null ? '${car.make} ${car.model} (${car.year})' : 'Loading...';
+                    final carName = car != null ? '${car.make} ${car.model} (${car.year})' : 'loading'.tr(ref);
                     
                     return Card(
                       margin: const EdgeInsets.only(bottom: 16),
@@ -154,7 +155,7 @@ class _TechnicianJobsPageState extends ConsumerState<TechnicianJobsPage> {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    _getMaintenanceTypeName(booking.maintenanceType),
+                                    _getMaintenanceTypeName(booking.maintenanceType, ref),
                                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -169,7 +170,7 @@ class _TechnicianJobsPageState extends ConsumerState<TechnicianJobsPage> {
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: Text(
-                                    _getStatusName(booking.status),
+                                    _getStatusName(booking.status, ref),
                                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                       color: _getStatusColor(booking.status),
                                       fontWeight: FontWeight.bold,
@@ -233,10 +234,10 @@ class _TechnicianJobsPageState extends ConsumerState<TechnicianJobsPage> {
                                 ),
                                 label: Text(
                                   booking.status == BookingStatus.inProgress 
-                                      ? 'Continue Work & Complete Job' 
+                                      ? 'continue_work_complete'.tr(ref) 
                                       : booking.status == BookingStatus.completed
-                                          ? 'View Invoice'
-                                          : 'Start Job & Add Invoice',
+                                          ? 'view_invoice'.tr(ref)
+                                          : 'start_job_add_invoice'.tr(ref),
                                 ),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: booking.status == BookingStatus.inProgress 
@@ -260,33 +261,33 @@ class _TechnicianJobsPageState extends ConsumerState<TechnicianJobsPage> {
     );
   }
 
-  String _getMaintenanceTypeName(MaintenanceType type) {
+  String _getMaintenanceTypeName(MaintenanceType type, WidgetRef ref) {
     switch (type) {
       case MaintenanceType.regular:
-        return 'Regular Maintenance';
+        return 'regular_maintenance'.tr(ref);
       case MaintenanceType.inspection:
-        return 'Inspection';
+        return 'inspection'.tr(ref);
       case MaintenanceType.repair:
-        return 'Repair Service';
+        return 'repair_service'.tr(ref);
       case MaintenanceType.emergency:
-        return 'Emergency Service';
+        return 'emergency_service'.tr(ref);
     }
   }
 
-  String _getStatusName(BookingStatus status) {
+  String _getStatusName(BookingStatus status, WidgetRef ref) {
     switch (status) {
       case BookingStatus.pending:
-        return 'Pending';
+        return 'pending'.tr(ref);
       case BookingStatus.confirmed:
-        return 'Confirmed';
+        return 'confirmed'.tr(ref);
       case BookingStatus.inProgress:
-        return 'In Progress';
+        return 'in_progress'.tr(ref);
       case BookingStatus.completedPendingPayment:
-        return 'Awaiting Payment';
+        return 'awaiting_payment'.tr(ref);
       case BookingStatus.completed:
-        return 'Completed';
+        return 'completed'.tr(ref);
       case BookingStatus.cancelled:
-        return 'Cancelled';
+        return 'cancelled'.tr(ref);
     }
   }
 

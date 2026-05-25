@@ -48,10 +48,10 @@ class ServiceRepository {
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       });
-      debugPrint('✅ Service created: ${doc.id}');
+      debugPrint('Service created: ${doc.id}');
       return doc.id;
     } catch (e) {
-      debugPrint('❌ Error creating service: $e');
+      debugPrint('Error creating service: $e');
       rethrow;
     }
   }
@@ -63,9 +63,9 @@ class ServiceRepository {
         ...updates,
         'updatedAt': FieldValue.serverTimestamp(),
       });
-      debugPrint('✅ Service updated: $id');
+      debugPrint('Service updated: $id');
     } catch (e) {
-      debugPrint('❌ Error updating service: $e');
+      debugPrint('Error updating service: $e');
       rethrow;
     }
   }
@@ -77,9 +77,9 @@ class ServiceRepository {
         'isActive': false,
         'updatedAt': FieldValue.serverTimestamp(),
       });
-      debugPrint('✅ Service deactivated: $id');
+      debugPrint('Service deactivated: $id');
     } catch (e) {
-      debugPrint('❌ Error deleting service: $e');
+      debugPrint('Error deleting service: $e');
       rethrow;
     }
   }
@@ -104,9 +104,9 @@ class ServiceRepository {
       }
       
       await batch.commit();
-      debugPrint('✅ Bulk created ${services.length} services');
+      debugPrint('Bulk created ${services.length} services');
     } catch (e) {
-      debugPrint('❌ Error bulk creating services: $e');
+      debugPrint('Error bulk creating services: $e');
       rethrow;
     }
   }

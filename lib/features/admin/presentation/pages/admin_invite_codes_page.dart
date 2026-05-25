@@ -3,16 +3,18 @@ import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:car_maintenance_system_new/core/services/firebase_service.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 import 'dart:math';
 
-class AdminInviteCodesPage extends StatefulWidget {
+class AdminInviteCodesPage extends ConsumerStatefulWidget {
   const AdminInviteCodesPage({super.key});
 
   @override
-  State<AdminInviteCodesPage> createState() => _AdminInviteCodesPageState();
+  ConsumerState<AdminInviteCodesPage> createState() => _AdminInviteCodesPageState();
 }
 
-class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
+class _AdminInviteCodesPageState extends ConsumerState<AdminInviteCodesPage> {
   final _roleController = TextEditingController(text: 'technician');
   final _maxUsesController = TextEditingController(text: '1');
   bool _isGenerating = false;
@@ -33,8 +35,8 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
   Future<void> _createInviteCode() async {
     if (_maxUsesController.text.isEmpty || int.tryParse(_maxUsesController.text) == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a valid number for max uses'),
+        SnackBar(
+          content: Text('invalid_max_uses'.tr(ref)),
           backgroundColor: Colors.red,
         ),
       );
@@ -61,17 +63,17 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Invite code created: $code'),
+            content: Text('${'invite_code_created'.tr(ref)}$code'),
             backgroundColor: Colors.green,
             action: SnackBarAction(
-              label: 'Copy',
+              label: 'copy'.tr(ref),
               textColor: Colors.white,
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: code));
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Code copied to clipboard!'),
-                    duration: Duration(seconds: 2),
+                  SnackBar(
+                    content: Text('code_copied'.tr(ref)),
+                    duration: const Duration(seconds: 2),
                   ),
                 );
               },
@@ -83,7 +85,7 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error creating invite code: $e'),
+            content: Text('${'error_creating_code'.tr(ref)}$e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -102,22 +104,22 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
             context: context,
             builder: (context) => AlertDialog(
               title: Text(
-                'Deactivate User Accounts?',
+                'deactivate_users_title'.tr(ref),
                 style: TextStyle(fontSize: 18.sp),
               ),
               content: Text(
-                'This code has been used by ${usedBy.length} user(s). Do you want to deactivate their accounts as well?',
+                'deactivate_users_desc'.tr(ref),
                 style: TextStyle(fontSize: 14.sp),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: Text('No', style: TextStyle(fontSize: 14.sp)),
+                  child: Text('no'.tr(ref), style: TextStyle(fontSize: 14.sp)),
                 ),
                 TextButton(
                   onPressed: () => Navigator.pop(context, true),
                   style: TextButton.styleFrom(foregroundColor: Colors.red),
-                  child: Text('Yes, Deactivate Users', style: TextStyle(fontSize: 14.sp)),
+                  child: Text('yes_deactivate'.tr(ref), style: TextStyle(fontSize: 14.sp)),
                 ),
               ],
             ),
@@ -141,7 +143,7 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Code deactivated and ${usedBy.length} user account(s) disabled'),
+                  content: Text('${'code_deactivated_users_disabled'.tr(ref)} (${usedBy.length})'),
                   backgroundColor: Colors.orange,
                 ),
               );
@@ -149,8 +151,8 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
           } else {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Code deactivated (users remain active)'),
+                SnackBar(
+                  content: Text('code_deactivated'.tr(ref)),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -165,22 +167,22 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
             context: context,
             builder: (context) => AlertDialog(
               title: Text(
-                'Reactivate User Accounts?',
+                'reactivate_users_title'.tr(ref),
                 style: TextStyle(fontSize: 18.sp),
               ),
               content: Text(
-                'This code was used by ${usedBy.length} user(s). Do you want to reactivate their accounts as well?',
+                'reactivate_users_desc'.tr(ref),
                 style: TextStyle(fontSize: 14.sp),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: Text('No', style: TextStyle(fontSize: 14.sp)),
+                  child: Text('no'.tr(ref), style: TextStyle(fontSize: 14.sp)),
                 ),
                 TextButton(
                   onPressed: () => Navigator.pop(context, true),
                   style: TextButton.styleFrom(foregroundColor: Colors.green),
-                  child: Text('Yes, Reactivate Users', style: TextStyle(fontSize: 14.sp)),
+                  child: Text('yes_reactivate'.tr(ref), style: TextStyle(fontSize: 14.sp)),
                 ),
               ],
             ),
@@ -204,7 +206,7 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Code activated and ${usedBy.length} user account(s) enabled'),
+                  content: Text('${'code_activated_users_enabled'.tr(ref)} (${usedBy.length})'),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -212,8 +214,8 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
           } else {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Code activated (users remain disabled)'),
+                SnackBar(
+                  content: Text('code_activated'.tr(ref)),
                   backgroundColor: Colors.orange,
                 ),
               );
@@ -231,7 +233,7 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Code ${!currentStatus ? "activated" : "deactivated"}'),
+              content: Text(!currentStatus ? 'code_activated'.tr(ref) : 'code_deactivated'.tr(ref)),
               backgroundColor: Colors.green,
             ),
           );
@@ -241,7 +243,7 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error updating code: $e'),
+            content: Text('${'error_updating_code'.tr(ref)}$e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -251,7 +253,7 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
 
   Future<String> _getTechnicianNames(List<dynamic> userIds) async {
     if (userIds.isEmpty) {
-      return 'Not used yet';
+      return 'not_used_yet'.tr(ref);
     }
 
     try {
@@ -270,7 +272,7 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
       return names.isEmpty ? 'Not used yet' : names.join(', ');
     } catch (e) {
       debugPrint('Error fetching technician names: $e');
-      return 'Error loading names';
+      return 'error_loading_names'.tr(ref);
     }
   }
 
@@ -279,22 +281,22 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          'Delete Invite Code',
+          'delete_invite_code'.tr(ref),
           style: TextStyle(fontSize: 18.sp),
         ),
         content: Text(
-          'Are you sure you want to delete code: $code?',
+          '${'delete_code_confirm'.tr(ref)}$code?',
           style: TextStyle(fontSize: 14.sp),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel', style: TextStyle(fontSize: 14.sp)),
+            child: Text('cancel'.tr(ref), style: TextStyle(fontSize: 14.sp)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text('Delete', style: TextStyle(fontSize: 14.sp)),
+            child: Text('delete'.tr(ref), style: TextStyle(fontSize: 14.sp)),
           ),
         ],
       ),
@@ -309,8 +311,8 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Code deleted successfully'),
+            SnackBar(
+              content: Text('code_deleted_success'.tr(ref)),
               backgroundColor: Colors.green,
             ),
           );
@@ -319,7 +321,7 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error deleting code: $e'),
+              content: Text('${'error_deleting_code'.tr(ref)}$e'),
               backgroundColor: Colors.red,
             ),
           );
@@ -333,7 +335,7 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Invite Codes',
+          'invite_codes'.tr(ref),
           style: TextStyle(fontSize: 18.sp),
         ),
       ),
@@ -348,7 +350,7 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Generate New Invite Code',
+                    'generate_invite_code'.tr(ref),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontSize: 18.sp,
                     ),
@@ -360,7 +362,7 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
                         child: DropdownButtonFormField<String>(
                           initialValue: _roleController.text,
                           decoration: InputDecoration(
-                            labelText: 'Role',
+                            labelText: 'role'.tr(ref),
                             labelStyle: TextStyle(fontSize: 14.sp),
                             border: const OutlineInputBorder(),
                             contentPadding: EdgeInsets.symmetric(
@@ -368,19 +370,23 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
                               vertical: 12.h,
                             ),
                           ),
-                          style: TextStyle(fontSize: 14.sp),
+                          style: TextStyle(
+                            fontSize: 14.sp, 
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                          dropdownColor: Theme.of(context).cardColor,
                           items: [
                             DropdownMenuItem(
                               value: 'technician',
-                              child: Text('Technician', style: TextStyle(fontSize: 14.sp)),
+                              child: Text('technician'.tr(ref), style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface)),
                             ),
                             DropdownMenuItem(
                               value: 'cashier',
-                              child: Text('Cashier', style: TextStyle(fontSize: 14.sp)),
+                              child: Text('cashier'.tr(ref), style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface)),
                             ),
                             DropdownMenuItem(
                               value: 'admin',
-                              child: Text('Admin', style: TextStyle(fontSize: 14.sp)),
+                              child: Text('admin'.tr(ref), style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface)),
                             ),
                           ],
                           onChanged: (value) {
@@ -395,7 +401,7 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
                         child: TextFormField(
                           controller: _maxUsesController,
                           decoration: InputDecoration(
-                            labelText: 'Max Uses',
+                            labelText: 'max_uses'.tr(ref),
                             labelStyle: TextStyle(fontSize: 14.sp),
                             border: const OutlineInputBorder(),
                             contentPadding: EdgeInsets.symmetric(
@@ -403,7 +409,7 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
                               vertical: 12.h,
                             ),
                           ),
-                          style: TextStyle(fontSize: 14.sp),
+                          style: TextStyle(fontSize: 14.sp, color: Theme.of(context).textTheme.bodyLarge?.color),
                           keyboardType: TextInputType.number,
                         ),
                       ),
@@ -423,7 +429,7 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
                             )
                           : Icon(Icons.add, size: 20.sp),
                       label: Text(
-                        _isGenerating ? 'Generating...' : 'Generate Code',
+                        _isGenerating ? 'generating'.tr(ref) : 'generate_code'.tr(ref),
                         style: TextStyle(fontSize: 14.sp),
                       ),
                     ),
@@ -463,11 +469,11 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
                         Icon(Icons.code_off, size: 64.sp, color: Colors.grey),
                         SizedBox(height: 16.h),
                         Text(
-                          'No invite codes yet',
+                          'no_invite_codes'.tr(ref),
                           style: TextStyle(fontSize: 16.sp),
                         ),
                         Text(
-                          'Generate one using the form above',
+                          'generate_one_form'.tr(ref),
                           style: TextStyle(color: Colors.grey, fontSize: 14.sp),
                         ),
                       ],
@@ -531,7 +537,7 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
                                               ScaffoldMessenger.of(context).showSnackBar(
                                                 SnackBar(
                                                   content: Text(
-                                                    'Code copied to clipboard!',
+                                                    'code_copied'.tr(ref),
                                                     style: TextStyle(fontSize: 14.sp),
                                                   ),
                                                   duration: const Duration(seconds: 2),
@@ -557,23 +563,26 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
                                               vertical: 4.h,
                                             ),
                                             decoration: BoxDecoration(
-                                              color: Theme.of(context).colorScheme.primaryContainer,
+                                              color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
                                               borderRadius: BorderRadius.circular(12.r),
                                             ),
                                             child: Text(
                                               role.toUpperCase(),
                                               style: TextStyle(
                                                 fontSize: 10.sp,
-                                                fontWeight: FontWeight.w500,
-                                                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                                fontWeight: FontWeight.bold,
+                                                color: Theme.of(context).brightness == Brightness.dark 
+                                                    ? Colors.white 
+                                                    : Colors.black87,
                                               ),
                                             ),
                                           ),
                                           Text(
-                                            'Uses: $usedCount/$maxUses',
+                                            '${'uses'.tr(ref)} $usedCount/$maxUses',
                                             style: TextStyle(
                                               fontSize: 13.sp,
-                                              color: Colors.grey[600],
+                                              fontWeight: FontWeight.w500,
+                                              color: Theme.of(context).textTheme.bodyMedium?.color,
                                             ),
                                           ),
                                         ],
@@ -593,7 +602,7 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
                                                 SizedBox(width: 4.w),
                                                 Expanded(
                                                   child: Text(
-                                                    'Used by: ${snapshot.data ?? "Loading..."}',
+                                                    '${'used_by'.tr(ref)} ${snapshot.data ?? 'loading'.tr(ref)}',
                                                     style: TextStyle(
                                                       fontSize: 12.sp,
                                                       color: Colors.blue[700],
@@ -623,7 +632,7 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
                                           ),
                                           SizedBox(width: 8.w),
                                           Text(
-                                            isActive ? 'Deactivate' : 'Activate',
+                                            isActive ? 'deactivate'.tr(ref) : 'activate'.tr(ref),
                                             style: TextStyle(fontSize: 14.sp),
                                           ),
                                         ],
@@ -640,7 +649,7 @@ class _AdminInviteCodesPageState extends State<AdminInviteCodesPage> {
                                           ),
                                           SizedBox(width: 8.w),
                                           Text(
-                                            'Delete',
+                                            'delete'.tr(ref),
                                             style: TextStyle(
                                               color: Colors.red,
                                               fontSize: 14.sp,

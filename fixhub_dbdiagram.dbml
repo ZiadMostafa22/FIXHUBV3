@@ -1,0 +1,505 @@
+// =====================================================
+// Fix-Hub Database Schema for dbdiagram.io
+// Complete MySQL ERD with labeled relationships
+// =====================================================
+
+// =====================================================
+// USERS & AUTHENTICATION
+// =====================================================
+
+Table users {
+  id varchar(255) [pk, note: 'User unique identifier']
+  email varchar(255) [unique, not null, note: 'User email address']
+  name varchar(255) [not null]
+  phone varchar(20) [not null]
+  role user_role [not null, note: 'customer, technician, admin, cashier']
+  profile_image_url varchar(500)
+  is_active boolean [not null, default: true]
+  preferences json
+  invite_code_id varchar(255)
+  invite_code varchar(8)
+  created_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  updated_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  
+  indexes {
+    email
+    role
+    invite_code_id
+  }
+}
+
+Table invite_codes {
+  id varchar(255) [pk]
+  code varchar(8) [unique, not null]
+  role staff_role [not null, note: 'technician, cashier, admin']
+  max_uses int [not null]
+  used_count int [not null, default: 0]
+  is_active boolean [not null, default: true]
+  created_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  created_by varchar(255) [not null, ref: > users.id]
+  
+  indexes {
+    code
+    created_by
+  }
+}
+
+Table invite_code_usage {
+  id int [pk, increment]
+  invite_code_id varchar(255) [not null, ref: > invite_codes.id]
+  user_id varchar(255) [not null, ref: > users.id]
+  used_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  
+  indexes {
+    (invite_code_id, user_id) [unique]
+  }
+}
+
+// =====================================================
+// CARS & VEHICLES
+// =====================================================
+
+Table cars {
+  id varchar(255) [pk]
+  user_id varchar(255) [not null, ref: > users.id]
+  make varchar(100) [not null, note: 'Car manufacturer']
+  model varchar(100) [not null]
+  year int [not null]
+  color varchar(50) [not null]
+  license_plate varchar(50) [unique, not null]
+  type car_type [not null, note: 'sedan, suv, hatchback, etc']
+  vin varchar(17)
+  engine_type varchar(100)
+  mileage int
+  created_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  updated_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  
+  indexes {
+    user_id
+    license_plate
+  }
+}
+
+Table car_images {
+  id int [pk, increment]
+  car_id varchar(255) [not null, ref: > cars.id]
+  image_url varchar(500) [not null]
+  uploaded_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  
+  indexes {
+    car_id
+  }
+}
+
+// =====================================================
+// SERVICES & OFFERS
+// =====================================================
+
+Table services {
+  id varchar(255) [pk]
+  name varchar(255) [not null]
+  type service_type [not null, note: 'part, labor, service']
+  price decimal(10,2) [not null]
+  description text
+  category varchar(100)
+  is_active boolean [not null, default: true]
+  created_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  updated_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  
+  indexes {
+    type
+    category
+    is_active
+  }
+}
+
+Table offers {
+  id varchar(255) [pk]
+  title varchar(255) [not null]
+  description text [not null]
+  type offer_type [not null, note: 'announcement, discount, promotion, news']
+  image_url varchar(500)
+  start_date timestamp [not null]
+  end_date timestamp
+  is_active boolean [not null, default: true]
+  created_by varchar(255) [not null, ref: > users.id]
+  created_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  updated_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  discount_percentage int
+  code varchar(50) [unique]
+  terms text
+  
+  indexes {
+    code
+    is_active
+    created_by
+  }
+}
+
+// =====================================================
+// BOOKINGS & APPOINTMENTS
+// =====================================================
+
+Table bookings {
+  id varchar(255) [pk]
+  user_id varchar(255) [not null, ref: > users.id]
+  car_id varchar(255) [not null, ref: > cars.id]
+  service_id varchar(255) [ref: > services.id]
+  maintenance_type maintenance_type_enum [not null]
+  scheduled_date timestamp [not null]
+  time_slot varchar(50) [not null]
+  status booking_status [not null, default: 'pending']
+  description text
+  notes text
+  created_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  updated_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  started_at timestamp
+  completed_at timestamp
+  
+  // Service Details
+  labor_cost decimal(10,2)
+  tax decimal(10,2)
+  total_cost decimal(10,2)
+  technician_notes text
+  
+  // Discount/Offer
+  offer_code varchar(50)
+  offer_title varchar(255)
+  discount_percentage int
+  
+  // Rating
+  rating decimal(2,1)
+  rating_comment text
+  rated_at timestamp
+  
+  // Payment
+  is_paid boolean [not null, default: false]
+  paid_at timestamp
+  cashier_id varchar(255) [ref: > users.id]
+  payment_method payment_method_enum
+  
+  indexes {
+    user_id
+    car_id
+    status
+    scheduled_date
+    cashier_id
+    offer_code
+  }
+}
+
+Table booking_service_items {
+  id int [pk, increment]
+  booking_id varchar(255) [not null, ref: > bookings.id]
+  service_item_id varchar(255) [ref: > services.id]
+  name varchar(255) [not null]
+  type service_type [not null]
+  price decimal(10,2) [not null]
+  quantity int [not null, default: 1]
+  description text
+  category varchar(100)
+  
+  indexes {
+    booking_id
+  }
+}
+
+Table booking_technicians {
+  id int [pk, increment]
+  booking_id varchar(255) [not null, ref: > bookings.id]
+  technician_id varchar(255) [not null, ref: > users.id]
+  assigned_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  
+  indexes {
+    (booking_id, technician_id) [unique]
+    booking_id
+    technician_id
+  }
+}
+
+// =====================================================
+// REFUNDS
+// =====================================================
+
+Table refunds {
+  id varchar(255) [pk]
+  booking_id varchar(255) [unique, not null, ref: - bookings.id]
+  original_amount decimal(10,2) [not null]
+  refund_amount decimal(10,2) [not null]
+  reason text [not null]
+  customer_notes text
+  status refund_status [not null, default: 'requested']
+  requested_by varchar(255) [not null, ref: > users.id]
+  requested_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  approved_by varchar(255) [ref: > users.id]
+  approved_at timestamp
+  processed_at timestamp
+  original_payment_method varchar(50)
+  refund_method varchar(50)
+  
+  indexes {
+    booking_id
+    status
+    requested_by
+    approved_by
+  }
+}
+
+// =====================================================
+// INVENTORY MANAGEMENT
+// =====================================================
+
+Table inventory {
+  id varchar(255) [pk]
+  service_item_id varchar(255) [ref: > services.id]
+  name varchar(255) [not null]
+  sku varchar(100) [unique, not null]
+  category inventory_category [not null]
+  current_stock int [not null, default: 0]
+  low_stock_threshold int [not null, default: 10]
+  reorder_point int [not null, default: 15]
+  unit_cost decimal(10,2) [not null]
+  unit_price decimal(10,2) [not null]
+  location varchar(255)
+  supplier varchar(255)
+  supplier_contact varchar(255)
+  last_restocked timestamp
+  is_active boolean [not null, default: true]
+  created_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  updated_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  
+  indexes {
+    sku
+    category
+    service_item_id
+  }
+}
+
+Table inventory_transactions {
+  id varchar(255) [pk]
+  inventory_item_id varchar(255) [not null, ref: > inventory.id]
+  type transaction_type [not null, note: 'in, out, adjustment']
+  quantity int [not null]
+  quantity_before int [not null]
+  quantity_after int [not null]
+  booking_id varchar(255) [ref: > bookings.id]
+  technician_id varchar(255) [ref: > users.id]
+  reason text
+  notes text
+  created_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  created_by varchar(255) [not null, ref: > users.id]
+  
+  indexes {
+    inventory_item_id
+    booking_id
+    created_by
+    type
+  }
+}
+
+Table low_stock_alerts {
+  id varchar(255) [pk]
+  inventory_item_id varchar(255) [not null, ref: > inventory.id]
+  current_stock int [not null]
+  threshold int [not null]
+  is_resolved boolean [not null, default: false]
+  resolved_at timestamp
+  created_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  
+  indexes {
+    inventory_item_id
+    is_resolved
+  }
+}
+
+// =====================================================
+// NOTIFICATIONS
+// =====================================================
+
+Table user_notifications {
+  id varchar(255) [pk]
+  user_id varchar(255) [not null, ref: > users.id]
+  type notification_type [not null, note: 'push, inApp']
+  category notification_category [not null]
+  title varchar(255) [not null]
+  message text [not null]
+  is_read boolean [not null, default: false]
+  sent_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  booking_id varchar(255) [ref: > bookings.id]
+  car_id varchar(255) [ref: > cars.id]
+  metadata json
+  
+  indexes {
+    user_id
+    is_read
+    category
+    sent_at
+  }
+}
+
+// =====================================================
+// ENUMS
+// =====================================================
+
+Enum user_role {
+  customer
+  technician
+  admin
+  cashier
+}
+
+Enum staff_role {
+  technician
+  cashier
+  admin
+}
+
+Enum car_type {
+  sedan
+  suv
+  hatchback
+  coupe
+  convertible
+  truck
+  van
+}
+
+Enum maintenance_type_enum {
+  regular
+  repair
+  inspection
+  emergency
+}
+
+Enum booking_status {
+  pending
+  confirmed
+  inProgress
+  completedPendingPayment
+  completed
+  cancelled
+}
+
+Enum payment_method_enum {
+  cash
+  card
+  digital
+}
+
+Enum service_type {
+  part
+  labor
+  service
+}
+
+Enum inventory_category {
+  parts
+  supplies
+  tools
+}
+
+Enum refund_status {
+  requested
+  approved
+  rejected
+  processed
+}
+
+Enum offer_type {
+  announcement
+  discount
+  promotion
+  news
+}
+
+Enum notification_type {
+  push
+  inApp
+}
+
+Enum notification_category {
+  booking
+  payment
+  reminder
+  system
+}
+
+Enum transaction_type {
+  in
+  out
+  adjustment
+}
+
+// =====================================================
+// RELATIONSHIPS WITH LABELS
+// =====================================================
+
+// User owns multiple cars
+Ref: users.id < cars.user_id [label: "owns"]
+
+// User creates multiple bookings
+Ref: users.id < bookings.user_id [label: "creates"]
+
+// User receives notifications
+Ref: users.id < user_notifications.user_id [label: "receives"]
+
+// Admin creates offers
+Ref: users.id < offers.created_by [label: "creates (admin)"]
+
+// Admin creates invite codes
+Ref: users.id < invite_codes.created_by [label: "generates (admin)"]
+
+// Car has multiple bookings
+Ref: cars.id < bookings.car_id [label: "has service for"]
+
+// Car has images
+Ref: cars.id < car_images.car_id [label: "has photos"]
+
+// Booking contains service items
+Ref: bookings.id < booking_service_items.booking_id [label: "contains"]
+
+// Booking assigned to technicians (Many-to-Many)
+Ref: bookings.id < booking_technicians.booking_id [label: "assigned to"]
+Ref: users.id < booking_technicians.technician_id [label: "works on"]
+
+// Booking may have one refund (One-to-One)
+Ref: bookings.id - refunds.booking_id [label: "may have refund"]
+
+// Cashier requests refund
+Ref: users.id < refunds.requested_by [label: "requests (cashier)"]
+
+// Admin approves refund
+Ref: users.id < refunds.approved_by [label: "approves (admin)"]
+
+// Cashier processes payment
+Ref: users.id < bookings.cashier_id [label: "processes payment"]
+
+// Service catalog used in bookings
+Ref: services.id < booking_service_items.service_item_id [label: "used in"]
+
+// Inventory linked to services
+Ref: services.id < inventory.service_item_id [label: "linked to stock"]
+
+// Inventory has transactions
+Ref: inventory.id < inventory_transactions.inventory_item_id [label: "has movements"]
+
+// Inventory triggers alerts
+Ref: inventory.id < low_stock_alerts.inventory_item_id [label: "triggers alert"]
+
+// Booking uses inventory
+Ref: bookings.id < inventory_transactions.booking_id [label: "uses items"]
+
+// Technician performs transaction
+Ref: users.id < inventory_transactions.technician_id [label: "uses (tech)"]
+Ref: users.id < inventory_transactions.created_by [label: "recorded by"]
+
+// Notifications relate to bookings and cars
+Ref: bookings.id < user_notifications.booking_id [label: "about"]
+Ref: cars.id < user_notifications.car_id [label: "regarding"]
+
+// Invite code tracking
+Ref: invite_codes.id < invite_code_usage.invite_code_id [label: "tracks usage"]
+Ref: users.id < invite_code_usage.user_id [label: "used by"]
+
+// User uses invite code
+Ref: invite_codes.id < users.invite_code_id [label: "registered with"]

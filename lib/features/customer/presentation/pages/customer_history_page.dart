@@ -6,6 +6,7 @@ import 'package:car_maintenance_system_new/features/auth/presentation/viewmodels
 import 'package:car_maintenance_system_new/features/booking/presentation/viewmodels/booking_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/car/presentation/viewmodels/car_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/booking/domain/entities/booking_entity.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 import 'package:car_maintenance_system_new/core/utils/pdf_generator.dart';
 import 'package:car_maintenance_system_new/core/widgets/rating_dialog.dart';
 import 'package:car_maintenance_system_new/core/widgets/unified_filter_widget.dart';
@@ -133,13 +134,13 @@ class _CustomerHistoryPageState extends ConsumerState<CustomerHistoryPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Service History'),
+        title: Text('service_history'.tr(ref)),
         actions: [
           // Refresh button
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _refreshData,
-            tooltip: 'Refresh',
+            tooltip: 'retry'.tr(ref),
           ),
         ],
       ),
@@ -183,7 +184,7 @@ class _CustomerHistoryPageState extends ConsumerState<CustomerHistoryPage> {
                           ),
                         ),
                         Text(
-                          'Pending',
+                          'pending'.tr(ref),
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Colors.grey[600],
                             fontSize: 11,
@@ -206,7 +207,7 @@ class _CustomerHistoryPageState extends ConsumerState<CustomerHistoryPage> {
                           ),
                         ),
                         Text(
-                          'In Progress',
+                          'service_in_progress'.tr(ref),
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Colors.grey[600],
                             fontSize: 11,
@@ -229,7 +230,7 @@ class _CustomerHistoryPageState extends ConsumerState<CustomerHistoryPage> {
                           ),
                         ),
                         Text(
-                          'Completed',
+                          'completed'.tr(ref),
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Colors.grey[600],
                             fontSize: 11,
@@ -245,14 +246,14 @@ class _CustomerHistoryPageState extends ConsumerState<CustomerHistoryPage> {
                         const Icon(Icons.attach_money, color: Colors.purple, size: 28),
                         const SizedBox(height: 4),
                         Text(
-                          '\$${totalSpent.toStringAsFixed(0)}',
+                          '${'currency'.tr(ref)}${totalSpent.toStringAsFixed(0)}',
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Colors.purple,
                           ),
                         ),
                         Text(
-                          'Total Spent',
+                          'total_spent'.tr(ref),
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Colors.grey[600],
                             fontSize: 11,
@@ -278,7 +279,7 @@ class _CustomerHistoryPageState extends ConsumerState<CustomerHistoryPage> {
                             Icon(Icons.history, size: 64, color: Colors.grey[400]),
                             const SizedBox(height: 16),
             Text(
-                              'No service history',
+                              'no_service_history'.tr(ref),
               style: TextStyle(
                                 fontSize: 18,
                                 color: Colors.grey[600],
@@ -316,7 +317,7 @@ class _CustomerHistoryPageState extends ConsumerState<CustomerHistoryPage> {
                                       children: [
                                         Expanded(
                                           child: Text(
-                                            _getMaintenanceTypeName(booking.maintenanceType),
+                                            _getMaintenanceTypeName(booking.maintenanceType, ref),
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .titleMedium
@@ -336,7 +337,7 @@ class _CustomerHistoryPageState extends ConsumerState<CustomerHistoryPage> {
                                             borderRadius: BorderRadius.circular(12),
                                           ),
                                           child: Text(
-                                            _getStatusName(booking.status),
+                                            _getStatusName(booking.status, ref),
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .bodySmall
@@ -352,7 +353,7 @@ class _CustomerHistoryPageState extends ConsumerState<CustomerHistoryPage> {
                                     Text(
                                       car != null 
                                           ? '${car.make} ${car.model} (${car.year})'
-                                          : 'Loading...',
+                                          : 'loading'.tr(ref),
                                       style: Theme.of(context).textTheme.bodyMedium,
                                     ),
                                     const SizedBox(height: 4),
@@ -394,15 +395,15 @@ class _CustomerHistoryPageState extends ConsumerState<CustomerHistoryPage> {
                                           child: Row(
                                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                             children: [
-                                              const Text(
-                                                'Total Cost:',
+                                              Text(
+                                                'total_cost_label'.tr(ref),
                                                 style: TextStyle(fontWeight: FontWeight.bold),
                                               ),
                                               Row(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
                                                   Text(
-                                                    '\$${booking.totalCost.toStringAsFixed(2)}',
+                                                    '${'currency'.tr(ref)}${booking.totalCost.toStringAsFixed(2)}',
                                                     style: const TextStyle(
                                                       fontWeight: FontWeight.bold,
                                                       color: Colors.green,
@@ -426,7 +427,7 @@ class _CustomerHistoryPageState extends ConsumerState<CustomerHistoryPage> {
                                       if (booking.rating != null) ...[
                                         Row(
                                           children: [
-                                            const Text('Your Rating: '),
+                                            Text('your_rating'.tr(ref)),
                                             RatingBarIndicator(
                                               rating: booking.rating!,
                                               itemBuilder: (context, index) => const Icon(
@@ -487,7 +488,7 @@ class _CustomerHistoryPageState extends ConsumerState<CustomerHistoryPage> {
                                               );
                                             },
                                             icon: const Icon(Icons.star, size: 18),
-                                            label: const Text('Rate This Service'),
+                                            label: Text('rate_this_service'.tr(ref)),
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: Colors.amber,
                                             ),
@@ -508,33 +509,33 @@ class _CustomerHistoryPageState extends ConsumerState<CustomerHistoryPage> {
     );
   }
 
-  String _getMaintenanceTypeName(MaintenanceType type) {
+  String _getMaintenanceTypeName(MaintenanceType type, WidgetRef ref) {
     switch (type) {
       case MaintenanceType.regular:
-        return 'Regular Maintenance';
+        return 'regular_maintenance'.tr(ref);
       case MaintenanceType.inspection:
-        return 'Inspection';
+        return 'inspection'.tr(ref);
       case MaintenanceType.repair:
-        return 'Repair';
+        return 'repair_service'.tr(ref);
       case MaintenanceType.emergency:
-        return 'Emergency Service';
+        return 'emergency_service'.tr(ref);
     }
   }
 
-  String _getStatusName(BookingStatus status) {
+  String _getStatusName(BookingStatus status, WidgetRef ref) {
     switch (status) {
       case BookingStatus.pending:
-        return 'Pending';
+        return 'pending'.tr(ref);
       case BookingStatus.confirmed:
-        return 'Confirmed';
+        return 'confirmed'.tr(ref);
       case BookingStatus.inProgress:
-        return 'In Progress';
+        return 'service_in_progress'.tr(ref);
       case BookingStatus.completedPendingPayment:
-        return 'Awaiting Payment';
+        return 'awaiting_payment'.tr(ref);
       case BookingStatus.completed:
-        return 'Completed';
+        return 'completed'.tr(ref);
       case BookingStatus.cancelled:
-        return 'Cancelled';
+        return 'was_cancelled'.tr(ref);
     }
   }
 
@@ -559,18 +560,18 @@ class _CustomerHistoryPageState extends ConsumerState<CustomerHistoryPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Invoice Details'),
+        title: Text('invoice_details'.tr(ref)),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Booking ID: ${booking.id}'),
-              Text('Vehicle: ${car != null ? "${car.make} ${car.model}" : "Loading..."}'),
-              Text('Date: ${DateFormat('MMM dd, yyyy').format(booking.scheduledDate)}'),
+              Text('${'booking_id'.tr(ref)}${booking.id}'),
+              Text('${'vehicle'.tr(ref)}: ${car != null ? "${car.make} ${car.model}" : "loading".tr(ref)}'),
+              Text('${'date'.tr(ref)}: ${DateFormat('MMM dd, yyyy').format(booking.scheduledDate)}'),
               const Divider(height: 20),
-              const Text('Service Items:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('${'service_items'.tr(ref)}:',
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               if (booking.serviceItems != null && booking.serviceItems!.isNotEmpty)
                 ...booking.serviceItems!.map((item) => Padding(
@@ -581,18 +582,18 @@ class _CustomerHistoryPageState extends ConsumerState<CustomerHistoryPage> {
                           Expanded(
                             child: Text('${item.name} x${item.quantity}'),
                           ),
-                          Text('\$${item.totalPrice.toStringAsFixed(2)}'),
+                          Text('${'currency'.tr(ref)}${item.totalPrice.toStringAsFixed(2)}'),
                         ],
                       ),
                     ))
               else
-                const Text('No items'),
+                Text('no_items'.tr(ref)),
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text('Labor Cost:'),
-                  Text('\$${(booking.laborCost ?? 0).toStringAsFixed(2)}'),
+                  Text('${'currency'.tr(ref)}${(booking.laborCost ?? 0).toStringAsFixed(2)}'),
                 ],
               ),
               const Divider(height: 20),
@@ -600,24 +601,24 @@ class _CustomerHistoryPageState extends ConsumerState<CustomerHistoryPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text('Subtotal:'),
-                  Text('\$${booking.subtotal.toStringAsFixed(2)}'),
+                  Text('${'currency'.tr(ref)}${booking.subtotal.toStringAsFixed(2)}'),
                 ],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text('Tax (10%):'),
-                  Text('\$${((booking.tax ?? (booking.subtotal * 0.10))).toStringAsFixed(2)}'),
+                  Text('${'currency'.tr(ref)}${((booking.tax ?? (booking.subtotal * 0.10))).toStringAsFixed(2)}'),
                 ],
               ),
               const Divider(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Total:',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                  Text('${'total'.tr(ref)}:',
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                   Text(
-                    '\$${booking.totalCost.toStringAsFixed(2)}',
+                    '${'currency'.tr(ref)}${booking.totalCost.toStringAsFixed(2)}',
                     style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
@@ -628,8 +629,8 @@ class _CustomerHistoryPageState extends ConsumerState<CustomerHistoryPage> {
               if (booking.technicianNotes != null &&
                   booking.technicianNotes!.isNotEmpty) ...[
                 const Divider(height: 20),
-                const Text('Technician Notes:',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                Text('${'technician_notes'.tr(ref)}:',
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
                 Text(booking.technicianNotes!),
               ],
@@ -648,14 +649,14 @@ class _CustomerHistoryPageState extends ConsumerState<CustomerHistoryPage> {
               );
             },
             icon: const Icon(Icons.picture_as_pdf),
-            label: const Text('Download PDF'),
+            label: Text('download_pdf'.tr(ref)),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text('close'.tr(ref)),
           ),
         ],
       ),

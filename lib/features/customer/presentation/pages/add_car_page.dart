@@ -5,6 +5,7 @@ import 'package:car_maintenance_system_new/features/auth/presentation/viewmodels
 import 'package:car_maintenance_system_new/features/car/presentation/viewmodels/car_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/car/domain/entities/car_entity.dart';
 import 'package:car_maintenance_system_new/core/constants/egyptian_cars.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 
 class AddCarPage extends ConsumerStatefulWidget {
   const AddCarPage({super.key});
@@ -55,8 +56,8 @@ class _AddCarPageState extends ConsumerState<AddCarPage> {
       if (mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('✅ Car added successfully!'),
+            SnackBar(
+              content: Text('car_added_successfully'.tr(ref)),
               backgroundColor: Colors.green,
             ),
           );
@@ -65,7 +66,7 @@ class _AddCarPageState extends ConsumerState<AddCarPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                  ref.read(carViewModelProvider).error ?? 'Failed to add car'),
+                  ref.read(carViewModelProvider).error != null ? 'failed_add_car'.tr(ref) : 'failed_add_car'.tr(ref)),
               backgroundColor: Colors.red,
             ),
           );
@@ -87,7 +88,7 @@ class _AddCarPageState extends ConsumerState<AddCarPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add New Car'),
+        title: Text('add_new_car'.tr(ref)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -114,12 +115,12 @@ class _AddCarPageState extends ConsumerState<AddCarPage> {
               const SizedBox(height: 16),
 
               // ─── Make ───────────────────────────────────────
-              Text('Car Make', style: theme.textTheme.labelLarge),
+              Text('car_make'.tr(ref), style: theme.textTheme.labelLarge),
               const SizedBox(height: 6),
               DropdownButtonFormField<String>(
                 value: _selectedMake,
                 decoration:
-                    inputDecoration.copyWith(hintText: 'Select car brand'),
+                    inputDecoration.copyWith(hintText: 'select_brand'.tr(ref)),
                 isExpanded: true,
                 items: EgyptianCars.makes
                     .map((make) =>
@@ -131,20 +132,20 @@ class _AddCarPageState extends ConsumerState<AddCarPage> {
                     _selectedModel = null; // Reset model when make changes
                   });
                 },
-                validator: (v) => v == null ? 'Please select the car brand' : null,
+                validator: (v) => v == null ? 'select_brand_validation'.tr(ref) : null,
               ),
 
               const SizedBox(height: 16),
 
               // ─── Model ──────────────────────────────────────
-              Text('Model', style: theme.textTheme.labelLarge),
+              Text('model'.tr(ref), style: theme.textTheme.labelLarge),
               const SizedBox(height: 6),
               DropdownButtonFormField<String>(
                 value: _selectedModel,
                 decoration: inputDecoration.copyWith(
                   hintText: _selectedMake == null
-                      ? 'Select brand first'
-                      : 'Select model',
+                      ? 'select_brand_first'.tr(ref)
+                      : 'select_model'.tr(ref),
                 ),
                 isExpanded: true,
                 items: _availableModels
@@ -153,17 +154,17 @@ class _AddCarPageState extends ConsumerState<AddCarPage> {
                     .toList(),
                 onChanged:
                     _selectedMake == null ? null : (v) => setState(() => _selectedModel = v),
-                validator: (v) => v == null ? 'Please select the model' : null,
+                validator: (v) => v == null ? 'select_model_validation'.tr(ref) : null,
               ),
 
               const SizedBox(height: 16),
 
               // ─── Year ───────────────────────────────────────
-              Text('Year', style: theme.textTheme.labelLarge),
+              Text('year'.tr(ref), style: theme.textTheme.labelLarge),
               const SizedBox(height: 6),
               DropdownButtonFormField<int>(
                 value: _selectedYear,
-                decoration: inputDecoration.copyWith(hintText: 'Select year'),
+                decoration: inputDecoration.copyWith(hintText: 'select_year'.tr(ref)),
                 isExpanded: true,
                 menuMaxHeight: 250,
                 items: EgyptianCars.years
@@ -171,41 +172,41 @@ class _AddCarPageState extends ConsumerState<AddCarPage> {
                         DropdownMenuItem(value: y, child: Text(y.toString())))
                     .toList(),
                 onChanged: (v) => setState(() => _selectedYear = v),
-                validator: (v) => v == null ? 'Please select the year' : null,
+                validator: (v) => v == null ? 'select_year_validation'.tr(ref) : null,
               ),
 
               const SizedBox(height: 16),
 
               // ─── Color ──────────────────────────────────────
-              Text('Color', style: theme.textTheme.labelLarge),
+              Text('color'.tr(ref), style: theme.textTheme.labelLarge),
               const SizedBox(height: 6),
               DropdownButtonFormField<String>(
                 value: _selectedColor,
-                decoration: inputDecoration.copyWith(hintText: 'Select color'),
+                decoration: inputDecoration.copyWith(hintText: 'select_color'.tr(ref)),
                 isExpanded: true,
                 items: EgyptianCars.colors
                     .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                     .toList(),
                 onChanged: (v) => setState(() => _selectedColor = v),
-                validator: (v) => v == null ? 'Please select the color' : null,
+                validator: (v) => v == null ? 'select_color_validation'.tr(ref) : null,
               ),
 
               const SizedBox(height: 16),
 
               // ─── Type ───────────────────────────────────────
-              Text('Car Type', style: theme.textTheme.labelLarge),
+              Text('car_type'.tr(ref), style: theme.textTheme.labelLarge),
               const SizedBox(height: 6),
               DropdownButtonFormField<CarType>(
                 value: _selectedType,
-                decoration: inputDecoration.copyWith(hintText: 'Select type'),
+                decoration: inputDecoration.copyWith(hintText: 'select_type'.tr(ref)),
                 isExpanded: true,
-                items: const [
-                  DropdownMenuItem(value: CarType.sedan, child: Text('Sedan')),
-                  DropdownMenuItem(value: CarType.suv, child: Text('SUV')),
-                  DropdownMenuItem(value: CarType.truck, child: Text('Truck / Pickup')),
-                  DropdownMenuItem(value: CarType.hatchback, child: Text('Hatchback')),
-                  DropdownMenuItem(value: CarType.coupe, child: Text('Coupe')),
-                  DropdownMenuItem(value: CarType.van, child: Text('Van / Minivan')),
+                items: [
+                  DropdownMenuItem(value: CarType.sedan, child: Text('sedan'.tr(ref))),
+                  DropdownMenuItem(value: CarType.suv, child: Text('suv'.tr(ref))),
+                  DropdownMenuItem(value: CarType.truck, child: Text('truck_pickup'.tr(ref))),
+                  DropdownMenuItem(value: CarType.hatchback, child: Text('hatchback'.tr(ref))),
+                  DropdownMenuItem(value: CarType.coupe, child: Text('coupe'.tr(ref))),
+                  DropdownMenuItem(value: CarType.van, child: Text('van_minivan'.tr(ref))),
                 ],
                 onChanged: (v) => setState(() => _selectedType = v!),
               ),
@@ -213,17 +214,17 @@ class _AddCarPageState extends ConsumerState<AddCarPage> {
               const SizedBox(height: 16),
 
               // ─── Plate Number ───────────────────────────────
-              Text('Plate Number *', style: theme.textTheme.labelLarge),
+              Text('${'plate_number'.tr(ref)} *', style: theme.textTheme.labelLarge),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _plateController,
                 decoration: inputDecoration.copyWith(
-                  hintText: 'e.g., 123 أ ب ج',
+                  hintText: 'plate_number_hint'.tr(ref),
                   prefixIcon: const Icon(Icons.credit_card),
                 ),
                 textCapitalization: TextCapitalization.characters,
                 validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Please enter plate number' : null,
+                    (v == null || v.trim().isEmpty) ? 'enter_plate_validation'.tr(ref) : null,
               ),
 
               const SizedBox(height: 24),
@@ -241,7 +242,7 @@ class _AddCarPageState extends ConsumerState<AddCarPage> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.add),
-                label: const Text('Add Car', style: TextStyle(fontSize: 16)),
+                label: Text('add_car'.tr(ref), style: const TextStyle(fontSize: 16)),
               ),
 
               const SizedBox(height: 16),

@@ -22,7 +22,7 @@ class NotificationService {
       );
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-        debugPrint('✅ Notification permission granted');
+        debugPrint('Notification permission granted');
         
         // Re-enable auto-init
         await _messaging.setAutoInitEnabled(true);
@@ -37,10 +37,10 @@ class NotificationService {
         // Handle background messages
         FirebaseMessaging.onBackgroundMessage(_handleBackgroundMessage);
       } else {
-        debugPrint('⚠️ Notification permission denied');
+        debugPrint('Notification permission denied');
       }
     } catch (e) {
-      debugPrint('❌ Error initializing notifications: $e');
+      debugPrint('Error initializing notifications: $e');
     }
   }
 
@@ -68,7 +68,7 @@ class NotificationService {
           .get();
       
       if (duplicateCheck.docs.isNotEmpty) {
-        debugPrint('⚠️ Duplicate notification prevented: $title');
+        debugPrint('Duplicate notification prevented: $title');
         return; // Don't send duplicate
       }
 
@@ -93,9 +93,9 @@ class NotificationService {
           .collection('user_notifications')
           .add(notification.toFirestore());
 
-      debugPrint('✅ Notification sent to user $userId: $title');
+      debugPrint('Notification sent to user $userId: $title');
     } catch (e) {
-      debugPrint('❌ Error sending notification: $e');
+      debugPrint('Error sending notification: $e');
     }
   }
 
@@ -119,7 +119,7 @@ We look forward to serving you!''';
 
     await sendNotification(
       userId: userId,
-      title: '✅ Booking Confirmed',
+      title: 'Booking Confirmed',
       message: message,
       category: NotificationCategory.booking,
       bookingId: bookingId,
@@ -167,7 +167,7 @@ Please proceed to payment.''';
 
     await sendNotification(
       userId: userId,
-      title: '✅ Service Completed',
+      title: 'Service Completed',
       message: message,
       category: NotificationCategory.booking,
       bookingId: bookingId,
@@ -189,7 +189,7 @@ Thank you for your business!''';
 
     await sendNotification(
       userId: userId,
-      title: '💳 Payment Completed',
+      title: 'Payment Completed',
       message: message,
       category: NotificationCategory.payment,
       bookingId: bookingId,
@@ -209,9 +209,9 @@ Thank you for your business!''';
           .collection('user_notifications')
           .doc(notificationId)
           .update({'read': true});
-      debugPrint('✅ Marked notification as read: $notificationId');
+      debugPrint('Marked notification as read: $notificationId');
     } catch (e) {
-      debugPrint('❌ Error marking notification as read: $e');
+      debugPrint('Error marking notification as read: $e');
     }
   }
 
@@ -229,9 +229,9 @@ Thank you for your business!''';
         batch.update(doc.reference, {'read': true});
       }
       await batch.commit();
-      debugPrint('✅ Marked all notifications as read for user $userId');
+      debugPrint('Marked all notifications as read for user $userId');
     } catch (e) {
-      debugPrint('❌ Error marking all as read: $e');
+      debugPrint('Error marking all as read: $e');
     }
   }
 
@@ -271,9 +271,9 @@ Thank you for your business!''';
           .collection('user_notifications')
           .doc(notificationId)
           .delete();
-      debugPrint('✅ Deleted notification: $notificationId');
+      debugPrint('Deleted notification: $notificationId');
     } catch (e) {
-      debugPrint('❌ Error deleting notification: $e');
+      debugPrint('Error deleting notification: $e');
     }
   }
 }

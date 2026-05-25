@@ -6,6 +6,7 @@ import 'package:car_maintenance_system_new/features/booking/presentation/viewmod
 import 'package:car_maintenance_system_new/features/car/presentation/viewmodels/car_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/booking/domain/entities/booking_entity.dart';
 import 'package:car_maintenance_system_new/core/widgets/detailed_invoice_dialog.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 
 class ActiveServices extends ConsumerWidget {
   const ActiveServices({super.key});
@@ -14,6 +15,7 @@ class ActiveServices extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final bookingState = ref.watch(bookingViewModelProvider);
     final carState = ref.watch(carViewModelProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Filter for active services: inProgress or completedPendingPayment
     final activeBookings = bookingState.bookings.where((booking) {
@@ -38,7 +40,7 @@ class ActiveServices extends ConsumerWidget {
             ),
             SizedBox(width: 8.w),
             Text(
-              'Active Services',
+              'active_services'.tr(ref),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 fontSize: 18.sp,
@@ -74,7 +76,12 @@ class ActiveServices extends ConsumerWidget {
 
         return Card(
           margin: EdgeInsets.only(bottom: 12.h),
-          elevation: 3,
+          elevation: isDark ? 0 : 3,
+          color: isDark ? const Color(0xFF1E1E1E) : null,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.r),
+            side: isDark ? BorderSide(color: Colors.grey.shade800) : BorderSide.none,
+          ),
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12.r),
@@ -82,14 +89,8 @@ class ActiveServices extends ConsumerWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: booking.status == BookingStatus.completedPendingPayment
-                    ? [
-                        Colors.deepPurple.shade50,
-                        Colors.purple.shade50,
-                      ]
-                    : [
-                        Colors.blue.shade50,
-                        Colors.lightBlue.shade50,
-                      ],
+                    ? (isDark ? [Colors.deepPurple.shade900.withOpacity(0.3), Colors.purple.shade900.withOpacity(0.1)] : [Colors.deepPurple.shade50, Colors.purple.shade50])
+                    : (isDark ? [Colors.blue.shade900.withOpacity(0.3), Colors.lightBlue.shade900.withOpacity(0.1)] : [Colors.blue.shade50, Colors.lightBlue.shade50]),
               ),
             ),
             child: Padding(
@@ -116,7 +117,7 @@ class ActiveServices extends ConsumerWidget {
                               ),
                               SizedBox(width: 6.w),
                               Text(
-                                _getStatusText(booking.status),
+                                _getStatusText(booking.status, ref),
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
@@ -139,7 +140,7 @@ class ActiveServices extends ConsumerWidget {
                                 Icon(Icons.payment, size: 12.sp, color: Colors.white),
                                 SizedBox(width: 4.w),
                                 Text(
-                                  'Payment Due',
+                                  'payment_due'.tr(ref),
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 10.sp,
@@ -158,7 +159,7 @@ class ActiveServices extends ConsumerWidget {
                     Row(
                       children: [
                         CircleAvatar(
-                          backgroundColor: Colors.white,
+                          backgroundColor: isDark ? Colors.grey[800] : Colors.white,
                           radius: 24.r,
                           child: Icon(
                             Icons.directions_car,
@@ -176,12 +177,13 @@ class ActiveServices extends ConsumerWidget {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16.sp,
+                                  color: Theme.of(context).textTheme.bodyLarge?.color,
                                 ),
                               ),
                               Text(
                                 car.licensePlate,
                                 style: TextStyle(
-                                  color: Colors.grey[700],
+                                  color: isDark ? Colors.grey[400] : Colors.grey[700],
                                   fontSize: 13.sp,
                                 ),
                               ),
@@ -192,20 +194,20 @@ class ActiveServices extends ConsumerWidget {
                     ),
                     
                     SizedBox(height: 12.h),
-                    Divider(height: 1.h, color: Colors.grey.shade300),
+                    Divider(height: 1.h, color: isDark ? Colors.grey.shade700 : Colors.grey.shade300),
                     SizedBox(height: 12.h),
                     
                     // Service Type & Date
                     Row(
                       children: [
-                        Icon(Icons.build, size: 16.sp, color: Colors.grey[600]),
+                        Icon(Icons.build, size: 16.sp, color: isDark ? Colors.grey[400] : Colors.grey[600]),
                         SizedBox(width: 8.w),
                         Expanded(
                           child: Text(
-                            _getMaintenanceTypeName(booking.maintenanceType),
+                            _getMaintenanceTypeName(booking.maintenanceType, ref),
                             style: TextStyle(
                               fontSize: 13.sp,
-                              color: Colors.grey[800],
+                              color: Theme.of(context).textTheme.bodyMedium?.color,
                             ),
                           ),
                         ),
@@ -214,13 +216,13 @@ class ActiveServices extends ConsumerWidget {
                     SizedBox(height: 8.h),
                     Row(
                       children: [
-                        Icon(Icons.calendar_today, size: 16.sp, color: Colors.grey[600]),
+                        Icon(Icons.calendar_today, size: 16.sp, color: isDark ? Colors.grey[400] : Colors.grey[600]),
                         SizedBox(width: 8.w),
                         Text(
                           DateFormat('dd MMM yyyy, HH:mm').format(booking.scheduledDate),
                           style: TextStyle(
                             fontSize: 13.sp,
-                            color: Colors.grey[800],
+                            color: Theme.of(context).textTheme.bodyMedium?.color,
                           ),
                         ),
                       ],
@@ -243,9 +245,9 @@ class ActiveServices extends ConsumerWidget {
                         child: Container(
                           padding: EdgeInsets.all(12.w),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: isDark ? Colors.grey[800] : Colors.white,
                             borderRadius: BorderRadius.circular(8.r),
-                            border: Border.all(color: Colors.grey.shade300),
+                            border: Border.all(color: isDark ? Colors.grey.shade700 : Colors.grey.shade300),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -254,28 +256,28 @@ class ActiveServices extends ConsumerWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Total Amount',
+                                    'total_amount'.tr(ref),
                                     style: TextStyle(
                                       fontSize: 12.sp,
-                                      color: Colors.grey[600],
+                                      color: isDark ? Colors.grey[400] : Colors.grey[600],
                                     ),
                                   ),
                                   SizedBox(height: 4.h),
                                   Row(
                                     children: [
                                       Text(
-                                        '\$${booking.totalCost.toStringAsFixed(2)}',
+                                        '${'currency'.tr(ref)}${booking.totalCost.toStringAsFixed(2)}',
                                         style: TextStyle(
                                           fontSize: 20.sp,
                                           fontWeight: FontWeight.bold,
-                                          color: Colors.green,
+                                          color: isDark ? Colors.greenAccent : Colors.green,
                                         ),
                                       ),
                                       SizedBox(width: 8.w),
                                       Icon(
                                         Icons.receipt_long,
                                         size: 16.sp,
-                                        color: Colors.green,
+                                        color: isDark ? Colors.greenAccent : Colors.green,
                                       ),
                                     ],
                                   ),
@@ -298,8 +300,9 @@ class ActiveServices extends ConsumerWidget {
                       Container(
                         padding: EdgeInsets.all(12.w),
                         decoration: BoxDecoration(
-                          color: Colors.blue.shade100,
-                          borderRadius: BorderRadius.circular(8.r),
+                          color: isDark ? Theme.of(context).primaryColor.withOpacity(0.2) : Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(color: isDark ? Theme.of(context).primaryColor.withOpacity(0.5) : Colors.blue.shade100),
                         ),
                         child: Row(
                           children: [
@@ -308,16 +311,16 @@ class ActiveServices extends ConsumerWidget {
                               height: 20.h,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.blue.shade700,
+                                color: isDark ? Theme.of(context).colorScheme.primary : Theme.of(context).primaryColor,
                               ),
                             ),
                             SizedBox(width: 12.w),
                             Expanded(
                               child: Text(
-                                'Our technician is working on your vehicle',
+                                'technician_working'.tr(ref),
                                 style: TextStyle(
                                   fontSize: 12.sp,
-                                  color: Colors.blue.shade900,
+                                  color: isDark ? Colors.blue.shade100 : Colors.blue.shade900,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -358,27 +361,27 @@ class ActiveServices extends ConsumerWidget {
     }
   }
 
-  String _getStatusText(BookingStatus status) {
+  String _getStatusText(BookingStatus status, WidgetRef ref) {
     switch (status) {
       case BookingStatus.inProgress:
-        return 'Service in Progress';
+        return 'service_in_progress'.tr(ref);
       case BookingStatus.completedPendingPayment:
-        return 'Service Completed';
+        return 'service_completed'.tr(ref);
       default:
         return 'Unknown';
     }
   }
 
-  String _getMaintenanceTypeName(MaintenanceType type) {
+  String _getMaintenanceTypeName(MaintenanceType type, WidgetRef ref) {
     switch (type) {
       case MaintenanceType.regular:
-        return 'Regular Maintenance';
+        return 'regular_maintenance'.tr(ref);
       case MaintenanceType.repair:
-        return 'Repair Service';
+        return 'repair_service'.tr(ref);
       case MaintenanceType.inspection:
-        return 'Inspection';
+        return 'inspection'.tr(ref);
       case MaintenanceType.emergency:
-        return 'Emergency Service';
+        return 'emergency_service'.tr(ref);
     }
   }
 }

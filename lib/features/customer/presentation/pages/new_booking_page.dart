@@ -8,6 +8,7 @@ import 'package:car_maintenance_system_new/features/car/presentation/viewmodels/
 import 'package:car_maintenance_system_new/features/booking/domain/entities/booking_entity.dart';
 import 'package:car_maintenance_system_new/core/models/offer_model.dart';
 import 'package:car_maintenance_system_new/core/utils/discount_validator.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Multi-step booking page (3 steps)
@@ -40,30 +41,30 @@ class _NewBookingPageState extends ConsumerState<NewBookingPage> {
   OfferModel? _appliedOffer;
   bool _isValidatingCode = false;
 
-  static const Map<MaintenanceType, _TypeMeta> _typeMeta = {
+  Map<MaintenanceType, _TypeMeta> _getTypeMeta(WidgetRef ref) => {
     MaintenanceType.regular: _TypeMeta(
-      label: 'Regular Maintenance',
+      label: 'regular_maintenance'.tr(ref),
       icon: Icons.build_circle,
-      color: Color(0xFF2196F3),
-      hint: 'Oil change, filters, fluids…',
+      color: const Color(0xFF2196F3),
+      hint: 'regular_maintenance_hint'.tr(ref),
     ),
     MaintenanceType.inspection: _TypeMeta(
-      label: 'Inspection',
+      label: 'inspection'.tr(ref),
       icon: Icons.search,
-      color: Color(0xFF4CAF50),
-      hint: 'Safety check, computer scan…',
+      color: const Color(0xFF4CAF50),
+      hint: 'inspection_hint'.tr(ref),
     ),
     MaintenanceType.repair: _TypeMeta(
-      label: 'Repair',
+      label: 'repair_service'.tr(ref),
       icon: Icons.build,
-      color: Color(0xFFFF9800),
-      hint: 'Brakes, engine, transmission…',
+      color: const Color(0xFFFF9800),
+      hint: 'repair_hint'.tr(ref),
     ),
     MaintenanceType.emergency: _TypeMeta(
-      label: 'Emergency',
+      label: 'emergency_service'.tr(ref),
       icon: Icons.warning_rounded,
-      color: Color(0xFFF44336),
-      hint: 'Urgent — off-road assistance…',
+      color: const Color(0xFFF44336),
+      hint: 'emergency_hint'.tr(ref),
     ),
   };
 
@@ -130,7 +131,7 @@ class _NewBookingPageState extends ConsumerState<NewBookingPage> {
       firstDate: today,
       lastDate: lastDate,
       selectableDayPredicate: notFriday,
-      helpText: 'Select Appointment Date (Closed Fridays)',
+      helpText: 'select_date_help'.tr(ref),
     );
 
     if (picked != null && picked.weekday != DateTime.friday) {
@@ -143,19 +144,19 @@ class _NewBookingPageState extends ConsumerState<NewBookingPage> {
 
   Future<void> _selectTime() async {
     if (_selectedDate == null) {
-      _showSnack('Please select a date first', Colors.orange);
+      _showSnack('select_date_first'.tr(ref), Colors.orange);
       return;
     }
     final picked = await showTimePicker(
       context: context,
       initialTime: const TimeOfDay(hour: 9, minute: 0),
-      helpText: 'Working Hours: 8:00 AM – 6:00 PM',
+      helpText: 'working_hours_help'.tr(ref),
     );
     if (picked == null) return;
     if (picked.hour < 8 || picked.hour > 18 ||
         (picked.hour == 18 && picked.minute > 0)) {
       if (!mounted) return;
-      _showSnack('Please select a time between 8:00 AM and 6:00 PM', Colors.red);
+      _showSnack('select_time_range_validation'.tr(ref), Colors.red);
       return;
     }
     setState(() => _selectedTime = picked);
@@ -166,7 +167,7 @@ class _NewBookingPageState extends ConsumerState<NewBookingPage> {
   Future<void> _validateDiscountCode() async {
     final code = _discountCodeController.text.trim();
     if (code.isEmpty) {
-      _showSnack('Please enter a discount code', Colors.orange);
+      _showSnack('enter_discount_code'.tr(ref), Colors.orange);
       return;
     }
     setState(() => _isValidatingCode = true);
@@ -184,7 +185,7 @@ class _NewBookingPageState extends ConsumerState<NewBookingPage> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _isValidatingCode = false);
-      _showSnack('Error: $e', Colors.red);
+      _showSnack('${'error'.tr(ref)}$e', Colors.red);
     }
   }
 
@@ -199,7 +200,7 @@ class _NewBookingPageState extends ConsumerState<NewBookingPage> {
   Future<void> _submitBooking() async {
     if (!_step1Valid || !_step2Valid) return;
     if (_selectedDate!.weekday == DateTime.friday) {
-      _showSnack('We are closed on Fridays', Colors.red);
+      _showSnack('closed_fridays'.tr(ref), Colors.red);
       return;
     }
 
@@ -238,11 +239,11 @@ class _NewBookingPageState extends ConsumerState<NewBookingPage> {
 
     if (!mounted) return;
     if (success) {
-      _showSnack('✅ Booking confirmed!', Colors.green);
+      _showSnack('booking_confirmed_success'.tr(ref), Colors.green);
       context.pop();
     } else {
       _showSnack(
-        ref.read(bookingViewModelProvider).error ?? 'Failed to create booking',
+        ref.read(bookingViewModelProvider).error != null ? 'failed_add_car'.tr(ref) : 'failed_add_car'.tr(ref),
         Colors.red,
       );
     }
@@ -257,7 +258,7 @@ class _NewBookingPageState extends ConsumerState<NewBookingPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('New Booking'),
+        title: Text('new_booking'.tr(ref)),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(4),
           child: LinearProgressIndicator(
@@ -273,11 +274,11 @@ class _NewBookingPageState extends ConsumerState<NewBookingPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Row(
               children: [
-                _StepBadge(index: 0, current: _currentStep, label: 'Your Car'),
+                _StepBadge(index: 0, current: _currentStep, label: 'your_car'.tr(ref)),
                 const Expanded(child: Divider()),
-                _StepBadge(index: 1, current: _currentStep, label: 'Service'),
+                _StepBadge(index: 1, current: _currentStep, label: 'service'.tr(ref)),
                 const Expanded(child: Divider()),
-                _StepBadge(index: 2, current: _currentStep, label: 'Confirm'),
+                _StepBadge(index: 2, current: _currentStep, label: 'confirm'.tr(ref)),
               ],
             ),
           ),
@@ -297,7 +298,7 @@ class _NewBookingPageState extends ConsumerState<NewBookingPage> {
                   selectedDate: _selectedDate,
                   selectedTime: _selectedTime,
                   selectedType: _selectedMaintenanceType,
-                  typeMeta: _typeMeta,
+                  typeMeta: _getTypeMeta(ref),
                   descriptionController: _descriptionController,
                   onSelectDate: _selectDate,
                   onSelectTime: _selectTime,
@@ -311,7 +312,7 @@ class _NewBookingPageState extends ConsumerState<NewBookingPage> {
                   selectedDate: _selectedDate,
                   selectedTime: _selectedTime,
                   maintenanceType: _selectedMaintenanceType ?? MaintenanceType.regular,
-                  typeMeta: _typeMeta,
+                  typeMeta: _getTypeMeta(ref),
                   discountController: _discountCodeController,
                   appliedOffer: _appliedOffer,
                   isValidatingCode: _isValidatingCode,
@@ -332,17 +333,17 @@ class _NewBookingPageState extends ConsumerState<NewBookingPage> {
             onNext: () {
               if (_currentStep == 0) {
                 if (_selectedCarId == null) {
-                  _showSnack('Please select your car first', Colors.orange);
+                  _showSnack('select_car_validation'.tr(ref), Colors.orange);
                   return;
                 }
               }
               if (_currentStep == 1) {
                 if (_selectedMaintenanceType == null) {
-                  _showSnack('Please select a maintenance type', Colors.orange);
+                  _showSnack('select_maintenance_validation'.tr(ref), Colors.orange);
                   return;
                 }
                 if (!_step2Valid) {
-                  _showSnack('Please select date and time', Colors.orange);
+                  _showSnack('select_date_time_validation'.tr(ref), Colors.orange);
                   return;
                 }
               }
@@ -421,7 +422,7 @@ class _StepBadge extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────
 // Bottom navigation bar
 // ─────────────────────────────────────────────────────────────
-class _BottomNav extends StatelessWidget {
+class _BottomNav extends ConsumerWidget {
   final int currentStep;
   final VoidCallback onBack;
   final VoidCallback onNext;
@@ -433,7 +434,7 @@ class _BottomNav extends StatelessWidget {
       required this.isLoading});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -451,7 +452,7 @@ class _BottomNav extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: onBack,
               icon: const Icon(Icons.arrow_back),
-              label: const Text('Back'),
+              label: Text('back'.tr(ref)),
               style:
                   OutlinedButton.styleFrom(padding: const EdgeInsets.all(14)),
             ),
@@ -464,7 +465,7 @@ class _BottomNav extends StatelessWidget {
                     height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2))
                 : Icon(currentStep < 2 ? Icons.arrow_forward : Icons.check),
-            label: Text(currentStep < 2 ? 'Next' : 'Confirm Booking'),
+            label: Text(currentStep < 2 ? 'next'.tr(ref) : 'confirm_booking'.tr(ref)),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             ),
@@ -496,7 +497,7 @@ class _Step1 extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Select Your Car',
+          Text('select_your_car'.tr(ref),
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
@@ -553,7 +554,7 @@ class _Step1 extends ConsumerWidget {
             TextButton.icon(
               onPressed: () => context.push('/customer/add-car'),
               icon: const Icon(Icons.add),
-              label: const Text('Add another car'),
+              label: Text('add_another_car'.tr(ref)),
             ),
         ],
       ),
@@ -561,11 +562,11 @@ class _Step1 extends ConsumerWidget {
   }
 }
 
-class _EmptyCarCard extends StatelessWidget {
+class _EmptyCarCard extends ConsumerWidget {
   final VoidCallback onAdd;
   const _EmptyCarCard({required this.onAdd});
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -573,16 +574,16 @@ class _EmptyCarCard extends StatelessWidget {
           children: [
             const Icon(Icons.directions_car, size: 48, color: Colors.grey),
             const SizedBox(height: 8),
-            const Text('No cars registered',
-                style: TextStyle(fontWeight: FontWeight.w600)),
+            Text('no_cars_registered'.tr(ref),
+                style: const TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 4),
-            const Text('Add a car to continue',
-                style: TextStyle(color: Colors.grey, fontSize: 13)),
+            Text('add_car_to_continue'.tr(ref),
+                style: const TextStyle(color: Colors.grey, fontSize: 13)),
             const SizedBox(height: 12),
             ElevatedButton.icon(
               onPressed: onAdd,
               icon: const Icon(Icons.add),
-              label: const Text('Add a Car'),
+              label: Text('add_car'.tr(ref)),
             ),
           ],
         ),
@@ -594,7 +595,7 @@ class _EmptyCarCard extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────
 // STEP 2 — Date & Time
 // ─────────────────────────────────────────────────────────────
-class _Step2 extends StatelessWidget {
+class _Step2 extends ConsumerWidget {
   final DateTime? selectedDate;
   final TimeOfDay? selectedTime;
   final MaintenanceType? selectedType;
@@ -616,14 +617,14 @@ class _Step2 extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Maintenance type
-          Text('Maintenance Type',
+          Text('maintenance_type'.tr(ref),
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
@@ -694,13 +695,13 @@ class _Step2 extends StatelessWidget {
           const SizedBox(height: 20),
 
           // Date & Time
-          Text('Appointment Date & Time',
+          Text('appointment_date_time'.tr(ref),
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
                   ?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
-          Text('Working hours: Sat – Thu, 8:00 AM – 6:00 PM',
+          Text('working_hours_desc'.tr(ref),
               style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
           const SizedBox(height: 10),
           Row(
@@ -709,7 +710,7 @@ class _Step2 extends StatelessWidget {
                 child: _DateTimeTile(
                   icon: Icons.calendar_month,
                   label: selectedDate == null
-                      ? 'Select Date'
+                      ? 'select_date'.tr(ref)
                       : DateFormat('EEE, MMM d').format(selectedDate!),
                   onTap: onSelectDate,
                   isSet: selectedDate != null,
@@ -720,7 +721,7 @@ class _Step2 extends StatelessWidget {
                 child: _DateTimeTile(
                   icon: Icons.access_time,
                   label: selectedTime == null
-                      ? 'Select Time'
+                      ? 'select_time'.tr(ref)
                       : selectedTime!.format(context),
                   onTap: onSelectTime,
                   isSet: selectedTime != null,
@@ -732,7 +733,7 @@ class _Step2 extends StatelessWidget {
           const SizedBox(height: 20),
 
           // Optional description
-          Text('Additional Notes (Optional)',
+          Text('additional_notes'.tr(ref),
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
@@ -741,9 +742,9 @@ class _Step2 extends StatelessWidget {
           TextFormField(
             controller: descriptionController,
             maxLines: 3,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               hintText:
-                  'Describe your issue or any additional details…',
+                  'describe_issue_hint'.tr(ref),
               border: OutlineInputBorder(),
               contentPadding:
                   EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -807,7 +808,7 @@ class _DateTimeTile extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────
 // STEP 3 — Summary + Discount + Confirm
 // ─────────────────────────────────────────────────────────────
-class _Step3 extends StatelessWidget {
+class _Step3 extends ConsumerWidget {
   final dynamic selectedCar;
   final DateTime? selectedDate;
   final TimeOfDay? selectedTime;
@@ -833,7 +834,7 @@ class _Step3 extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final meta = typeMeta[maintenanceType]!;
     final theme = Theme.of(context);
 
@@ -842,7 +843,7 @@ class _Step3 extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Booking Summary',
+          Text('booking_summary'.tr(ref),
               style: theme.textTheme.titleMedium
                   ?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 10),
@@ -857,7 +858,7 @@ class _Step3 extends StatelessWidget {
                 children: [
                   _SummaryRow(
                     icon: Icons.directions_car,
-                    label: 'Car',
+                    label: 'vehicle'.tr(ref),
                     value: selectedCar != null
                         ? '${selectedCar!.make} ${selectedCar!.model} (${selectedCar!.year})'
                         : '—',
@@ -865,21 +866,21 @@ class _Step3 extends StatelessWidget {
                   const Divider(height: 16),
                   _SummaryRow(
                     icon: meta.icon,
-                    label: 'Type',
+                    label: 'type'.tr(ref),
                     value: meta.label,
                     valueColor: meta.color,
                   ),
                   const Divider(height: 16),
                   _SummaryRow(
                     icon: Icons.build_circle_outlined,
-                    label: 'Type',
+                    label: 'type'.tr(ref),
                     value: meta.label,
                     valueColor: meta.color,
                   ),
                   const Divider(height: 16),
                   _SummaryRow(
                     icon: Icons.calendar_today,
-                    label: 'Date',
+                    label: 'date'.tr(ref),
                     value: selectedDate != null
                         ? DateFormat('EEEE, MMMM d, y').format(selectedDate!)
                         : '—',
@@ -887,7 +888,7 @@ class _Step3 extends StatelessWidget {
                   const Divider(height: 16),
                   _SummaryRow(
                     icon: Icons.access_time,
-                    label: 'Time',
+                    label: 'time'.tr(ref),
                     value: selectedTime?.format(context) ?? '—',
                   ),
                   const Divider(height: 16),
@@ -899,7 +900,7 @@ class _Step3 extends StatelessWidget {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Final price will be calculated after the technician completes the service',
+                          'final_price_notice'.tr(ref),
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.orange.shade700,
@@ -917,7 +918,7 @@ class _Step3 extends StatelessWidget {
           const SizedBox(height: 20),
 
           // Discount code
-          Text('Discount Code',
+          Text('discount_code'.tr(ref),
               style: theme.textTheme.titleMedium
                   ?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
@@ -928,8 +929,8 @@ class _Step3 extends StatelessWidget {
                   child: TextField(
                     controller: discountController,
                     textCapitalization: TextCapitalization.characters,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter code (optional)',
+                    decoration: InputDecoration(
+                      hintText: 'discount_code_hint'.tr(ref),
                       border: OutlineInputBorder(),
                       contentPadding:
                           EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -946,7 +947,7 @@ class _Step3 extends StatelessWidget {
                           width: 16,
                           height: 16,
                           child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Text('Apply'),
+                      : Text('apply'.tr(ref)),
                 ),
               ],
             ),
@@ -970,7 +971,7 @@ class _Step3 extends StatelessWidget {
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold)),
                         Text(
-                            '${appliedOffer!.discountPercentage}% discount applied',
+                            '${appliedOffer!.discountPercentage}% ${'discount_applied_desc'.tr(ref)}',
                             style: const TextStyle(
                                 fontSize: 12, color: Colors.green)),
                       ],
@@ -990,7 +991,7 @@ class _Step3 extends StatelessWidget {
           TextButton.icon(
             onPressed: () => context.go('/customer/offers'),
             icon: const Icon(Icons.local_offer, size: 16),
-            label: const Text('View available offers'),
+            label: Text('view_available_offers'.tr(ref)),
           ),
         ],
       ),

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:car_maintenance_system_new/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/car/presentation/viewmodels/car_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/customer/presentation/widgets/customer_bottom_nav_bar.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 
 class CustomerCarsPage extends ConsumerStatefulWidget {
   const CustomerCarsPage({super.key});
@@ -30,7 +31,7 @@ class _CustomerCarsPageState extends ConsumerState<CustomerCarsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Cars'),
+        title: Text('my_cars'.tr(ref)),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -53,8 +54,8 @@ class _CustomerCarsPageState extends ConsumerState<CustomerCarsPage> {
                         color: Colors.grey,
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'No cars registered yet',
+                      Text(
+                        'no_cars_registered'.tr(ref),
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -62,8 +63,8 @@ class _CustomerCarsPageState extends ConsumerState<CustomerCarsPage> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Add your first car to get started',
+                      Text(
+                        'add_first_car'.tr(ref),
                         style: TextStyle(
                           color: Colors.grey,
                         ),
@@ -72,7 +73,7 @@ class _CustomerCarsPageState extends ConsumerState<CustomerCarsPage> {
                       ElevatedButton.icon(
                         onPressed: () => context.go('/customer/add-car'),
                         icon: const Icon(Icons.add),
-                        label: const Text('Add Car'),
+                        label: Text('add_car'.tr(ref)),
                       ),
                     ],
                   ),
@@ -101,21 +102,21 @@ class _CustomerCarsPageState extends ConsumerState<CustomerCarsPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 8),
-                            Text('Year: ${car.year}'),
-                            Text('Color: ${car.color}'),
-                            Text('Plate: ${car.licensePlate}'),
-                            if (car.vin != null) Text('VIN: ${car.vin}'),
+                            Text('${'year'.tr(ref)}${car.year}'),
+                            Text('${'color'.tr(ref)}${car.color}'),
+                            Text('${'license_plate'.tr(ref)}${car.licensePlate}'),
+                            if (car.vin != null) Text('${'vin'.tr(ref)}${car.vin}'),
                           ],
                         ),
                         trailing: PopupMenuButton(
                           itemBuilder: (context) => [
-                            const PopupMenuItem(
+                            PopupMenuItem(
                               value: 'delete',
                               child: Row(
                                 children: [
-                                  Icon(Icons.delete, color: Colors.red),
-                                  SizedBox(width: 8),
-                                  Text('Delete'),
+                                  const Icon(Icons.delete, color: Colors.red),
+                                  const SizedBox(width: 8),
+                                  Text('delete'.tr(ref)),
                                 ],
                               ),
                             ),
@@ -128,20 +129,20 @@ class _CustomerCarsPageState extends ConsumerState<CustomerCarsPage> {
                               final confirm = await showDialog<bool>(
                                 context: context,
                                 builder: (dialogContext) => AlertDialog(
-                                  title: const Text('Delete Car'),
-                                  content: const Text(
-                                    'Are you sure you want to delete this car?',
+                                  title: Text('delete_car'.tr(ref)),
+                                  content: Text(
+                                    'delete_car_confirm'.tr(ref),
                                   ),
                                   actions: [
                                     TextButton(
                                       onPressed: () => Navigator.pop(dialogContext, false),
-                                      child: const Text('Cancel'),
+                                      child: Text('cancel'.tr(ref)),
                                     ),
                                     TextButton(
                                       onPressed: () => Navigator.pop(dialogContext, true),
-                                      child: const Text(
-                                        'Delete',
-                                        style: TextStyle(color: Colors.red),
+                                      child: Text(
+                                        'delete'.tr(ref),
+                                        style: const TextStyle(color: Colors.red),
                                       ),
                                     ),
                                   ],
@@ -158,8 +159,8 @@ class _CustomerCarsPageState extends ConsumerState<CustomerCarsPage> {
                                   SnackBar(
                                     content: Text(
                                       success
-                                          ? 'Car deleted successfully'
-                                          : 'Failed to delete car',
+                                          ? 'car_deleted_successfully'.tr(ref)
+                                          : 'failed_delete_car'.tr(ref),
                                     ),
                                     backgroundColor:
                                         success ? Colors.green : Colors.red,

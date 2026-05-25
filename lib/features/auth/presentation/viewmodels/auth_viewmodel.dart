@@ -147,7 +147,7 @@ class AuthViewModel extends StateNotifier<AuthState> {
       }
 
       if (kDebugMode) {
-        debugPrint('✅ Login successful: ${userEntity.name}');
+        debugPrint('Login successful: ${userEntity.name}');
       }
 
       final userRoleString = userEntity.role.toString().split('.').last;
@@ -155,7 +155,7 @@ class AuthViewModel extends StateNotifier<AuthState> {
       // Verify role matches (or auto-login if role doesn't match but exists)
       if (userRoleString != role) {
         if (kDebugMode) {
-          debugPrint('⚠️ Role mismatch: Selected $role, but user is $userRoleString');
+          debugPrint('Role mismatch: Selected $role, but user is $userRoleString');
           debugPrint('🔄 Logging in with correct role: $userRoleString');
         }
       }
@@ -174,7 +174,7 @@ class AuthViewModel extends StateNotifier<AuthState> {
       return true;
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ Login error: $e');
+        debugPrint('Login error: $e');
       }
 
       // Clean error message
@@ -258,7 +258,7 @@ class AuthViewModel extends StateNotifier<AuthState> {
       if (kDebugMode) {
         debugPrint('✓ State updated!');
         debugPrint('═══════════════════════════════════════════════');
-        debugPrint('✅ REGISTRATION SUCCESSFUL!');
+        debugPrint('REGISTRATION SUCCESSFUL!');
         debugPrint('User: $name ($email)');
         debugPrint('Role: $role');
         debugPrint('UID: ${userEntity.id}');
@@ -280,7 +280,7 @@ class AuthViewModel extends StateNotifier<AuthState> {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         debugPrint('═══════════════════════════════════════════════');
-        debugPrint('❌ REGISTRATION FAILED!');
+        debugPrint('REGISTRATION FAILED!');
         debugPrint('Error: $e');
         debugPrint('Stack trace: $stackTrace');
         debugPrint('═══════════════════════════════════════════════');

@@ -1,0 +1,321 @@
+"---","---"
+"USE CASE DETAILS","Register as Customer"
+"---","---"
+"Use Case ID","UC-C01"
+"Use Case Name","Register as Customer"
+"Primary Actor","Customer"
+"Preconditions","User has email and phone number"
+"Postconditions","Customer account is created in Firestore"
+"Trigger","User selects ""Register as Customer"""
+"Main Flow","1. User enters email, password, name, and phone
+2. System validates input format
+3. System creates Firebase Auth account
+4. System creates Firestore user profile with role=customer
+5. System logs user in automatically
+6. System redirects to Customer Dashboard"
+"Alternative Flow","3a. If email already exists, show error
+3b. If password too weak, show error
+4a. If network error, retry with backoff"
+"",""
+"",""
+"---","---"
+"USE CASE DETAILS","Book Service Maintenance"
+"---","---"
+"Use Case ID","UC-C02"
+"Use Case Name","Book Service Maintenance"
+"Primary Actor","Customer"
+"Preconditions","Customer is logged in and has added at least one car"
+"Postconditions","Booking created with status=pending, visible to all technicians"
+"Trigger","Customer clicks ""Book Service"""
+"Main Flow","1. Customer selects car from their list
+2. Customer selects maintenance type (regular/repair/inspection/emergency)
+3. Customer browses service catalog and adds items
+4. Customer selects date and time slot
+5. System checks slot availability
+6. Customer enters description/notes
+7. Customer applies discount code (optional)
+8. System validates offer code if provided
+9. Customer confirms booking
+10. System saves booking to Firestore
+11. System sends notifications to all technicians
+12. System shows confirmation to customer"
+"Alternative Flow","5a. If slot unavailable, show alternative slots
+8a. If offer code invalid/expired, show error
+10a. If network error, retry"
+"",""
+"",""
+"---","---"
+"USE CASE DETAILS","Track Maintenance Status"
+"---","---"
+"Use Case ID","UC-C03"
+"Use Case Name","Track Maintenance Status"
+"Primary Actor","Customer"
+"Preconditions","Customer has active bookings"
+"Postconditions","Customer views current status"
+"Trigger","Customer opens ""My Bookings"""
+"Main Flow","1. System queries bookings where userId=currentUser
+2. System displays bookings with real-time status
+3. Customer clicks on booking to see details
+4. System shows: assigned technician, service items, current status, estimated completion"
+"Alternative Flow","2a. If no bookings exist, show ""No bookings yet"""
+"",""
+"",""
+"---","---"
+"USE CASE DETAILS","Rate Completed Service"
+"---","---"
+"Use Case ID","UC-C04"
+"Use Case Name","Rate Completed Service"
+"Primary Actor","Customer"
+"Preconditions","Booking status=completed and isPaid=true and rating is null"
+"Postconditions","Booking updated with rating and comment"
+"Trigger","Customer clicks ""Rate Service"" on completed booking"
+"Main Flow","1. System shows rating dialog
+2. Customer selects stars (1-5)
+3. Customer enters comment (optional)
+4. Customer submits rating
+5. System updates booking with rating, ratingComment, ratedAt
+6. System sends notification to assigned technician"
+"Alternative Flow","2a. If already rated, show ""Already rated"""
+"",""
+"",""
+"---","---"
+"USE CASE DETAILS","Download Invoice PDF"
+"---","---"
+"Use Case ID","UC-C05"
+"Use Case Name","Download Invoice PDF"
+"Primary Actor","Customer"
+"Preconditions","Booking isPaid=true"
+"Postconditions","PDF invoice downloaded to device"
+"Trigger","Customer clicks ""Download Invoice"""
+"Main Flow","1. System retrieves booking details
+2. System generates PDF with: customer info, car details, service items, labor cost, discount, tax, total
+3. System downloads PDF to device
+4. System shows success message"
+"Alternative Flow","2a. If PDF generation fails, show error"
+"",""
+"",""
+"---","---"
+"USE CASE DETAILS","Chat with AI Assistant"
+"---","---"
+"Use Case ID","UC-C06"
+"Use Case Name","Chat with AI Assistant"
+"Primary Actor","Customer"
+"Preconditions","Customer is logged in"
+"Postconditions","Conversation saved to Firestore"
+"Trigger","Customer opens Chatbot"
+"Main Flow","1. System loads previous conversation history
+2. Customer types message
+3. System sends message to Gemini AI
+4. System receives AI response
+5. System displays response to customer
+6. System saves conversation to Firestore"
+"Alternative Flow","3a. If API error, show ""Unable to connect"""
+"",""
+"",""
+"---","---"
+"USE CASE DETAILS","View Available Jobs"
+"---","---"
+"Use Case ID","UC-T01"
+"Use Case Name","View Available Jobs"
+"Primary Actor","Technician"
+"Preconditions","Technician is logged in"
+"Postconditions","List of pending bookings displayed"
+"Trigger","Technician opens dashboard"
+"Main Flow","1. System queries bookings where status=pending
+2. System displays job list with: customer name, car details, maintenance type, scheduled date
+3. Technician views job details"
+"Alternative Flow","1a. If no jobs available, show ""No jobs available"""
+"",""
+"",""
+"---","---"
+"USE CASE DETAILS","Pick and Start Job"
+"---","---"
+"Use Case ID","UC-T02"
+"Use Case Name","Pick and Start Job"
+"Primary Actor","Technician"
+"Preconditions","Job status=pending"
+"Postconditions","Job status=inProgress, technician assigned"
+"Trigger","Technician clicks ""Start Job"""
+"Main Flow","1. System updates booking: status=inProgress, assignedTechnicians=[techId], startedAt=now
+2. System sends notification to customer
+3. System redirects technician to job details page"
+"Alternative Flow","1a. If job already taken by another technician, show error"
+"",""
+"",""
+"---","---"
+"USE CASE DETAILS","Add Service Items and Parts"
+"---","---"
+"Use Case ID","UC-T03"
+"Use Case Name","Add Service Items and Parts"
+"Primary Actor","Technician"
+"Preconditions","Technician is working on job (status=inProgress)"
+"Postconditions","Service items added to booking, inventory updated"
+"Trigger","Technician clicks ""Add Items"""
+"Main Flow","1. Technician searches for parts/services
+2. Technician selects item and enters quantity
+3. System checks inventory availability
+4. Technician adds item to booking
+5. System creates inventory_transaction (type=out)
+6. System decrements inventory.currentStock
+7. System checks if currentStock < threshold
+8. If yes, create low_stock_alert and notify admin"
+"Alternative Flow","3a. If insufficient stock, show error"
+"",""
+"",""
+"---","---"
+"USE CASE DETAILS","Complete Job"
+"---","---"
+"Use Case ID","UC-T04"
+"Use Case Name","Complete Job"
+"Primary Actor","Technician"
+"Preconditions","Job status=inProgress"
+"Postconditions","Job status=completedPendingPayment"
+"Trigger","Technician clicks ""Complete Job"""
+"Main Flow","1. Technician enters completion notes
+2. System updates booking: status=completedPendingPayment, completedAt=now
+3. System calculates totalCost (parts + labor + tax - discount)
+4. System sends notification to cashier
+5. System sends notification to customer"
+"Alternative Flow","None"
+"",""
+"",""
+"---","---"
+"USE CASE DETAILS","Generate Invite Code"
+"---","---"
+"Use Case ID","UC-A01"
+"Use Case Name","Generate Invite Code"
+"Primary Actor","Admin"
+"Preconditions","Admin is logged in"
+"Postconditions","New invite code created in Firestore"
+"Trigger","Admin clicks ""Generate Code"""
+"Main Flow","1. Admin selects role (technician/admin/cashier)
+2. Admin enters max uses
+3. System generates unique 8-character code
+4. System creates invite_code document with: code, role, maxUses, usedCount=0, isActive=true, createdBy=adminId
+5. System displays code to admin with copy button"
+"Alternative Flow","4a. If code generation fails, retry"
+"",""
+"",""
+"---","---"
+"USE CASE DETAILS","Manage Users"
+"---","---"
+"Use Case ID","UC-A02"
+"Use Case Name","Manage Users"
+"Primary Actor","Admin"
+"Preconditions","Admin is logged in"
+"Postconditions","User account activated/deactivated"
+"Trigger","Admin opens ""Users Management"""
+"Main Flow","1. System displays all users with: name, email, role, isActive status
+2. Admin selects user
+3. Admin toggles isActive status
+4. System updates user document"
+"Alternative Flow","None"
+"",""
+"",""
+"---","---"
+"USE CASE DETAILS","Approve or Reject Refund"
+"---","---"
+"Use Case ID","UC-A03"
+"Use Case Name","Approve or Reject Refund"
+"Primary Actor","Admin"
+"Preconditions","Refund status=requested"
+"Postconditions","Refund status=approved or rejected"
+"Trigger","Admin opens ""Refund Requests"""
+"Main Flow","1. System displays refund requests with status=requested
+2. Admin views refund details: booking info, refund reason, amount
+3. Admin reviews booking history
+4. Admin clicks ""Approve"" or ""Reject""
+5. System updates refund: status=approved/rejected, approvedBy=adminId, approvedAt=now
+6. System sends notification to cashier
+7. If rejected, system sends notification to customer"
+"Alternative Flow","None"
+"",""
+"",""
+"---","---"
+"USE CASE DETAILS","Create Promotional Offer"
+"---","---"
+"Use Case ID","UC-A04"
+"Use Case Name","Create Promotional Offer"
+"Primary Actor","Admin"
+"Preconditions","Admin is logged in"
+"Postconditions","New offer created, customers notified"
+"Trigger","Admin clicks ""Create Offer"""
+"Main Flow","1. Admin enters: title, description, discountPercentage, startDate, endDate
+2. System generates unique offer code
+3. Admin uploads offer image (optional)
+4. System creates offer document with: code, type=discount, isActive=true, createdBy=adminId
+5. System queries all users where role=customer
+6. System sends notification to all customers
+7. System displays success message"
+"Alternative Flow","2a. If code generation fails, retry"
+"",""
+"",""
+"---","---"
+"USE CASE DETAILS","View System Reports"
+"---","---"
+"Use Case ID","UC-A05"
+"Use Case Name","View System Reports"
+"Primary Actor","Admin"
+"Preconditions","Admin is logged in"
+"Postconditions","Reports displayed"
+"Trigger","Admin opens ""Reports"""
+"Main Flow","1. Admin selects report type (profit/performance/bookings)
+2. Admin selects date range
+3. System aggregates data from Firestore
+4. System calculates: total revenue, completed bookings, active technicians, average rating
+5. System displays charts and statistics"
+"Alternative Flow","3a. If no data available, show ""No data"""
+"",""
+"",""
+"---","---"
+"USE CASE DETAILS","Process Payment"
+"---","---"
+"Use Case ID","UC-CS01"
+"Use Case Name","Process Payment"
+"Primary Actor","Cashier"
+"Preconditions","Booking status=completedPendingPayment"
+"Postconditions","Booking isPaid=true, status=completed, invoice created"
+"Trigger","Cashier opens ""Pending Payments"""
+"Main Flow","1. System displays bookings with status=completedPendingPayment
+2. Cashier selects booking
+3. System displays cost breakdown: subtotal, discount, tax, total
+4. Cashier selects payment method (cash/card/digital)
+5. Cashier processes payment
+6. System updates booking: isPaid=true, paidAt=now, cashierId, paymentMethod, status=completed
+7. System creates invoice document
+8. System sends invoice to customer
+9. System sends ""payment successful"" notification to customer"
+"Alternative Flow","5a. If payment fails, show error and retry"
+"",""
+"",""
+"---","---"
+"USE CASE DETAILS","Initiate Refund Request"
+"---","---"
+"Use Case ID","UC-CS02"
+"Use Case Name","Initiate Refund Request"
+"Primary Actor","Cashier"
+"Preconditions","Booking isPaid=true"
+"Postconditions","Refund created with status=requested"
+"Trigger","Customer requests refund at cashier"
+"Main Flow","1. Cashier retrieves booking details
+2. Cashier enters refund reason and amount
+3. Cashier adds customer notes (optional)
+4. System creates refund document: bookingId, refundAmount, reason, status=requested, requestedBy=cashierId, requestedAt=now
+5. System sends notification to admin for approval"
+"Alternative Flow","1a. If booking not paid, show error"
+"",""
+"",""
+"---","---"
+"USE CASE DETAILS","View Profit Reports"
+"---","---"
+"Use Case ID","UC-CS03"
+"Use Case Name","View Profit Reports"
+"Primary Actor","Cashier"
+"Preconditions","Cashier is logged in"
+"Postconditions","Profit data displayed"
+"Trigger","Cashier opens ""Reports"""
+"Main Flow","1. Cashier selects date range
+2. System queries bookings where isPaid=true within date range
+3. System sums totalCost from all paid bookings
+4. System displays total revenue and transaction count"
+"Alternative Flow","2a. If no transactions, show ""No data"""

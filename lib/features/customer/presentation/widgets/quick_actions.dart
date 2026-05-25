@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-class QuickActions extends StatelessWidget {
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class QuickActions extends ConsumerWidget {
   const QuickActions({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return GridView.count(
       crossAxisCount: 2,
       shrinkWrap: true,
@@ -18,8 +21,8 @@ class QuickActions extends StatelessWidget {
         _buildActionCard(
           context,
           icon: Icons.add_circle_outline,
-          title: 'Add Car',
-          subtitle: 'Register your vehicle',
+          title: 'add_car'.tr(ref),
+          subtitle: 'add_car_subtitle'.tr(ref),
           color: Colors.blue,
           onTap: () {
             context.go('/customer/add-car');
@@ -28,8 +31,8 @@ class QuickActions extends StatelessWidget {
         _buildActionCard(
           context,
           icon: Icons.book_online,
-          title: 'Book Service',
-          subtitle: 'Schedule maintenance',
+          title: 'book_service'.tr(ref),
+          subtitle: 'book_service_subtitle'.tr(ref),
           color: Colors.green,
           onTap: () {
             context.go('/customer/new-booking');
@@ -38,8 +41,8 @@ class QuickActions extends StatelessWidget {
         _buildActionCard(
           context,
           icon: Icons.smart_toy,
-          title: 'AI Assistant',
-          subtitle: 'Ask questions',
+          title: 'ai_assistant'.tr(ref),
+          subtitle: 'ai_assistant_subtitle'.tr(ref),
           color: Colors.purple,
           onTap: () {
             context.go('/customer/chatbot');
@@ -48,8 +51,8 @@ class QuickActions extends StatelessWidget {
         _buildActionCard(
           context,
           icon: Icons.local_offer,
-          title: 'Special Offers',
-          subtitle: 'View deals & discounts',
+          title: 'special_offers'.tr(ref),
+          subtitle: 'special_offers_subtitle'.tr(ref),
           color: Colors.red,
           onTap: () {
             context.go('/customer/offers');
@@ -58,8 +61,8 @@ class QuickActions extends StatelessWidget {
         _buildActionCard(
           context,
           icon: Icons.history,
-          title: 'Service History',
-          subtitle: 'View past services',
+          title: 'service_history'.tr(ref),
+          subtitle: 'service_history_subtitle'.tr(ref),
           color: Colors.orange,
           onTap: () {
             context.go('/customer/history');
@@ -68,8 +71,8 @@ class QuickActions extends StatelessWidget {
         _buildActionCard(
           context,
           icon: Icons.directions_car,
-          title: 'My Cars',
-          subtitle: 'Manage vehicles',
+          title: 'my_cars'.tr(ref),
+          subtitle: 'my_cars_subtitle'.tr(ref),
           color: Colors.teal,
           onTap: () {
             context.go('/customer/cars');

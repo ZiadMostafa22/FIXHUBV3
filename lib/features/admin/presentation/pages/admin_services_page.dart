@@ -478,7 +478,7 @@ class _AdminServicesPageState extends ConsumerState<AdminServicesPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('✅ تم استيراد ${allServices.length} خدمة بنجاح!'),
+            content: Text('تم استيراد ${allServices.length} خدمة بنجاح!'),
             backgroundColor: Colors.green,
           ),
         );

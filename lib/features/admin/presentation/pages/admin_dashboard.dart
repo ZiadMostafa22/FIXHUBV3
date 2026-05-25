@@ -10,6 +10,9 @@ import 'package:car_maintenance_system_new/features/admin/presentation/widgets/a
 import 'package:car_maintenance_system_new/features/admin/presentation/widgets/recent_activities.dart';
 import 'package:car_maintenance_system_new/features/shared/presentation/pages/notifications_page.dart';
 
+import 'package:car_maintenance_system_new/features/shared/presentation/widgets/app_drawer.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
+
 class AdminDashboard extends ConsumerStatefulWidget {
   const AdminDashboard({super.key});
 
@@ -51,117 +54,12 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
     final user = authState.user;
 
     return Scaffold(
+      drawer: const AppDrawer(role: 'admin'),
       appBar: AppBar(
         title: Text(
-          'Admin Dashboard',
+          'admin_dashboard'.tr(ref),
           style: TextStyle(fontSize: 18.sp),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.settings, size: 22.sp),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsPage()),
-              );
-            },
-          ),
-          // Notification bell with unread count
-          Consumer(
-            builder: (context, ref, child) {
-              final unreadAsync = ref.watch(unreadCountProvider);
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.notifications, size: 22.sp),
-                    onPressed: () {
-                      context.push('/admin/notifications');
-                    },
-                  ),
-                  unreadAsync.when(
-                    data: (count) => count > 0
-                        ? Positioned(
-                            right: 8,
-                            top: 8,
-                            child: Container(
-                              padding: EdgeInsets.all(4.w),
-                              decoration: const BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
-                              ),
-                              constraints: BoxConstraints(
-                                minWidth: 16.w,
-                                minHeight: 16.w,
-                              ),
-                              child: Text(
-                                count > 9 ? '9+' : '$count',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10.sp,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          )
-                        : const SizedBox.shrink(),
-                    loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const SizedBox.shrink(),
-                  ),
-                ],
-              );
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.local_offer, size: 22.sp),
-            tooltip: 'Manage Offers',
-            onPressed: () {
-              context.push('/admin/offers');
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.vpn_key, size: 22.sp),
-            tooltip: 'Invite Codes',
-            onPressed: () {
-              context.push('/admin/invite-codes');
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.logout, size: 22.sp),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (dialogContext) => AlertDialog(
-                  title: const Text('Sign Out'),
-                  content: const Text('Are you sure you want to sign out?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(dialogContext),
-                      child: const Text('Cancel'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () async {
-                        // Close dialog first
-                        Navigator.pop(dialogContext);
-                        // Small delay to ensure dialog is fully closed
-                        await Future.delayed(const Duration(milliseconds: 100));
-                        // Then sign out - router will handle navigation
-                        if (mounted) {
-                          await ref.read(authViewModelProvider.notifier).signOut();
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                      ),
-                      child: const Text('Sign Out'),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.w),
@@ -176,7 +74,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Welcome back, ${user?.name ?? 'Admin'}!',
+                      '${'welcome_back'.tr(ref)}${user?.name ?? 'admin'.tr(ref)}!',
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         fontSize: 20.sp,
@@ -184,7 +82,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'Here\'s what\'s happening with your business today.',
+                      'business_overview'.tr(ref),
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Colors.grey[600],
                         fontSize: 14.sp,
@@ -199,7 +97,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
             
             // Statistics
             Text(
-              'Overview',
+              'overview'.tr(ref),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 fontSize: 18.sp,
@@ -212,7 +110,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
             
             // Quick Actions - NEW FEATURES
             Text(
-              'Quick Actions',
+              'quick_actions'.tr(ref),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 fontSize: 18.sp,
@@ -230,21 +128,21 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                 _buildQuickActionCard(
                   context,
                   icon: Icons.build_circle,
-                  label: 'Services',
+                  label: 'services'.tr(ref),
                   color: Colors.blue,
                   onTap: () => context.push('/admin/services'),
                 ),
                 _buildQuickActionCard(
                   context,
                   icon: Icons.receipt_long,
-                  label: 'Refunds',
+                  label: 'refunds'.tr(ref),
                   color: Colors.orange,
                   onTap: () => context.push('/admin/refunds'),
                 ),
                 _buildQuickActionCard(
                   context,
                   icon: Icons.bar_chart,
-                  label: 'Reports',
+                  label: 'reports'.tr(ref),
                   color: Colors.purple,
                   onTap: () => context.push('/admin/reports'),
                 ),
@@ -256,7 +154,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
             
             // Recent Activities
             Text(
-              'Recent Activities',
+              'recent_activities'.tr(ref),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 fontSize: 18.sp,
@@ -266,54 +164,6 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
             const RecentActivities(),
           ],
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: 0,
-        selectedFontSize: 12.sp,
-        unselectedFontSize: 10.sp,
-        iconSize: 24.sp,
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              // Already on dashboard
-              break;
-            case 1:
-              context.go('/admin/users');
-              break;
-            case 2:
-              context.go('/admin/technicians');
-              break;
-            case 3:
-              context.go('/admin/bookings');
-              break;
-            case 4:
-              context.go('/admin/analytics');
-              break;
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: 'Dashboard',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: 'Users',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.work),
-            label: 'Technicians',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book_online),
-            label: 'Bookings',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.analytics),
-            label: 'Analytics',
-          ),
-        ],
       ),
     );
   }

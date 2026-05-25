@@ -93,7 +93,7 @@ class BookingViewModel extends StateNotifier<BookingState> {
       );
 
       if (kDebugMode) {
-        print('📋 Loaded ${bookings.length} bookings');
+        print('Loaded ${bookings.length} bookings');
         for (var booking in bookings) {
           print('  - ${booking.id}: ${booking.status}');
         }
@@ -102,7 +102,7 @@ class BookingViewModel extends StateNotifier<BookingState> {
       state = state.copyWith(bookings: bookings, isLoading: false);
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error loading bookings: $e');
+        print('Error loading bookings: $e');
       }
       state = state.copyWith(isLoading: false, error: e.toString());
     }
@@ -129,7 +129,7 @@ class BookingViewModel extends StateNotifier<BookingState> {
           // Debug: Check for bookings with discount info
           for (var booking in bookings) {
             if (booking.offerCode != null || booking.discountPercentage != null) {
-              print('💰 Found booking with discount: ${booking.id}');
+              print('Found booking with discount: ${booking.id}');
               print('   - Code: ${booking.offerCode}');
               print('   - Title: ${booking.offerTitle}');
               print('   - %: ${booking.discountPercentage}');
@@ -154,7 +154,7 @@ class BookingViewModel extends StateNotifier<BookingState> {
       },
       onError: (error) {
         if (kDebugMode) {
-          print('❌ Error in real-time listener: $error');
+          print('Error in real-time listener: $error');
         }
         state = state.copyWith(error: error.toString());
       },
@@ -204,13 +204,13 @@ class BookingViewModel extends StateNotifier<BookingState> {
         }
       } catch (e) {
         if (kDebugMode) {
-          print('⚠️ Failed to send notification: $e');
+          print('Failed to send notification: $e');
         }
         // Don't fail the booking if notification fails
       }
 
       if (kDebugMode) {
-        print('✅ Booking created successfully - real-time listener will update state');
+        print('Booking created successfully - real-time listener will update state');
       }
 
       state = state.copyWith(isLoading: false);
@@ -218,7 +218,7 @@ class BookingViewModel extends StateNotifier<BookingState> {
       return true;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error creating booking: $e');
+        print('Error creating booking: $e');
       }
       state = state.copyWith(isLoading: false, error: e.toString());
       return false;
@@ -235,13 +235,13 @@ class BookingViewModel extends StateNotifier<BookingState> {
       await updateBookingUseCase(bookingId, updates);
 
       if (kDebugMode) {
-        print('✅ Booking updated successfully - real-time listener will update state');
+        print('Booking updated successfully - real-time listener will update state');
       }
 
       return true;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error updating booking: $e');
+        print('Error updating booking: $e');
       }
       return false;
     }
@@ -257,7 +257,7 @@ class BookingViewModel extends StateNotifier<BookingState> {
       final bookingExists = state.bookings.any((b) => b.id == bookingId);
       if (!bookingExists) {
         if (kDebugMode) {
-          print('⚠️ Booking not found: $bookingId');
+          print('Booking not found: $bookingId');
         }
         return false;
       }
@@ -281,24 +281,24 @@ class BookingViewModel extends StateNotifier<BookingState> {
       // Update Firestore (non-blocking, don't wait for it)
       cancelBookingUseCase(bookingId).then((_) {
         if (kDebugMode) {
-          print('✅ Firestore updated successfully for booking: $bookingId');
+          print('Firestore updated successfully for booking: $bookingId');
         }
       }).catchError((error) {
         if (kDebugMode) {
-          print('❌ Firestore update error: $error');
+          print('Firestore update error: $error');
         }
         // Don't fail the operation if Firestore update fails
         // The local state is already updated
       });
 
       if (kDebugMode) {
-        print('✅ Booking $bookingId cancelled successfully');
+        print('Booking $bookingId cancelled successfully');
       }
 
       return true;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error cancelling booking $bookingId: $e');
+        print('Error cancelling booking $bookingId: $e');
       }
       // Ensure loading is stopped even on error
       state = state.copyWith(isLoading: false);
@@ -327,7 +327,7 @@ class BookingViewModel extends StateNotifier<BookingState> {
       return await updateBooking(bookingId, updates);
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error updating booking status: $e');
+        print('Error updating booking status: $e');
       }
       return false;
     }
@@ -399,7 +399,7 @@ class BookingViewModel extends StateNotifier<BookingState> {
         }
       } catch (e) {
         if (kDebugMode) {
-          print('⚠️ Failed to send payment notification: $e');
+          print('Failed to send payment notification: $e');
         }
       }
 

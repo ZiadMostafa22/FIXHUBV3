@@ -8,6 +8,7 @@ import 'package:car_maintenance_system_new/core/services/notification_service.da
 import 'package:car_maintenance_system_new/core/models/notification_model.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 
 // Model to hold refund with extra details
 class RefundWithDetails {
@@ -98,7 +99,7 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
       final Set<String> userIds = {};
       final Set<String> carIds = {};
       
-      debugPrint('🚀 Batch fetching ${bookingIds.length} bookings');
+      debugPrint('Batch fetching ${bookingIds.length} bookings');
       
       final bookingFutures = bookingIds.map((bookingId) async {
         try {
@@ -116,7 +117,7 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
       
       await Future.wait(bookingFutures);
       
-      debugPrint('🚀 Batch fetching ${userIds.length} users and ${carIds.length} cars');
+      debugPrint('Batch fetching ${userIds.length} users and ${carIds.length} cars');
       
       // Batch fetch all users and cars in parallel
       final Map<String, Map<String, dynamic>> usersData = {};
@@ -146,7 +147,7 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
       
       await Future.wait([...userFutures, ...carFutures]);
       
-      debugPrint('✅ Batch fetch complete! Processing refunds...');
+      debugPrint('Batch fetch complete! Processing refunds...');
       
       // Now build refunds with details from cached data
       final List<RefundWithDetails> refundsWithDetails = [];
@@ -216,7 +217,7 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
           .where((r) => r.refund.status == RefundStatus.processed)
           .toList();
 
-      debugPrint('✅ Loaded ${pending.length} pending and ${completed.length} completed refunds');
+      debugPrint('Loaded ${pending.length} pending and ${completed.length} completed refunds');
 
       setState(() {
         _pendingRefunds = pending;
@@ -224,7 +225,7 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
         _isLoading = false;
       });
     } catch (e) {
-      debugPrint('❌ Error loading refunds: $e');
+      debugPrint('Error loading refunds: $e');
       setState(() {
         _error = e.toString();
         _isLoading = false;
@@ -249,8 +250,8 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
       if (customerId != null) {
         await NotificationService().sendNotification(
           userId: customerId,
-          title: '💰 Refund Processed',
-          message: 'Your refund of \$${refundDetails.refund.refundAmount.toStringAsFixed(2)} has been processed. The money has been returned via ${refundDetails.refund.refundMethod ?? "original payment method"}.',
+          title: 'refund_processed'.tr(ref),
+          message: '${'your_refund'.tr(ref)} ${refundDetails.refund.refundAmount.toStringAsFixed(2)} ${'currency'.tr(ref)} ${'has_been_processed'.tr(ref)} ${'money_returned_via'.tr(ref)} ${refundDetails.refund.refundMethod ?? "original payment method"}.',
           category: NotificationCategory.payment,
           bookingId: refundDetails.refund.bookingId,
         );
@@ -261,8 +262,8 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ Refund processed - Customer notified'),
+          SnackBar(
+            content: Text('refund_processed_notified'.tr(ref)),
             backgroundColor: Colors.green,
           ),
         );
@@ -279,7 +280,7 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
   Future<void> _callCustomer(String? phone) async {
     if (phone == null || phone.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Phone number not available')),
+        SnackBar(content: Text('phone_not_available'.tr(ref))),
       );
       return;
     }
@@ -294,7 +295,7 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Refunds'),
+        title: Text('refunds'.tr(ref)),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -308,7 +309,7 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Pending'),
+                  Text('pending'.tr(ref)),
                   if (_pendingRefunds.isNotEmpty) ...[
                     SizedBox(width: 8.w),
                     Container(
@@ -330,7 +331,7 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
                 ],
               ),
             ),
-            const Tab(text: 'Completed'),
+            Tab(text: 'completed'.tr(ref)),
           ],
         ),
       ),
@@ -345,7 +346,7 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
                       SizedBox(height: 16.h),
                       Text('Error: $_error'),
                       SizedBox(height: 16.h),
-                      ElevatedButton(onPressed: _loadRefunds, child: const Text('Retry')),
+                      ElevatedButton(onPressed: _loadRefunds, child: Text('retry'.tr(ref))),
                     ],
                   ),
                 )
@@ -374,7 +375,7 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
             ),
             SizedBox(height: 16.h),
             Text(
-              isPending ? 'No pending refunds' : 'No completed refunds',
+              isPending ? 'no_pending_refunds'.tr(ref) : 'no_completed_refunds'.tr(ref),
               style: TextStyle(fontSize: 16.sp, color: Colors.grey),
             ),
           ],
@@ -443,7 +444,7 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            isPending ? 'PENDING' : 'COMPLETED',
+                            isPending ? 'pending'.tr(ref).toUpperCase() : 'completed'.tr(ref).toUpperCase(),
                                     style: TextStyle(
                               color: Colors.white,
                               fontSize: 10.sp,
@@ -474,7 +475,7 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                   Text(
-                    '\$${refund.refundAmount.toStringAsFixed(2)}',
+                    '${refund.refundAmount.toStringAsFixed(2)} ${'currency'.tr(ref)}',
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
@@ -482,7 +483,7 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
                     ),
                   ),
                   Text(
-                    'Refund',
+                    'refund'.tr(ref),
                     style: TextStyle(
                       fontSize: 10.sp,
                       color: Colors.grey.shade600,
@@ -535,7 +536,7 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
                     SizedBox(width: 8.w),
                     Expanded(
                   child: Text(
-                        'Refund Details',
+                        'refund_details'.tr(ref),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 16.sp,
@@ -568,13 +569,13 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
                       // Customer Information
                       _buildDialogSection(
                         dialogContext,
-                        'Customer Information',
+                        'customer_info'.tr(ref),
                         [
-                          _buildDialogInfoRow('Name', refundDetails.customerName ?? 'Unknown'),
-                          _buildDialogInfoRow('Phone', refundDetails.customerPhone ?? 'N/A', 
+                          _buildDialogInfoRow('name'.tr(ref).replaceAll(':', ''), refundDetails.customerName ?? 'unknown'.tr(ref)),
+                          _buildDialogInfoRow('phone'.tr(ref).replaceAll(':', ''), refundDetails.customerPhone ?? 'N/A', 
                               isPhone: true, onTap: () => _callCustomer(refundDetails.customerPhone)),
                           if (refundDetails.customerEmail != null)
-                            _buildDialogInfoRow('Email', refundDetails.customerEmail!),
+                            _buildDialogInfoRow('email'.tr(ref).replaceAll(':', ''), refundDetails.customerEmail!),
                         ],
                       ),
                       
@@ -583,11 +584,11 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
                       // Vehicle Information
                       _buildDialogSection(
                         dialogContext,
-                        'Vehicle Information',
+                        'vehicle_info'.tr(ref),
                         [
-                          _buildDialogInfoRow('Car', refundDetails.carInfo),
+                          _buildDialogInfoRow('vehicle'.tr(ref).replaceAll(':', ''), refundDetails.carInfo),
                           if (refundDetails.licensePlate != null)
-                            _buildDialogInfoRow('Plate', refundDetails.licensePlate!),
+                            _buildDialogInfoRow('license_plate'.tr(ref).replaceAll(':', ''), refundDetails.licensePlate!),
                         ],
                       ),
                       
@@ -596,13 +597,13 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
                       // Booking Details
                       _buildDialogSection(
                         dialogContext,
-                        'Booking Details',
+                        'booking_details'.tr(ref),
                         [
-                          _buildDialogInfoRow('Booking ID', '#${refund.bookingId.substring(0, 8)}'),
+                          _buildDialogInfoRow('booking_id'.tr(ref).replaceAll(':', ''), '#${refund.bookingId.substring(0, 8)}'),
                           if (refundDetails.serviceType != null)
-                            _buildDialogInfoRow('Service', _formatServiceType(refundDetails.serviceType!)),
+                            _buildDialogInfoRow('service'.tr(ref).replaceAll(':', ''), _formatServiceType(refundDetails.serviceType!, ref)),
                           if (refundDetails.bookingDate != null)
-                            _buildDialogInfoRow('Date', DateFormat('MMM d, yyyy').format(refundDetails.bookingDate!)),
+                            _buildDialogInfoRow('date'.tr(ref).replaceAll(':', ''), DateFormat('MMM d, yyyy').format(refundDetails.bookingDate!)),
                         ],
                       ),
                       
@@ -611,14 +612,14 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
                       // Refund Details
                       _buildDialogSection(
                         dialogContext,
-                        'Refund Details',
+                        'refund_details'.tr(ref),
                         [
-                          _buildDialogInfoRow('Reason', refund.reason),
+                          _buildDialogInfoRow('reason'.tr(ref).replaceAll(':', ''), refund.reason),
                           if (refund.customerNotes != null && refund.customerNotes!.isNotEmpty)
-                            _buildDialogInfoRow('Notes', refund.customerNotes!),
-                          _buildDialogInfoRow('Original Amount', '\$${refund.originalAmount.toStringAsFixed(2)}'),
+                            _buildDialogInfoRow('notes'.tr(ref).replaceAll(':', ''), refund.customerNotes!),
+                          _buildDialogInfoRow('original_amount'.tr(ref).replaceAll(':', ''), '${refund.originalAmount.toStringAsFixed(2)} ${'currency'.tr(ref)}'),
                           if (refund.refundMethod != null)
-                            _buildDialogInfoRow('Payment Method', refund.refundMethod!.toUpperCase()),
+                            _buildDialogInfoRow('payment_method'.tr(ref).replaceAll(':', ''), refund.refundMethod!.toUpperCase()),
                         ],
                       ),
                       
@@ -644,7 +645,7 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
                             ),
                             SizedBox(height: 4.h),
                   Text(
-                    '\$${refund.refundAmount.toStringAsFixed(2)}',
+                    '${refund.refundAmount.toStringAsFixed(2)} ${'currency'.tr(ref)}',
                     style: TextStyle(
                                 fontSize: 28.sp,
                       fontWeight: FontWeight.bold,
@@ -670,7 +671,7 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
                               SizedBox(width: 8.w),
                               Expanded(
                                 child: Text(
-                                  'Processed on ${DateFormat('MMM d, yyyy \'at\' HH:mm').format(refund.processedAt!)}',
+                                  '${'processed_on'.tr(ref)}${DateFormat('MMM d, yyyy \'at\' HH:mm').format(refund.processedAt!)}',
                                   style: TextStyle(color: Colors.green.shade700, fontSize: 13.sp),
                                 ),
                               ),
@@ -698,7 +699,7 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
                   children: [
                     Expanded(
                       child: Text(
-                        'Requested: ${DateFormat('MMM dd, HH:mm').format(refund.requestedAt)}',
+                        '${'requested'.tr(ref)}${DateFormat('MMM dd, HH:mm').format(refund.requestedAt)}',
                         style: TextStyle(
                           fontSize: 10.sp,
                           color: Colors.grey[600],
@@ -714,7 +715,7 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
                           _showProcessDialog(refundDetails);
                         },
                         icon: const Icon(Icons.check_circle, size: 16),
-                        label: const Text('Process'),
+                        label: Text('process'.tr(ref)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           foregroundColor: Colors.white,
@@ -730,7 +731,7 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
                           minimumSize: Size(0, 32.h),
                         ),
                         child: Text(
-                          'Close',
+                          'close'.tr(ref),
                           style: TextStyle(fontSize: 12.sp),
                         ),
                     ),
@@ -817,16 +818,16 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
     );
   }
 
-  String _formatServiceType(String type) {
+  String _formatServiceType(String type, WidgetRef ref) {
     switch (type.toLowerCase()) {
       case 'regular':
-        return 'Regular Maintenance';
+        return 'regular_maintenance'.tr(ref);
       case 'inspection':
-        return 'Inspection';
+        return 'inspection'.tr(ref);
       case 'repair':
-        return 'Repair Service';
+        return 'repair_service'.tr(ref);
       case 'emergency':
-        return 'Emergency Service';
+        return 'emergency_service'.tr(ref);
       default:
         return type;
     }
@@ -843,7 +844,7 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
             children: [
               Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28.sp),
               SizedBox(width: 8.w),
-              const Text('Confirm Refund'),
+              Text('confirm_refund'.tr(ref)),
             ],
           ),
           content: SingleChildScrollView(
@@ -851,8 +852,8 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-                const Text(
-                  'Please confirm that you have returned the money to the customer.',
+                Text(
+                  'confirm_refund_message'.tr(ref),
                   style: TextStyle(fontWeight: FontWeight.w500),
                 ),
               SizedBox(height: 16.h),
@@ -867,10 +868,10 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Customer: ${refundDetails.customerName ?? "Unknown"}'),
+                      Text('${'customer'.tr(ref)}${refundDetails.customerName ?? "unknown".tr(ref)}'),
                       if (refundDetails.customerPhone != null)
-                        Text('Phone: ${refundDetails.customerPhone}'),
-                      Text('Car: ${refundDetails.carInfo}'),
+                        Text('${'phone'.tr(ref)}${refundDetails.customerPhone}'),
+                      Text('${'vehicle'.tr(ref)}${refundDetails.carInfo}'),
                     ],
                   ),
                 ),
@@ -888,10 +889,10 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
                 ),
                   child: Column(
                   children: [
-                      const Text('Refund Amount'),
+                      Text('amount_to_refund'.tr(ref)),
                       SizedBox(height: 4.h),
                     Text(
-                      '\$${refund.refundAmount.toStringAsFixed(2)}',
+                      '${refund.refundAmount.toStringAsFixed(2)} ${'currency'.tr(ref)}',
                         style: TextStyle(
                           fontSize: 24.sp,
                           fontWeight: FontWeight.bold,
@@ -900,7 +901,7 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
                       ),
                       if (refund.refundMethod != null)
                         Text(
-                          'via ${refund.refundMethod!.toUpperCase()}',
+                          '${'via'.tr(ref)} ${refund.refundMethod!.toUpperCase()}',
                           style: TextStyle(fontSize: 12.sp, color: Colors.grey),
                     ),
                   ],
@@ -909,7 +910,7 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
                 
                 SizedBox(height: 12.h),
               Text(
-                  '⚠️ This action cannot be undone. The customer will be notified.',
+                  '${'this_action_cannot_be_undone'.tr(ref)} ${'customer_will_be_notified'.tr(ref)}',
                   style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
               ),
             ],
@@ -918,12 +919,12 @@ class _CashierRefundsPageState extends ConsumerState<CashierRefundsPage> with Si
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Cancel'),
+              child: Text('cancel'.tr(ref)),
             ),
             ElevatedButton.icon(
               onPressed: () => Navigator.pop(dialogContext, true),
               icon: const Icon(Icons.check),
-              label: const Text('Yes, Refund Completed'),
+              label: Text('yes_refund_completed'.tr(ref)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
                 foregroundColor: Colors.white,

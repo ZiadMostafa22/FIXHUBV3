@@ -58,10 +58,10 @@ class RefundRepository {
       );
 
       final doc = await _firestore.collection(_collection).add(refund.toFirestore());
-      debugPrint('✅ Refund request created: ${doc.id}');
+      debugPrint('Refund request created: ${doc.id}');
       return doc.id;
     } catch (e) {
-      debugPrint('❌ Error creating refund request: $e');
+      debugPrint('Error creating refund request: $e');
       rethrow;
     }
   }
@@ -79,9 +79,9 @@ class RefundRepository {
         'approvedAt': FieldValue.serverTimestamp(),
         'refundMethod': refundMethod,
       });
-      debugPrint('✅ Refund approved: $refundId');
+      debugPrint('Refund approved: $refundId');
     } catch (e) {
-      debugPrint('❌ Error approving refund: $e');
+      debugPrint('Error approving refund: $e');
       rethrow;
     }
   }
@@ -99,9 +99,9 @@ class RefundRepository {
         'approvedAt': FieldValue.serverTimestamp(),
         'customerNotes': rejectionReason,
       });
-      debugPrint('✅ Refund rejected: $refundId');
+      debugPrint('Refund rejected: $refundId');
     } catch (e) {
-      debugPrint('❌ Error rejecting refund: $e');
+      debugPrint('Error rejecting refund: $e');
       rethrow;
     }
   }
@@ -113,9 +113,9 @@ class RefundRepository {
         'status': 'processed',
         'processedAt': FieldValue.serverTimestamp(),
       });
-      debugPrint('✅ Refund processed: $refundId');
+      debugPrint('Refund processed: $refundId');
     } catch (e) {
-      debugPrint('❌ Error processing refund: $e');
+      debugPrint('Error processing refund: $e');
       rethrow;
     }
   }
@@ -134,7 +134,7 @@ class RefundRepository {
       return RefundEntity.fromFirestore(
           snapshot.docs.first.data(), snapshot.docs.first.id);
     } catch (e) {
-      debugPrint('❌ Error getting refund: $e');
+      debugPrint('Error getting refund: $e');
       return null;
     }
   }

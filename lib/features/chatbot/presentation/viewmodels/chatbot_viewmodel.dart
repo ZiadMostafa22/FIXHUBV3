@@ -1,4 +1,7 @@
+import 'dart:io';
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:car_maintenance_system_new/features/chatbot/domain/entities/chat_message_entity.dart';
 import 'package:car_maintenance_system_new/features/chatbot/domain/di/chatbot_usecases_di.dart';
 import 'package:car_maintenance_system_new/features/chatbot/domain/usecases/send_message_usecase.dart';
@@ -21,15 +24,34 @@ class ChatbotState {
   final bool isLoading;
   final bool isSending;
   final String? error;
+  final File? selectedImage;
 
   ChatbotState({
     this.messages = const [],
     this.isLoading = false,
     this.isSending = false,
     this.error,
+    this.selectedImage,
   });
 
   ChatbotState copyWith({
+    List<ChatMessageEntity>? messages,
+    bool? isLoading,
+    bool? isSending,
+    String? error,
+    File? selectedImage,
+  }) {
+    return ChatbotState(
+      messages: messages ?? this.messages,
+      isLoading: isLoading ?? this.isLoading,
+      isSending: isSending ?? this.isSending,
+      error: error, // Error usually cleared unless passed
+      selectedImage: selectedImage, // Usually cleared unless explicitly passed or kept via another method. Actually, to clear it, we should allow null. 
+      // Workaround for nullable properties in copyWith:
+    );
+  }
+  
+  ChatbotState copyWithKeepImage({
     List<ChatMessageEntity>? messages,
     bool? isLoading,
     bool? isSending,
@@ -40,6 +62,7 @@ class ChatbotState {
       isLoading: isLoading ?? this.isLoading,
       isSending: isSending ?? this.isSending,
       error: error ?? this.error,
+      selectedImage: this.selectedImage,
     );
   }
 }
@@ -58,31 +81,77 @@ class ChatbotViewModel extends StateNotifier<ChatbotState> {
   /// Load conversation history for a user
   Future<void> loadConversation(String userId) async {
     try {
-      state = state.copyWith(isLoading: true, error: null);
+      state = state.copyWith(isLoading: true, error: null, selectedImage: state.selectedImage);
       final conversation = await getConversationsUseCase(userId);
       
       if (conversation != null) {
-        state = state.copyWith(
+        state = state.copyWithKeepImage(
           messages: conversation.messages,
           isLoading: false,
         );
       } else {
-        state = state.copyWith(isLoading: false);
+        state = state.copyWithKeepImage(isLoading: false);
       }
     } catch (e) {
-      state = state.copyWith(
+      state = state.copyWithKeepImage(
         isLoading: false,
         error: e.toString(),
       );
     }
   }
 
+  /// Pick an image
+  Future<void> pickImage(ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: source, imageQuality: 70); // Compress slightly
+      
+      if (pickedFile != null) {
+        state = state.copyWith(
+          messages: state.messages,
+          isLoading: state.isLoading,
+          isSending: state.isSending,
+          error: state.error,
+          selectedImage: File(pickedFile.path),
+        );
+      }
+    } catch (e) {
+      state = state.copyWithKeepImage(error: 'Error picking image: $e');
+    }
+  }
+
+  /// Remove selected image
+  void removeSelectedImage() {
+    state = state.copyWith(
+      messages: state.messages,
+      isLoading: state.isLoading,
+      isSending: state.isSending,
+      error: state.error,
+      selectedImage: null,
+    );
+  }
+
   /// Send a message and get AI response
-  Future<void> sendMessage(String userId, String message) async {
-    if (message.trim().isEmpty) return;
+  Future<void> sendMessage(String userId, String message, {bool isTechnician = false}) async {
+    if (message.trim().isEmpty && state.selectedImage == null) return;
 
     try {
-      state = state.copyWith(isSending: true, error: null);
+      String? base64Image;
+      File? imageToSend = state.selectedImage;
+      
+      // Clear selected image from UI immediately while sending
+      state = state.copyWith(
+        isSending: true, 
+        error: null,
+        messages: state.messages,
+        isLoading: state.isLoading,
+        selectedImage: null,
+      );
+
+      if (imageToSend != null) {
+        final bytes = await imageToSend.readAsBytes();
+        base64Image = base64Encode(bytes);
+      }
 
       // Add user message to state immediately
       final userMessage = ChatMessageEntity(
@@ -90,14 +159,17 @@ class ChatbotViewModel extends StateNotifier<ChatbotState> {
         text: message,
         type: MessageType.user,
         timestamp: DateTime.now(),
+        base64Image: base64Image,
       );
 
-      state = state.copyWith(
+      state = state.copyWithKeepImage(
         messages: [...state.messages, userMessage],
       );
 
       // Get AI response
-      final response = await sendMessageUseCase(userId, message, state.messages);
+      // NOTE: SendMessageUseCase needs to be updated to accept isTechnician if we want it to go all the way,
+      // We already added it. Let's pass it down.
+      final response = await sendMessageUseCase(userId, message, state.messages, base64Image: base64Image, isTechnician: isTechnician);
 
       // Add AI response to state
       final assistantMessage = ChatMessageEntity(
@@ -107,12 +179,12 @@ class ChatbotViewModel extends StateNotifier<ChatbotState> {
         timestamp: DateTime.now(),
       );
 
-      state = state.copyWith(
+      state = state.copyWithKeepImage(
         messages: [...state.messages, assistantMessage],
         isSending: false,
       );
     } catch (e) {
-      state = state.copyWith(
+      state = state.copyWithKeepImage(
         isSending: false,
         error: e.toString(),
       );
@@ -123,9 +195,9 @@ class ChatbotViewModel extends StateNotifier<ChatbotState> {
   Future<void> clearConversation(String userId) async {
     try {
       await clearConversationUseCase(userId);
-      state = state.copyWith(messages: []);
+      state = state.copyWithKeepImage(messages: []);
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      state = state.copyWithKeepImage(error: e.toString());
     }
   }
 }

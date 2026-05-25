@@ -12,7 +12,8 @@ import 'package:car_maintenance_system_new/features/customer/presentation/widget
 import 'package:car_maintenance_system_new/features/customer/presentation/widgets/missed_appointments.dart';
 import 'package:car_maintenance_system_new/features/booking/domain/entities/booking_entity.dart';
 import 'package:car_maintenance_system_new/features/customer/presentation/widgets/customer_bottom_nav_bar.dart';
-import 'package:car_maintenance_system_new/features/shared/presentation/pages/notifications_page.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
+import 'package:car_maintenance_system_new/features/shared/presentation/widgets/app_drawer.dart';
 
 class CustomerDashboard extends ConsumerStatefulWidget {
   const CustomerDashboard({super.key});
@@ -39,12 +40,9 @@ class _CustomerDashboardState extends ConsumerState<CustomerDashboard> {
 
   @override
   void dispose() {
-    // Stop listening when dashboard is disposed
-    // Wrap in try-catch to handle cases where widget is already disposed during logout
     try {
       ref.read(bookingViewModelProvider.notifier).stopListening();
     } catch (e) {
-      // Widget was already disposed, safe to ignore
       debugPrint('Dashboard disposed, listener cleanup skipped: $e');
     }
     super.dispose();
@@ -64,69 +62,12 @@ class _CustomerDashboardState extends ConsumerState<CustomerDashboard> {
     final user = authState.user;
 
     return Scaffold(
+      drawer: const AppDrawer(role: 'customer'),
       appBar: AppBar(
         title: Text(
-          'Welcome, ${user?.name ?? 'Customer'}',
+          '${'welcome'.tr(ref)}, ${user?.name ?? ''}',
           style: TextStyle(fontSize: 18.sp),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.settings, size: 22.sp),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsPage()),
-              );
-            },
-          ),
-          // Notification bell with unread count
-          Consumer(
-            builder: (context, ref, child) {
-              final unreadAsync = ref.watch(unreadCountProvider);
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.notifications, size: 22.sp),
-                    onPressed: () {
-                      context.push('/customer/notifications');
-                    },
-                  ),
-                  unreadAsync.when(
-                    data: (count) => count > 0
-                        ? Positioned(
-                            right: 8,
-                            top: 8,
-                            child: Container(
-                              padding: EdgeInsets.all(4.w),
-                              decoration: const BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
-                              ),
-                              constraints: BoxConstraints(
-                                minWidth: 16.w,
-                                minHeight: 16.w,
-                              ),
-                              child: Text(
-                                count > 9 ? '9+' : '$count',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10.sp,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          )
-                        : const SizedBox.shrink(),
-                    loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const SizedBox.shrink(),
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
       ),
       body: RefreshIndicator(
         onRefresh: _refreshData,
@@ -143,7 +84,7 @@ class _CustomerDashboardState extends ConsumerState<CustomerDashboard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Good ${_getGreeting()}!',
+                      _getGreeting(ref),
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         fontSize: 20.sp,
@@ -151,7 +92,7 @@ class _CustomerDashboardState extends ConsumerState<CustomerDashboard> {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'How can we help you with your car today?',
+                      'how_can_we_help'.tr(ref),
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Colors.grey[600],
                         fontSize: 14.sp,
@@ -166,7 +107,7 @@ class _CustomerDashboardState extends ConsumerState<CustomerDashboard> {
             
             // Quick Actions
             Text(
-              'Quick Actions',
+              'quick_actions'.tr(ref),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 fontSize: 18.sp,
@@ -177,7 +118,7 @@ class _CustomerDashboardState extends ConsumerState<CustomerDashboard> {
             
             SizedBox(height: 24.h),
             
-            // Upcoming Appointments (only show section if there are appointments)
+            // Upcoming Appointments
             Consumer(
               builder: (context, ref, child) {
                 final bookingState = ref.watch(bookingViewModelProvider);
@@ -195,7 +136,7 @@ class _CustomerDashboardState extends ConsumerState<CustomerDashboard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Upcoming Appointments',
+                      'upcoming_appointments'.tr(ref),
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         fontSize: 18.sp,
@@ -209,14 +150,9 @@ class _CustomerDashboardState extends ConsumerState<CustomerDashboard> {
               },
             ),
             
-            // Missed Appointments (show if any exist)
             const MissedAppointments(),
-            
-            // Active Services (In Progress & Pending Payment)
             const ActiveServices(),
-            
             SizedBox(height: 24.h),
-            
           ],
         ),
         ),
@@ -225,14 +161,14 @@ class _CustomerDashboardState extends ConsumerState<CustomerDashboard> {
     );
   }
 
-  String _getGreeting() {
+  String _getGreeting(WidgetRef ref) {
     final hour = DateTime.now().hour;
     if (hour < 12) {
-      return 'Morning';
+      return 'good_morning'.tr(ref);
     } else if (hour < 17) {
-      return 'Afternoon';
+      return 'good_afternoon'.tr(ref);
     } else {
-      return 'Evening';
+      return 'good_evening'.tr(ref);
     }
   }
 }

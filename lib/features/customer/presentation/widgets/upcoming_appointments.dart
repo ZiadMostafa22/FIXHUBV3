@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:car_maintenance_system_new/features/booking/presentation/viewmodels/booking_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/car/presentation/viewmodels/car_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/booking/domain/entities/booking_entity.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 
 class UpcomingAppointments extends ConsumerStatefulWidget {
   const UpcomingAppointments({super.key});
@@ -64,7 +65,7 @@ class _UpcomingAppointmentsState extends ConsumerState<UpcomingAppointments> {
       children: displayBookings.map((booking) {
         // Get car info
         final car = carState.cars.where((c) => c.id == booking.carId).firstOrNull;
-        final carName = car != null ? '${car.make} ${car.model}' : 'Loading...';
+        final carName = car != null ? '${car.make} ${car.model}' : 'loading'.tr(ref);
         
         return Card(
           margin: EdgeInsets.only(bottom: 12.h),
@@ -88,7 +89,7 @@ class _UpcomingAppointmentsState extends ConsumerState<UpcomingAppointments> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _getMaintenanceTypeName(booking.maintenanceType),
+                            _getMaintenanceTypeName(booking.maintenanceType, ref),
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               fontSize: 15.sp,
@@ -114,7 +115,7 @@ class _UpcomingAppointmentsState extends ConsumerState<UpcomingAppointments> {
                               ),
                               SizedBox(width: 4.w),
                               Text(
-                                '${DateFormat('MMM dd, yyyy').format(booking.scheduledDate)} at ${booking.timeSlot}',
+                                '${DateFormat('MMM dd, yyyy').format(booking.scheduledDate)} ${'at'.tr(ref)} ${booking.timeSlot}',
                                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                   color: Colors.grey[500],
                                   fontSize: 11.sp,
@@ -132,7 +133,7 @@ class _UpcomingAppointmentsState extends ConsumerState<UpcomingAppointments> {
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       child: Text(
-                        _getStatusName(booking.status),
+                        _getStatusName(booking.status, ref),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: _getStatusColor(booking.status),
                           fontWeight: FontWeight.bold,
@@ -152,7 +153,7 @@ class _UpcomingAppointmentsState extends ConsumerState<UpcomingAppointments> {
                     child: OutlinedButton.icon(
                       onPressed: () => _showCancelDialog(context, ref, booking),
                       icon: Icon(Icons.cancel_outlined, size: 16.sp),
-                      label: const Text('Cancel Appointment'),
+                      label: Text('cancel_appointment'.tr(ref)),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.red,
                         side: const BorderSide(color: Colors.red),
@@ -173,14 +174,14 @@ class _UpcomingAppointmentsState extends ConsumerState<UpcomingAppointments> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Cancel Appointment'),
-        content: const Text(
-          'Are you sure you want to cancel this appointment? This action cannot be undone.',
+        title: Text('cancel_appointment'.tr(ref)),
+        content: Text(
+          'cancel_appointment_confirm'.tr(ref),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Keep Appointment'),
+            child: Text('keep_appointment'.tr(ref)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -216,8 +217,8 @@ class _UpcomingAppointmentsState extends ConsumerState<UpcomingAppointments> {
                     SnackBar(
                       content: Text(
                         success 
-                          ? 'Appointment cancelled successfully'
-                          : 'Failed to cancel appointment. Please try again.',
+                          ? 'appointment_cancelled_success'.tr(ref)
+                          : 'failed_cancel_appointment'.tr(ref),
                       ),
                       backgroundColor: success ? Colors.green : Colors.red,
                       duration: const Duration(seconds: 2),
@@ -225,7 +226,7 @@ class _UpcomingAppointmentsState extends ConsumerState<UpcomingAppointments> {
                   );
                 }
               } catch (e) {
-                print('❌ Cancellation error: $e');
+                print('Cancellation error: $e');
                 
                 // Close loading immediately
                 if (context.mounted) {
@@ -247,40 +248,40 @@ class _UpcomingAppointmentsState extends ConsumerState<UpcomingAppointments> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
             ),
-            child: const Text('Cancel Appointment'),
+            child: Text('cancel_appointment'.tr(ref)),
           ),
         ],
       ),
     );
   }
 
-  String _getMaintenanceTypeName(MaintenanceType type) {
+  String _getMaintenanceTypeName(MaintenanceType type, WidgetRef ref) {
     switch (type) {
       case MaintenanceType.regular:
-        return 'Regular Maintenance';
+        return 'regular_maintenance'.tr(ref);
       case MaintenanceType.inspection:
-        return 'Inspection';
+        return 'inspection'.tr(ref);
       case MaintenanceType.repair:
-        return 'Repair Service';
+        return 'repair_service'.tr(ref);
       case MaintenanceType.emergency:
-        return 'Emergency Service';
+        return 'emergency_service'.tr(ref);
     }
   }
 
-  String _getStatusName(BookingStatus status) {
+  String _getStatusName(BookingStatus status, WidgetRef ref) {
     switch (status) {
       case BookingStatus.pending:
-        return 'Pending';
+        return 'pending'.tr(ref);
       case BookingStatus.confirmed:
-        return 'Confirmed';
+        return 'confirmed'.tr(ref);
       case BookingStatus.inProgress:
-        return 'In Progress';
+        return 'service_in_progress'.tr(ref);
       case BookingStatus.completedPendingPayment:
-        return 'Awaiting Payment';
+        return 'awaiting_payment'.tr(ref);
       case BookingStatus.completed:
-        return 'Completed';
+        return 'completed'.tr(ref);
       case BookingStatus.cancelled:
-        return 'Cancelled';
+        return 'was_cancelled'.tr(ref);
     }
   }
 

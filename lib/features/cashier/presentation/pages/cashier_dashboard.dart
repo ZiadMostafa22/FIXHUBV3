@@ -11,6 +11,9 @@ import 'package:car_maintenance_system_new/features/shared/presentation/pages/se
 import 'package:car_maintenance_system_new/features/booking/domain/entities/booking_entity.dart';
 import 'package:car_maintenance_system_new/features/shared/presentation/pages/notifications_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
+
+import 'package:car_maintenance_system_new/features/shared/presentation/widgets/app_drawer.dart';
 
 class CashierDashboard extends ConsumerStatefulWidget {
   const CashierDashboard({super.key});
@@ -115,98 +118,12 @@ class _CashierDashboardState extends ConsumerState<CashierDashboard> {
     );
 
     return Scaffold(
+      drawer: const AppDrawer(role: 'cashier'),
       appBar: AppBar(
         title: Text(
-          'Welcome, ${user?.name ?? 'Cashier'}',
+          '${'welcome_cashier'.tr(ref)}${user?.name ?? 'cashier'.tr(ref)}',
           style: TextStyle(fontSize: 18.sp),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.settings, size: 22.sp),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsPage()),
-              );
-            },
-          ),
-          // Notification bell with unread count
-          Consumer(
-            builder: (context, ref, child) {
-              final unreadAsync = ref.watch(unreadCountProvider);
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-          IconButton(
-            icon: Icon(Icons.notifications, size: 22.sp),
-            onPressed: () {
-                      context.push('/cashier/notifications');
-                    },
-                  ),
-                  unreadAsync.when(
-                    data: (count) => count > 0
-                        ? Positioned(
-                            right: 8,
-                            top: 8,
-                            child: Container(
-                              padding: EdgeInsets.all(4.w),
-                              decoration: const BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
-                              ),
-                              constraints: BoxConstraints(
-                                minWidth: 16.w,
-                                minHeight: 16.w,
-                              ),
-                              child: Text(
-                                count > 9 ? '9+' : '$count',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10.sp,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          )
-                        : const SizedBox.shrink(),
-                    loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const SizedBox.shrink(),
-                  ),
-                ],
-              );
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.logout, size: 22.sp),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (dialogContext) => AlertDialog(
-                  title: const Text('Sign Out'),
-                  content: const Text('Are you sure you want to sign out?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(dialogContext),
-                      child: const Text('Cancel'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () async {
-                        Navigator.pop(dialogContext);
-                        await Future.delayed(const Duration(milliseconds: 100));
-                        if (mounted) {
-                          await ref.read(authViewModelProvider.notifier).signOut();
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                      child: const Text('Sign Out'),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
       ),
       body: RefreshIndicator(
         onRefresh: _refreshData,
@@ -240,7 +157,7 @@ class _CashierDashboardState extends ConsumerState<CashierDashboard> {
                               ),
                             ),
                             Text(
-                              'Pending Payments',
+                              'pending_payments'.tr(ref),
                               style: TextStyle(fontSize: 12.sp),
                               textAlign: TextAlign.center,
                             ),
@@ -264,7 +181,7 @@ class _CashierDashboardState extends ConsumerState<CashierDashboard> {
                             ),
                             SizedBox(height: 8.h),
                             Text(
-                              '\$${todayTotal.toStringAsFixed(0)}',
+                              '${todayTotal.toStringAsFixed(0)} ${'currency'.tr(ref)}',
                               style: TextStyle(
                                 fontSize: 28.sp,
                                 fontWeight: FontWeight.bold,
@@ -272,7 +189,7 @@ class _CashierDashboardState extends ConsumerState<CashierDashboard> {
                               ),
                             ),
                             Text(
-                              'Today\'s Total',
+                              'todays_total'.tr(ref),
                               style: TextStyle(fontSize: 12.sp),
                               textAlign: TextAlign.center,
                             ),
@@ -335,7 +252,7 @@ class _CashierDashboardState extends ConsumerState<CashierDashboard> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      '$count Refund${count > 1 ? 's' : ''} Pending',
+                                      '$count ${'refunds_pending'.tr(ref)}',
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 18.sp,
@@ -344,7 +261,7 @@ class _CashierDashboardState extends ConsumerState<CashierDashboard> {
                                     ),
                                     SizedBox(height: 4.h),
                                     Text(
-                                      'Tap to process approved refunds',
+                                      'tap_to_process_refunds'.tr(ref),
                                       style: TextStyle(
                                         color: Colors.white.withOpacity(0.9),
                                         fontSize: 12.sp,
@@ -374,7 +291,7 @@ class _CashierDashboardState extends ConsumerState<CashierDashboard> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Awaiting Payment',
+                    'awaiting_payment'.tr(ref),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       fontSize: 18.sp,
@@ -383,7 +300,7 @@ class _CashierDashboardState extends ConsumerState<CashierDashboard> {
                   if (pendingPayments.isNotEmpty)
                     TextButton(
                       onPressed: () => context.go('/cashier/payments'),
-                      child: const Text('View All'),
+                      child: Text('view_all'.tr(ref)),
                     ),
                 ],
               ),
@@ -402,7 +319,7 @@ class _CashierDashboardState extends ConsumerState<CashierDashboard> {
                         ),
                         SizedBox(height: 16.h),
                         Text(
-                          'No pending payments',
+                          'no_pending_payments'.tr(ref),
                           style: TextStyle(
                             color: Colors.grey,
                             fontSize: 16.sp,
@@ -446,7 +363,7 @@ class _CashierDashboardState extends ConsumerState<CashierDashboard> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          'Invoice #${booking.id.substring(0, 8)}',
+                                          '${'invoice'.tr(ref)}${booking.id.substring(0, 8)}',
                                           style: const TextStyle(fontWeight: FontWeight.bold),
                                         ),
                                         SizedBox(height: 4.h),
@@ -455,7 +372,7 @@ class _CashierDashboardState extends ConsumerState<CashierDashboard> {
                                           builder: (context, snapshot) {
                                             final customerName = snapshot.data ?? 'Loading...';
                                             return Text(
-                                              'Customer: $customerName',
+                                              '${'customer'.tr(ref)}$customerName',
                                               style: TextStyle(
                                                 fontSize: 12.sp,
                                                 color: Colors.grey[700],
@@ -466,7 +383,7 @@ class _CashierDashboardState extends ConsumerState<CashierDashboard> {
                                         ),
                                         SizedBox(height: 4.h),
                                         Text(
-                                          'Amount: \$${booking.totalCost.toStringAsFixed(2)}',
+                                          '${'amount'.tr(ref)}${booking.totalCost.toStringAsFixed(2)} ${'currency'.tr(ref)}',
                                           style: TextStyle(fontSize: 12.sp),
                                         ),
                                         if (car != null) ...[
@@ -502,7 +419,7 @@ class _CashierDashboardState extends ConsumerState<CashierDashboard> {
                                         if (booking.completedAt != null) ...[
                                           SizedBox(height: 4.h),
                                           Text(
-                                            'Completed: ${DateFormat('dd/MM/yyyy HH:mm').format(booking.completedAt!)}',
+                                            '${'completed_at'.tr(ref)}${DateFormat('dd/MM/yyyy HH:mm').format(booking.completedAt!)}',
                                             style: TextStyle(fontSize: 10.sp, color: Colors.grey),
                                           ),
                                         ],
@@ -518,7 +435,7 @@ class _CashierDashboardState extends ConsumerState<CashierDashboard> {
                                       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                                     ),
                                     child: Text(
-                                      'Receive',
+                                      'receive'.tr(ref),
                                       style: TextStyle(fontSize: 12.sp),
                                     ),
                                   ),
@@ -534,66 +451,6 @@ class _CashierDashboardState extends ConsumerState<CashierDashboard> {
             ],
           ),
         ),
-      ),
-      bottomNavigationBar: StreamBuilder<int>(
-        stream: _pendingRefundsStream,
-        builder: (context, snapshot) {
-          final refundsCount = snapshot.data ?? 0;
-          
-          return BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: 0,
-        selectedFontSize: 12.sp,
-        unselectedFontSize: 10.sp,
-        iconSize: 24.sp,
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              // Already on dashboard
-              break;
-            case 1:
-              context.go('/cashier/payments');
-              break;
-            case 2:
-              context.go('/cashier/refunds');
-              break;
-            case 3:
-              context.go('/cashier/reports');
-              break;
-            case 4:
-              context.go('/cashier/profile');
-              break;
-          }
-        },
-            items: [
-              const BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: 'Dashboard',
-          ),
-              const BottomNavigationBarItem(
-            icon: Icon(Icons.payment),
-            label: 'Payments',
-          ),
-          BottomNavigationBarItem(
-                icon: refundsCount > 0
-                    ? Badge(
-                        label: Text('$refundsCount'),
-                        child: const Icon(Icons.receipt_long),
-                      )
-                    : const Icon(Icons.receipt_long),
-            label: 'Refunds',
-          ),
-              const BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Reports',
-          ),
-              const BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-          );
-        },
       ),
     );
   }

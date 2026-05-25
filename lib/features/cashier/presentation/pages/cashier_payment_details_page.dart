@@ -11,6 +11,7 @@ import 'package:car_maintenance_system_new/features/booking/domain/entities/book
 import 'package:car_maintenance_system_new/core/utils/pdf_generator.dart';
 import 'package:car_maintenance_system_new/core/services/firebase_service.dart';
 import 'package:car_maintenance_system_new/features/refunds/data/repositories/refund_repository.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 
 class CashierPaymentDetailsPage extends ConsumerStatefulWidget {
   final String bookingId;
@@ -84,7 +85,7 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error exporting invoice: $e'),
+            content: Text('${'error_exporting'.tr(ref)}$e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -114,8 +115,8 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
 
       if (success) {
         scaffoldMessenger.showSnackBar(
-          const SnackBar(
-            content: Text('Payment processed successfully!'),
+          SnackBar(
+            content: Text('payment_processed'.tr(ref)),
             backgroundColor: Colors.green,
           ),
         );
@@ -126,7 +127,7 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
           context.go('/cashier');
         }
       } else {
-        throw 'Failed to process payment';
+        throw 'failed_payment'.tr(ref);
       }
     } catch (e) {
       setState(() => _isProcessing = false);
@@ -172,11 +173,11 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Invoice Details'),
+        title: Text('invoice_details'.tr(ref)),
         actions: [
           IconButton(
             icon: const Icon(Icons.download),
-            tooltip: 'Export Invoice',
+            tooltip: 'export_invoice'.tr(ref),
             onPressed: () => _exportInvoice(booking),
           ),
         ],
@@ -194,36 +195,36 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Booking Information',
+                      'booking_info'.tr(ref),
                       style: TextStyle(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     SizedBox(height: 12.h),
-                    _buildInfoRow('Invoice Number', '#${booking.id.substring(0, 8)}'),
+                    _buildInfoRow('invoice_number'.tr(ref), '#${booking.id.substring(0, 8)}'),
                     if (car != null)
-                      _buildInfoRow('Vehicle', '${car.make} ${car.model} (${car.year})'),
+                      _buildInfoRow('vehicle'.tr(ref), '${car.make} ${car.model} (${car.year})'),
                     // Customer Details
                     FutureBuilder<String>(
                       future: _getUserName(booking.userId),
                       builder: (context, snapshot) {
                         final customerName = snapshot.data ?? 'Loading...';
-                        return _buildInfoRow('Customer', customerName);
+                        return _buildInfoRow('customer'.tr(ref).replaceAll(':', ''), customerName);
                       },
                     ),
                     if (booking.completedAt != null)
                       _buildInfoRow(
-                        'Completion Date',
+                        'completion_date'.tr(ref),
                         DateFormat('dd/MM/yyyy HH:mm').format(booking.completedAt!),
                       ),
                     // Debug: Show discount information
                     if (booking.offerCode != null)
-                      _buildInfoRow('Discount Code', booking.offerCode!),
+                      _buildInfoRow('discount_code'.tr(ref), booking.offerCode!),
                     if (booking.offerTitle != null)
-                      _buildInfoRow('Offer Title', booking.offerTitle!),
+                      _buildInfoRow('offer_title'.tr(ref), booking.offerTitle!),
                     if (booking.discountPercentage != null)
-                      _buildInfoRow('Discount %', '${booking.discountPercentage}%'),
+                      _buildInfoRow('discount_percentage'.tr(ref), '${booking.discountPercentage}%'),
                   ],
                 ),
               ),
@@ -248,7 +249,7 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
                           ),
                           SizedBox(width: 8.w),
                           Text(
-                            'Vehicle Details',
+                            'vehicle_details'.tr(ref),
                             style: TextStyle(
                               fontSize: 18.sp,
                               fontWeight: FontWeight.bold,
@@ -257,18 +258,18 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
                         ],
                       ),
                       SizedBox(height: 12.h),
-                      _buildCarInfoRow('Make', car.make),
-                      _buildCarInfoRow('Model', car.model),
-                      _buildCarInfoRow('Year', car.year.toString()),
-                      _buildCarInfoRow('License Plate', car.licensePlate),
-                      _buildCarInfoRow('Color', car.color),
-                      _buildCarInfoRow('Type', car.type.toString().split('.').last.toUpperCase()),
+                      _buildCarInfoRow('make'.tr(ref), car.make),
+                      _buildCarInfoRow('model'.tr(ref), car.model),
+                      _buildCarInfoRow('year'.tr(ref), car.year.toString()),
+                      _buildCarInfoRow('license_plate'.tr(ref), car.licensePlate),
+                      _buildCarInfoRow('color'.tr(ref), car.color),
+                      _buildCarInfoRow('type'.tr(ref), car.type.toString().split('.').last.toUpperCase()),
                       if (car.vin != null && car.vin!.isNotEmpty)
-                        _buildCarInfoRow('VIN', car.vin!),
+                        _buildCarInfoRow('vin'.tr(ref), car.vin!),
                       if (car.mileage != null)
-                        _buildCarInfoRow('Mileage', '${car.mileage} km'),
+                        _buildCarInfoRow('mileage'.tr(ref), '${car.mileage} km'),
                       if (car.engineType != null && car.engineType!.isNotEmpty)
-                        _buildCarInfoRow('Engine Type', car.engineType!),
+                        _buildCarInfoRow('engine_type'.tr(ref), car.engineType!),
                     ],
                   ),
                 ),
@@ -285,7 +286,7 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Parts & Services',
+                        'parts_services'.tr(ref),
                         style: TextStyle(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
@@ -306,7 +307,7 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
                                     style: const TextStyle(fontWeight: FontWeight.w500),
                                   ),
                                   Text(
-                                    'Qty: ${item.quantity} × \$${item.price.toStringAsFixed(2)}',
+                                    '${'qty'.tr(ref)}${item.quantity} × ${item.price.toStringAsFixed(2)} ${'currency'.tr(ref)}',
                                     style: TextStyle(
                                       fontSize: 12.sp,
                                       color: Colors.grey,
@@ -316,7 +317,7 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
                               ),
                             ),
                             Text(
-                              '\$${item.totalPrice.toStringAsFixed(2)}',
+                              '${item.totalPrice.toStringAsFixed(2)} ${'currency'.tr(ref)}',
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ],
@@ -337,23 +338,24 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Cost Breakdown',
+                      'cost_breakdown'.tr(ref),
                       style: TextStyle(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     SizedBox(height: 12.h),
-                    _buildCostRow('Subtotal', booking.subtotal),
+                    _buildCostRow('subtotal'.tr(ref), booking.subtotal, ref: ref),
                     // Debug: Show discount info even if percentage is 0
                     if (booking.offerCode != null || booking.offerTitle != null || (booking.discountPercentage != null && booking.discountPercentage! > 0)) ...[
                       if (booking.discountPercentage != null && booking.discountPercentage! > 0) ...[
                         _buildCostRow(
-                          'Discount (${booking.discountPercentage}%)',
+                          '${'discount'.tr(ref)} (${booking.discountPercentage}%)',
                           -booking.discountAmount,
                           color: Colors.green,
+                          ref: ref,
                         ),
-                        _buildCostRow('After Discount', booking.subtotalAfterDiscount),
+                        _buildCostRow('after_discount'.tr(ref), booking.subtotalAfterDiscount, ref: ref),
                       ] else if (booking.offerCode != null || booking.offerTitle != null) ...[
                         // Show discount info even if percentage is 0 or null
                         Padding(
@@ -362,11 +364,11 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'Discount Applied',
+                                'discount_applied'.tr(ref),
                                 style: TextStyle(fontSize: 14.sp),
                               ),
                               Text(
-                                'Code: ${booking.offerCode ?? 'N/A'}',
+                                '${'code'.tr(ref)}${booking.offerCode ?? 'N/A'}',
                                 style: TextStyle(
                                   fontWeight: FontWeight.w500,
                                   fontSize: 14.sp,
@@ -379,24 +381,25 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
                       ],
                     ],
                     if (booking.laborCost != null)
-                      _buildCostRow('Labor Cost', booking.laborCost!),
+                      _buildCostRow('labor_cost'.tr(ref), booking.laborCost!, ref: ref),
                     _buildCostRow(
-                      'Tax (10%)',
+                      'tax'.tr(ref),
                       (booking.tax ?? (booking.subtotalAfterDiscount * 0.10)),
+                      ref: ref,
                     ),
                     Divider(height: 24.h),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Total',
+                          'total'.tr(ref),
                           style: TextStyle(
                             fontSize: 20.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
-                          '\$${booking.totalCost.toStringAsFixed(2)}',
+                          '${booking.totalCost.toStringAsFixed(2)} ${'currency'.tr(ref)}',
                           style: TextStyle(
                             fontSize: 24.sp,
                             fontWeight: FontWeight.bold,
@@ -421,7 +424,7 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Payment Method',
+                        'payment_method'.tr(ref),
                         style: TextStyle(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
@@ -429,11 +432,11 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
                       ),
                       SizedBox(height: 12.h),
                       RadioListTile<PaymentMethod>(
-                        title: const Row(
+                       title: Row(
                           children: [
-                            Icon(Icons.money, color: Colors.green),
-                            SizedBox(width: 8),
-                            Text('Cash'),
+                            const Icon(Icons.money, color: Colors.green),
+                            const SizedBox(width: 8),
+                            Text('cash'.tr(ref)),
                           ],
                         ),
                         value: PaymentMethod.cash,
@@ -443,11 +446,11 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
                         },
                       ),
                       RadioListTile<PaymentMethod>(
-                        title: const Row(
+                       title: Row(
                           children: [
-                            Icon(Icons.credit_card, color: Colors.blue),
-                            SizedBox(width: 8),
-                            Text('Credit Card'),
+                            const Icon(Icons.credit_card, color: Colors.blue),
+                            const SizedBox(width: 8),
+                            Text('card'.tr(ref)),
                           ],
                         ),
                         value: PaymentMethod.card,
@@ -457,11 +460,11 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
                         },
                       ),
                       RadioListTile<PaymentMethod>(
-                        title: const Row(
+                       title: Row(
                           children: [
-                            Icon(Icons.phone_android, color: Colors.orange),
-                            SizedBox(width: 8),
-                            Text('Digital Wallet'),
+                            const Icon(Icons.phone_android, color: Colors.orange),
+                            const SizedBox(width: 8),
+                            Text('digital_wallet'.tr(ref)),
                           ],
                         ),
                         value: PaymentMethod.digital,
@@ -494,7 +497,7 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
                         )
                       : const Icon(Icons.check_circle),
                   label: Text(
-                    _isProcessing ? 'Processing...' : 'Confirm Payment Received',
+                    _isProcessing ? 'processing'.tr(ref) : 'confirm_payment'.tr(ref),
                     style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
                   ),
                   style: ElevatedButton.styleFrom(
@@ -518,7 +521,7 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
                       ),
                       SizedBox(width: 12.w),
                       Text(
-                        'Payment Completed',
+                        'payment_completed'.tr(ref),
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16.sp,
@@ -528,7 +531,7 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
                       const Spacer(),
                       if (booking.paymentMethod != null)
                         Text(
-                          _getPaymentMethodName(booking.paymentMethod!),
+                          _getPaymentMethodName(booking.paymentMethod!, ref),
                           style: TextStyle(
                             fontSize: 14.sp,
                             color: Colors.green.shade600,
@@ -548,7 +551,7 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
                 child: OutlinedButton.icon(
                   onPressed: () => _showRefundDialog(booking),
                   icon: const Icon(Icons.receipt_long, color: Colors.orange),
-                  label: const Text('Request Refund'),
+                  label: Text('request_refund'.tr(ref)),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.orange,
                     side: const BorderSide(color: Colors.orange),
@@ -613,7 +616,7 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
     );
   }
 
-  Widget _buildCostRow(String label, double amount, {Color? color}) {
+  Widget _buildCostRow(String label, double amount, {Color? color, required WidgetRef ref}) {
     return Padding(
       padding: EdgeInsets.only(bottom: 8.h),
       child: Row(
@@ -624,7 +627,7 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
             style: TextStyle(fontSize: 14.sp),
           ),
           Text(
-            '\$${amount.toStringAsFixed(2)}',
+            '${amount.toStringAsFixed(2)} ${'currency'.tr(ref)}',
             style: TextStyle(
               fontWeight: FontWeight.w500,
               fontSize: 14.sp,
@@ -636,14 +639,14 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
     );
   }
 
-  String _getPaymentMethodName(PaymentMethod method) {
+  String _getPaymentMethodName(PaymentMethod method, WidgetRef ref) {
     switch (method) {
       case PaymentMethod.cash:
-        return 'Cash';
+        return 'cash'.tr(ref);
       case PaymentMethod.card:
-        return 'Credit Card';
+        return 'card'.tr(ref);
       case PaymentMethod.digital:
-        return 'Digital Payment';
+        return 'digital_wallet'.tr(ref);
     }
   }
 
@@ -673,37 +676,37 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Request Refund'),
+          title: Text('request_refund'.tr(ref)),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Booking: #${booking.id.substring(0, 8)}',
+                  '${'booking'.tr(ref).replaceAll(':', '')}: #${booking.id.substring(0, 8)}',
                   style: TextStyle(color: Colors.grey[600]),
                 ),
                 Text(
-                  'Original Amount: \$${booking.totalCost.toStringAsFixed(2)}',
+                  '${'original_amount'.tr(ref)}${booking.totalCost.toStringAsFixed(2)} ${'currency'.tr(ref)}',
                   style: TextStyle(color: Colors.grey[600]),
                 ),
                 SizedBox(height: 16.h),
                 TextField(
                   controller: refundAmountController,
-                  decoration: const InputDecoration(
-                    labelText: 'Refund Amount',
-                    prefixText: '\$',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: 'refund_amount'.tr(ref),
+                    prefixText: '${'currency'.tr(ref)} ',
+                    border: const OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.number,
                 ),
                 SizedBox(height: 12.h),
                 TextField(
                   controller: reasonController,
-                  decoration: const InputDecoration(
-                    labelText: 'Reason for Refund *',
-                    border: OutlineInputBorder(),
-                    hintText: 'Enter reason for refund request',
+                  decoration: InputDecoration(
+                    labelText: 'reason_refund'.tr(ref),
+                    border: const OutlineInputBorder(),
+                    hintText: 'enter_reason'.tr(ref),
                   ),
                   maxLines: 3,
                 ),
@@ -713,14 +716,14 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Cancel'),
+              child: Text('cancel'.tr(ref)),
             ),
             ElevatedButton(
               onPressed: () {
                 if (reasonController.text.trim().isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please enter a reason for the refund'),
+                    SnackBar(
+                      content: Text('please_enter_reason'.tr(ref)),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -729,7 +732,7 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
                 Navigator.pop(dialogContext, true);
               },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-              child: const Text('Submit Request'),
+              child: Text('submit_request'.tr(ref)),
             ),
           ],
         );
@@ -752,8 +755,8 @@ class _CashierPaymentDetailsPageState extends ConsumerState<CashierPaymentDetail
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Refund request submitted successfully'),
+            SnackBar(
+              content: Text('refund_submitted'.tr(ref)),
               backgroundColor: Colors.green,
             ),
           );

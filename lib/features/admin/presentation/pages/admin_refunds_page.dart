@@ -311,7 +311,7 @@ class _RefundCard extends ConsumerWidget {
       // Send notification to cashier (requestedBy is the cashier who requested)
       await NotificationService().sendNotification(
         userId: refund.requestedBy,
-        title: '✅ Refund Approved',
+        title: 'Refund Approved',
         message: 'Refund request for \$${refund.refundAmount.toStringAsFixed(2)} has been approved. Please process the refund to the customer.',
         category: NotificationCategory.payment,
         bookingId: refund.bookingId,
@@ -374,7 +374,7 @@ class _RefundCard extends ConsumerWidget {
         // Notify cashier
         await NotificationService().sendNotification(
           userId: refund.requestedBy,
-          title: '❌ Refund Rejected',
+          title: 'Refund Rejected',
           message: 'Refund request for \$${refund.refundAmount.toStringAsFixed(2)} was rejected. Reason: $reason',
           category: NotificationCategory.payment,
           bookingId: refund.bookingId,

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:car_maintenance_system_new/features/booking/presentation/viewmodels/booking_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/booking/domain/entities/booking_entity.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 
 class RecentActivities extends ConsumerWidget {
   const RecentActivities({super.key});
@@ -29,14 +30,14 @@ class RecentActivities extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'No recent activities',
+                'no_recent_activities'.tr(ref),
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: Colors.grey[600],
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                'Activities will appear here as they happen',
+                'activities_appear_here'.tr(ref),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.grey[500],
                 ),
@@ -49,7 +50,7 @@ class RecentActivities extends ConsumerWidget {
 
     return Column(
       children: displayBookings.map((booking) {
-        final activity = _createActivityFromBooking(booking);
+        final activity = _createActivityFromBooking(booking, ref);
         
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
@@ -109,7 +110,7 @@ class RecentActivities extends ConsumerWidget {
     );
   }
   
-  Map<String, dynamic> _createActivityFromBooking(BookingEntity booking) {
+  Map<String, dynamic> _createActivityFromBooking(BookingEntity booking, WidgetRef ref) {
     String title;
     String description;
     IconData icon;
@@ -117,38 +118,38 @@ class RecentActivities extends ConsumerWidget {
     
     switch (booking.status) {
       case BookingStatus.pending:
-        title = 'New Booking';
-        description = 'Booking created for ${_getMaintenanceTypeName(booking.maintenanceType)}';
+        title = 'new_booking'.tr(ref);
+        description = '${'booking_created_for'.tr(ref)} ${_getMaintenanceTypeName(booking.maintenanceType, ref)}';
         icon = Icons.book_online;
         color = Colors.orange;
         break;
       case BookingStatus.confirmed:
-        title = 'Booking Confirmed';
-        description = '${_getMaintenanceTypeName(booking.maintenanceType)} confirmed';
+        title = 'booking_confirmed'.tr(ref);
+        description = '${_getMaintenanceTypeName(booking.maintenanceType, ref)} ${'confirmed'.tr(ref)}';
         icon = Icons.check_circle_outline;
         color = Colors.blue;
         break;
       case BookingStatus.inProgress:
-        title = 'Service In Progress';
-        description = '${_getMaintenanceTypeName(booking.maintenanceType)} is being serviced';
+        title = 'service_in_progress'.tr(ref);
+        description = '${_getMaintenanceTypeName(booking.maintenanceType, ref)} ${'is_being_serviced'.tr(ref)}';
         icon = Icons.build;
         color = Colors.purple;
         break;
       case BookingStatus.completedPendingPayment:
-        title = 'Awaiting Payment';
-        description = '${_getMaintenanceTypeName(booking.maintenanceType)} completed, waiting for payment - \$${booking.totalCost.toStringAsFixed(2)}';
+        title = 'awaiting_payment'.tr(ref);
+        description = '${_getMaintenanceTypeName(booking.maintenanceType, ref)} ${'completed_waiting_payment'.tr(ref)} - ${booking.totalCost.toStringAsFixed(2)} ${'currency'.tr(ref)}';
         icon = Icons.payment;
         color = Colors.deepPurple;
         break;
       case BookingStatus.completed:
-        title = 'Service Completed';
-        description = '${_getMaintenanceTypeName(booking.maintenanceType)} completed - \$${booking.totalCost.toStringAsFixed(2)}';
+        title = 'service_completed'.tr(ref);
+        description = '${_getMaintenanceTypeName(booking.maintenanceType, ref)} ${'service_completed'.tr(ref).toLowerCase()} - ${booking.totalCost.toStringAsFixed(2)} ${'currency'.tr(ref)}';
         icon = Icons.check_circle;
         color = Colors.green;
         break;
       case BookingStatus.cancelled:
-        title = 'Booking Cancelled';
-        description = '${_getMaintenanceTypeName(booking.maintenanceType)} was cancelled';
+        title = 'booking_cancelled'.tr(ref);
+        description = '${_getMaintenanceTypeName(booking.maintenanceType, ref)} ${'was_cancelled'.tr(ref)}';
         icon = Icons.cancel;
         color = Colors.red;
         break;
@@ -159,37 +160,37 @@ class RecentActivities extends ConsumerWidget {
       'description': description,
       'icon': icon,
       'color': color,
-      'time': _getTimeAgo(booking.updatedAt),
+      'time': _getTimeAgo(booking.updatedAt, ref),
     };
   }
   
-  String _getMaintenanceTypeName(MaintenanceType type) {
+  String _getMaintenanceTypeName(MaintenanceType type, WidgetRef ref) {
     switch (type) {
       case MaintenanceType.regular:
-        return 'Regular Maintenance';
+        return 'regular_maintenance'.tr(ref);
       case MaintenanceType.inspection:
-        return 'Inspection';
+        return 'inspection'.tr(ref);
       case MaintenanceType.repair:
-        return 'Repair';
+        return 'repair_service'.tr(ref);
       case MaintenanceType.emergency:
-        return 'Emergency Service';
+        return 'emergency_service'.tr(ref);
     }
   }
   
-  String _getTimeAgo(DateTime dateTime) {
+  String _getTimeAgo(DateTime dateTime, WidgetRef ref) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
     
     if (difference.inDays > 7) {
       return DateFormat('MMM dd').format(dateTime);
     } else if (difference.inDays > 0) {
-      return '${difference.inDays} day${difference.inDays > 1 ? 's' : ''} ago';
+      return '${difference.inDays} ${'days_ago'.tr(ref)}';
     } else if (difference.inHours > 0) {
-      return '${difference.inHours} hour${difference.inHours > 1 ? 's' : ''} ago';
+      return '${difference.inHours} ${'hours_ago'.tr(ref)}';
     } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes} minute${difference.inMinutes > 1 ? 's' : ''} ago';
+      return '${difference.inMinutes} ${'minutes_ago'.tr(ref)}';
     } else {
-      return 'Just now';
+      return 'just_now'.tr(ref);
     }
   }
 }

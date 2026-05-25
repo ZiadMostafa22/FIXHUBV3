@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
@@ -111,7 +112,7 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
         if (data['carId'] != null) carIds.add(data['carId']);
       }
       
-      debugPrint('🚀 Batch fetching ${userIds.length} users and ${carIds.length} cars');
+      debugPrint('Batch fetching ${userIds.length} users and ${carIds.length} cars');
       
       // Batch fetch all users and cars in parallel
       final Map<String, String> userNames = {};
@@ -145,7 +146,7 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
       // Wait for all fetches to complete
       await Future.wait([...userFutures, ...carFutures]);
       
-      debugPrint('✅ Batch fetch complete! Processing payments...');
+      debugPrint('Batch fetch complete! Processing payments...');
       
       // Now process all bookings
       final List<PaymentReportData> payments = [];
@@ -205,14 +206,14 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
       // Sort by date descending
       payments.sort((a, b) => b.paidAt.compareTo(a.paidAt));
       
-      debugPrint('✅ Loaded ${payments.length} payments successfully');
+      debugPrint('Loaded ${payments.length} payments successfully');
 
       setState(() {
         _payments = payments;
         _isLoading = false;
       });
     } catch (e, stack) {
-      debugPrint('❌ Error loading payments: $e\n$stack');
+      debugPrint('Error loading payments: $e\n$stack');
       setState(() {
         _error = e.toString();
         _isLoading = false;
@@ -225,7 +226,7 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
       // Show loading
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Row(
               children: [
                 SizedBox(
@@ -237,7 +238,7 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
                   ),
                 ),
                 SizedBox(width: 16),
-                Text('Creating Excel file...'),
+                Text('creating_report'.tr(ref)),
               ],
             ),
             duration: Duration(seconds: 2),
@@ -245,27 +246,32 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
         );
       }
 
-      // Create Excel-compatible CSV (tab-separated for Excel)
+      // Create CSV content
       StringBuffer csv = StringBuffer();
       
       // BOM for Excel UTF-8 support
       csv.write('\uFEFF');
       
-      // Header row (tab-separated for Excel compatibility)
-      csv.writeln('Date\tBooking ID\tCustomer\tCar\tService Type\tPayment Method\tTotal Amount\tLabor Cost\tParts Cost\tProfit');
+      // Header row
+      csv.writeln('Date,Booking ID,Customer,Car,Service Type,Payment Method,Total Amount,Labor Cost,Parts Cost,Profit');
       
-      // Data rows (tab-separated)
+      // Helper to escape CSV strings
+      String _csvEscape(String text) {
+        return '"${text.replaceAll('"', '""')}"';
+      }
+
+      // Data rows
       for (var payment in _payments) {
         csv.writeln(
-          '${DateFormat('yyyy-MM-dd HH:mm').format(payment.paidAt)}\t'
-          '${payment.bookingId.substring(0, 8)}\t'
-          '${payment.customerName}\t'
-          '${payment.carInfo}\t'
-          '${payment.serviceType}\t'
-          '${payment.paymentMethod.toUpperCase()}\t'
-          '${payment.totalAmount.toStringAsFixed(2)}\t'
-          '${payment.laborCost.toStringAsFixed(2)}\t'
-          '${payment.partsCost.toStringAsFixed(2)}\t'
+          '${DateFormat('yyyy-MM-dd HH:mm').format(payment.paidAt)},'
+          '${payment.bookingId.substring(0, 8)},'
+          '${_csvEscape(payment.customerName)},'
+          '${_csvEscape(payment.carInfo)},'
+          '${_csvEscape(payment.serviceType)},'
+          '${payment.paymentMethod.toUpperCase()},'
+          '${payment.totalAmount.toStringAsFixed(2)},'
+          '${payment.laborCost.toStringAsFixed(2)},'
+          '${payment.partsCost.toStringAsFixed(2)},'
           '${payment.profit.toStringAsFixed(2)}'
         );
       }
@@ -274,7 +280,7 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
       final dateRange = _showAllTime 
           ? 'all_time'
           : '${DateFormat('yyyy-MM-dd').format(_startDate)}_to_${DateFormat('yyyy-MM-dd').format(_endDate)}';
-      final fileName = 'FixHub_Report_$dateRange.xlsx';
+      final fileName = 'FixHub_Report_$dateRange.csv';
       
       // Get directory and save file (no permission needed for app-specific storage)
       Directory directory;
@@ -308,7 +314,7 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
       final file = File(filePath);
       await file.writeAsString(csv.toString(), encoding: utf8);
       
-      debugPrint('✅ File saved to: $filePath');
+      debugPrint('File saved to: $filePath');
       
       if (mounted) {
         // Show success dialog with option to open file
@@ -319,16 +325,16 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
               children: [
                 Icon(Icons.check_circle, color: Colors.green, size: 28),
                 SizedBox(width: 8),
-                Text('✅ File Saved'),
+                Text('File Saved'),
               ],
             ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Excel report has been saved successfully!',
-                  style: TextStyle(fontWeight: FontWeight.w500),
+                Text(
+                  'csv_saved_successfully'.tr(ref),
+                  style: const TextStyle(fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 12),
                 Container(
@@ -345,9 +351,9 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
                         children: [
                           Icon(Icons.folder, size: 16, color: Colors.blue.shade700),
                           const SizedBox(width: 8),
-                          const Text(
-                            'Location:',
-                            style: TextStyle(
+                          Text(
+                            'location'.tr(ref),
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
                             ),
@@ -389,7 +395,7 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('Close'),
+                child: Text('close'.tr(ref)),
               ),
               ElevatedButton.icon(
                 onPressed: () async {
@@ -398,7 +404,7 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
                   if (result.type != ResultType.done && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Tip: Install a CSV viewer app to open this file'),
+                        content: Text('install_csv_viewer_tip'.tr(ref)),
                         action: SnackBarAction(
                           label: 'OK',
                           onPressed: () {},
@@ -408,7 +414,7 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
                   }
                 },
                 icon: const Icon(Icons.folder_open),
-                label: const Text('Open File'),
+                label: Text('open_file'.tr(ref)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
@@ -419,7 +425,7 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
         );
       }
     } catch (e, stack) {
-      debugPrint('❌ Export error: $e');
+      debugPrint('Export error: $e');
       debugPrint('Stack trace: $stack');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -442,12 +448,12 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Financial Reports'),
+        title: Text('financial_reports'.tr(ref)),
         actions: [
               if (_payments.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.download),
-              tooltip: 'Export Excel',
+              tooltip: 'export_csv'.tr(ref),
               onPressed: _exportToCSV,
             ),
           IconButton(
@@ -494,11 +500,11 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(value: 'today', child: Text('Today')),
-              const PopupMenuItem(value: 'week', child: Text('Last 7 Days')),
-              const PopupMenuItem(value: 'month', child: Text('Last 30 Days')),
-              const PopupMenuItem(value: 'all', child: Text('All Time')),
-              const PopupMenuItem(value: 'custom', child: Text('Custom Range...')),
+              PopupMenuItem(value: 'today', child: Text('today'.tr(ref))),
+              PopupMenuItem(value: 'week', child: Text('last_7_days'.tr(ref))),
+              PopupMenuItem(value: 'month', child: Text('last_30_days'.tr(ref))),
+              PopupMenuItem(value: 'all', child: Text('all_time'.tr(ref))),
+              PopupMenuItem(value: 'custom', child: Text('custom_range'.tr(ref))),
             ],
           ),
         ],
@@ -516,7 +522,7 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
             ),
             child: Text(
               _showAllTime 
-                  ? '📊 All Time Report'
+                  ? '📊 ${'all_time_report'.tr(ref)}'
                   : '📊 ${DateFormat('MMM d, yyyy').format(_startDate)} - ${DateFormat('MMM d, yyyy').format(_endDate)}',
               style: TextStyle(
                 fontSize: 14.sp,
@@ -586,12 +592,12 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
             Icon(Icons.receipt_outlined, size: 64.sp, color: Colors.grey),
             SizedBox(height: 16.h),
             Text(
-              'No payments found',
+              'no_payments_found'.tr(ref),
               style: TextStyle(fontSize: 16.sp, color: Colors.grey),
             ),
             SizedBox(height: 8.h),
             Text(
-              _showAllTime ? 'No paid bookings in database' : 'Try selecting a different date range',
+              _showAllTime ? 'no_paid_bookings_in_db'.tr(ref) : 'try_different_range'.tr(ref),
               style: TextStyle(fontSize: 12.sp, color: Colors.grey),
             ),
           ],
@@ -609,21 +615,21 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
             children: [
               Expanded(
                 child: _kpiCard(
-                  'Total Revenue',
-                  '\$${totalRevenue.toStringAsFixed(2)}',
+                  'total_revenue'.tr(ref),
+                  '${totalRevenue.toStringAsFixed(2)} ${'currency'.tr(ref)}',
                   Colors.blue,
                   Icons.attach_money,
-                  subtitle: '${_payments.length} transactions',
+                  subtitle: '${_payments.length} ${'transactions'.tr(ref)}',
                 ),
               ),
               SizedBox(width: 12.w),
               Expanded(
                 child: _kpiCard(
-                  'Total Profit',
-                  '\$${totalProfit.toStringAsFixed(2)}',
+                  'total_profit'.tr(ref),
+                  '${totalProfit.toStringAsFixed(2)} ${'currency'.tr(ref)}',
                   Colors.green,
                   Icons.trending_up,
-                  subtitle: '${profitMargin.toStringAsFixed(1)}% margin',
+                  subtitle: '${profitMargin.toStringAsFixed(1)}% ${'margin'.tr(ref)}',
                 ),
               ),
             ],
@@ -635,11 +641,11 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
           Row(
             children: [
               Expanded(
-                child: _costCard('Labor Cost', '\$${totalLaborCost.toStringAsFixed(2)}', Colors.orange),
+                child: _costCard('labor_cost'.tr(ref), '${totalLaborCost.toStringAsFixed(2)} ${'currency'.tr(ref)}', Colors.orange),
               ),
               SizedBox(width: 12.w),
               Expanded(
-                child: _costCard('Parts Cost', '\$${totalPartsCost.toStringAsFixed(2)}', Colors.purple),
+                child: _costCard('parts_cost'.tr(ref), '${totalPartsCost.toStringAsFixed(2)} ${'currency'.tr(ref)}', Colors.purple),
               ),
             ],
           ),
@@ -648,7 +654,7 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
 
           // Payment Methods Breakdown
           Text(
-            'Payment Methods',
+            'payment_methods'.tr(ref),
             style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 12.h),
@@ -680,7 +686,7 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
                           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp),
                         ),
                         Text(
-                          '$count transaction${count != 1 ? 's' : ''}',
+                          '$count ${'transactions'.tr(ref)}',
                           style: TextStyle(fontSize: 11.sp, color: Colors.grey),
                         ),
                       ],
@@ -690,7 +696,7 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        '\$${amount.toStringAsFixed(2)}',
+                        '${amount.toStringAsFixed(2)} ${'currency'.tr(ref)}',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16.sp,
@@ -715,14 +721,14 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Transactions (${_payments.length})',
+                '${'transactions'.tr(ref)} (${_payments.length})',
                 style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
               ),
               if (_payments.isNotEmpty)
                 TextButton.icon(
                   onPressed: _exportToCSV,
                   icon: const Icon(Icons.file_download, size: 18),
-                  label: const Text('Export Excel'),
+                  label: Text('export_csv'.tr(ref)),
                 ),
             ],
           ),
@@ -759,7 +765,7 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        '\$${payment.totalAmount.toStringAsFixed(2)}',
+                        '${payment.totalAmount.toStringAsFixed(2)} ${'currency'.tr(ref)}',
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.bold,
@@ -767,7 +773,7 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
                         ),
                       ),
                       Text(
-                        'Profit: \$${payment.profit.toStringAsFixed(2)}',
+                        '${'profit'.tr(ref)}: ${payment.profit.toStringAsFixed(2)} ${'currency'.tr(ref)}',
                         style: TextStyle(
                           fontSize: 10.sp,
                           color: payment.profit >= 0 ? Colors.green : Colors.red,
@@ -782,17 +788,17 @@ class _CashierReportsPageState extends ConsumerState<CashierReportsPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _detailRow('Booking ID', '#${payment.bookingId.substring(0, 8)}'),
-                          _detailRow('Car', payment.carInfo),
-                          _detailRow('Service', payment.serviceType),
+                          _detailRow('booking_id'.tr(ref), '#${payment.bookingId.substring(0, 8)}'),
+                          _detailRow('vehicle'.tr(ref), payment.carInfo),
+                          _detailRow('service'.tr(ref), payment.serviceType),
                           Divider(height: 24.h),
-                          _detailRow('Total Amount', '\$${payment.totalAmount.toStringAsFixed(2)}', isBold: true),
-                          _detailRow('Labor Cost', '\$${payment.laborCost.toStringAsFixed(2)}'),
-                          _detailRow('Parts Cost', '\$${payment.partsCost.toStringAsFixed(2)}'),
+                          _detailRow('total_amount'.tr(ref), '${payment.totalAmount.toStringAsFixed(2)} ${'currency'.tr(ref)}', isBold: true),
+                          _detailRow('labor_cost'.tr(ref), '${payment.laborCost.toStringAsFixed(2)} ${'currency'.tr(ref)}'),
+                          _detailRow('parts_cost'.tr(ref), '${payment.partsCost.toStringAsFixed(2)} ${'currency'.tr(ref)}'),
                           Divider(height: 16.h),
                           _detailRow(
-                            'Profit',
-                            '\$${payment.profit.toStringAsFixed(2)}',
+                            'profit'.tr(ref),
+                            '${payment.profit.toStringAsFixed(2)} ${'currency'.tr(ref)}',
                             isBold: true,
                             color: payment.profit >= 0 ? Colors.green : Colors.red,
                           ),

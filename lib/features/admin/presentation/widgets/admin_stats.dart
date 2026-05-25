@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:car_maintenance_system_new/features/booking/presentation/viewmodels/booking_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/booking/domain/entities/booking_entity.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 
 class AdminStats extends ConsumerWidget {
   const AdminStats({super.key});
@@ -47,29 +48,29 @@ class AdminStats extends ConsumerWidget {
       children: [
         _buildStatCard(
           context,
-          title: 'Total Users',
+          title: 'total_users'.tr(ref),
           value: totalUsers.toString(),
           icon: Icons.people,
           color: Colors.blue,
         ),
         _buildStatCard(
           context,
-          title: 'Active Bookings',
+          title: 'active_bookings'.tr(ref),
           value: activeBookings.toString(),
           icon: Icons.book_online,
           color: Colors.orange,
         ),
         _buildStatCard(
           context,
-          title: 'Completed Today',
+          title: 'completed_today'.tr(ref),
           value: completedToday.toString(),
           icon: Icons.check_circle,
           color: Colors.green,
         ),
         _buildStatCard(
           context,
-          title: 'Total Revenue',
-          value: '\$${totalRevenue.toStringAsFixed(2)}',
+          title: 'total_revenue'.tr(ref),
+          value: '${totalRevenue.toStringAsFixed(2)} ${'currency'.tr(ref)}',
           icon: Icons.attach_money,
           color: Colors.purple,
         ),

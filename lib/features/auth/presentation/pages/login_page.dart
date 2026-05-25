@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:car_maintenance_system_new/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -34,7 +35,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       );
       
       if (!success && mounted) {
-        final errorMessage = ref.read(authViewModelProvider).error ?? 'Login failed. Please check your credentials.';
+        final errorMessage = ref.read(authViewModelProvider).error ?? 'login_failed'.tr(ref);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
@@ -85,7 +86,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       ),
                       SizedBox(height: 16.h),
                       Text(
-                        'Car Maintenance',
+                        'app_title'.tr(ref),
                         style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).primaryColor,
@@ -95,7 +96,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       ),
                       SizedBox(height: 8.h),
                       Text(
-                        'Sign in to your account',
+                        'sign_in_to_account'.tr(ref),
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: Colors.grey[600],
                           fontSize: 14.sp,
@@ -117,7 +118,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           keyboardType: TextInputType.emailAddress,
                           style: TextStyle(fontSize: 14.sp),
                           decoration: InputDecoration(
-                            labelText: 'Email',
+                            labelText: 'email'.tr(ref),
                             labelStyle: TextStyle(fontSize: 14.sp),
                             prefixIcon: Icon(Icons.email, size: 20.sp),
                             isDense: true,
@@ -128,7 +129,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter your email';
+                              return 'enter_email_validation'.tr(ref);
                             }
                             return null;
                           },
@@ -139,7 +140,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           obscureText: _obscurePassword,
                           style: TextStyle(fontSize: 14.sp),
                           decoration: InputDecoration(
-                            labelText: 'Password',
+                            labelText: 'password'.tr(ref),
                             labelStyle: TextStyle(fontSize: 14.sp),
                             prefixIcon: Icon(Icons.lock, size: 20.sp),
                             isDense: true,
@@ -161,7 +162,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter your password';
+                              return 'enter_password_validation'.tr(ref);
                             }
                             return null;
                           },
@@ -181,7 +182,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                       valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
                                     ),
                                   )
-                                : Text('Sign In', style: TextStyle(fontSize: 16.sp)),
+                                : Text('sign_in'.tr(ref), style: TextStyle(fontSize: 16.sp)),
                           ),
                         ),
                       ],
@@ -196,7 +197,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
-                        "Don't have an account? ",
+                        'dont_have_account'.tr(ref) + ' ',
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 14.sp,
@@ -205,7 +206,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       TextButton(
                         onPressed: () => context.go('/register'),
                         child: Text(
-                          'Sign Up',
+                          'sign_up'.tr(ref),
                           style: TextStyle(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.bold,

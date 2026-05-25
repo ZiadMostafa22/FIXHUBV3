@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -14,6 +15,7 @@ class ChatMessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isUser = message.type == MessageType.user;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
@@ -46,14 +48,17 @@ class ChatMessageBubble extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
               decoration: BoxDecoration(
                 color: isUser 
-                    ? Theme.of(context).primaryColor 
-                    : Colors.white,
+                    ? (isDark ? Theme.of(context).primaryColor : Theme.of(context).primaryColor)
+                    : (isDark ? const Color(0xFF1F291F) : Colors.white),
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16.r),
-                  topRight: Radius.circular(16.r),
-                  bottomLeft: Radius.circular(isUser ? 16.r : 4.r),
-                  bottomRight: Radius.circular(isUser ? 4.r : 16.r),
+                  topLeft: Radius.circular(20.r),
+                  topRight: Radius.circular(20.r),
+                  bottomLeft: Radius.circular(isUser ? 20.r : 4.r),
+                  bottomRight: Radius.circular(isUser ? 4.r : 20.r),
                 ),
+                border: !isUser && !isDark 
+                    ? Border.all(color: Colors.grey.shade200) 
+                    : null,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
@@ -65,10 +70,26 @@ class ChatMessageBubble extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    message.text,
-                    style: GoogleFonts.rubik(
-                      color: isUser ? Colors.white : Colors.black87,
+                  if (message.base64Image != null && message.base64Image!.isNotEmpty)
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 8.h),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8.r),
+                        child: Image.memory(
+                          base64Decode(message.base64Image!),
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.broken_image, color: Colors.grey),
+                        ),
+                      ),
+                    ),
+                  if (message.text.isNotEmpty)
+                    Text(
+                      message.text,
+                    style: TextStyle(
+                      color: isUser 
+                          ? Colors.white 
+                          : (isDark ? Colors.white : Colors.black87),
                       fontSize: 15.sp,
                       height: 1.4,
                     ),
@@ -79,10 +100,10 @@ class ChatMessageBubble extends StatelessWidget {
                     children: [
                       Text(
                         _formatTime(message.timestamp),
-                        style: GoogleFonts.rubik(
+                        style: TextStyle(
                           color: isUser 
                               ? Colors.white70 
-                              : Colors.grey[600],
+                              : (isDark ? Colors.grey[400] : Colors.grey[600]),
                           fontSize: 11.sp,
                         ),
                       ),
@@ -107,13 +128,13 @@ class ChatMessageBubble extends StatelessWidget {
               width: 32.w,
               height: 32.w,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: isDark ? Colors.grey[800] : Colors.grey[300],
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.person,
                 size: 18.sp,
-                color: Colors.grey[700],
+                color: isDark ? Colors.grey[400] : Colors.grey[700],
               ),
             ),
           ],

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:car_maintenance_system_new/core/models/offer_model.dart';
 import 'package:car_maintenance_system_new/core/services/firebase_service.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 
 class CustomerOffersPage extends ConsumerStatefulWidget {
   const CustomerOffersPage({super.key});
@@ -20,7 +21,7 @@ class _CustomerOffersPageState extends ConsumerState<CustomerOffersPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Offers & Announcements', style: TextStyle(fontSize: 18.sp)),
+        title: Text('offers_announcements'.tr(ref), style: TextStyle(fontSize: 18.sp)),
         actions: [
           PopupMenuButton<String>(
             icon: Icon(Icons.filter_list, size: 22.sp),
@@ -30,11 +31,11 @@ class _CustomerOffersPageState extends ConsumerState<CustomerOffersPage> {
               });
             },
             itemBuilder: (context) => [
-              PopupMenuItem(value: 'all', child: Text('All', style: TextStyle(fontSize: 14.sp))),
-              PopupMenuItem(value: 'announcement', child: Text('Announcements', style: TextStyle(fontSize: 14.sp))),
-              PopupMenuItem(value: 'discount', child: Text('Discounts', style: TextStyle(fontSize: 14.sp))),
-              PopupMenuItem(value: 'promotion', child: Text('Promotions', style: TextStyle(fontSize: 14.sp))),
-              PopupMenuItem(value: 'news', child: Text('News', style: TextStyle(fontSize: 14.sp))),
+              PopupMenuItem(value: 'all', child: Text('all'.tr(ref), style: TextStyle(fontSize: 14.sp))),
+              PopupMenuItem(value: 'announcement', child: Text('announcements'.tr(ref), style: TextStyle(fontSize: 14.sp))),
+              PopupMenuItem(value: 'discount', child: Text('discounts'.tr(ref), style: TextStyle(fontSize: 14.sp))),
+              PopupMenuItem(value: 'promotion', child: Text('promotions'.tr(ref), style: TextStyle(fontSize: 14.sp))),
+              PopupMenuItem(value: 'news', child: Text('news'.tr(ref), style: TextStyle(fontSize: 14.sp))),
             ],
           ),
         ],
@@ -56,7 +57,7 @@ class _CustomerOffersPageState extends ConsumerState<CustomerOffersPage> {
                 children: [
                   Icon(Icons.error_outline, size: 64.sp, color: Colors.red),
                   SizedBox(height: 16.h),
-                  Text('Error loading offers', style: TextStyle(fontSize: 16.sp)),
+                  Text('error_loading_offers'.tr(ref), style: TextStyle(fontSize: 16.sp)),
                 ],
               ),
             );
@@ -70,7 +71,7 @@ class _CustomerOffersPageState extends ConsumerState<CustomerOffersPage> {
                   Icon(Icons.local_offer_outlined, size: 80.sp, color: Colors.grey),
                   SizedBox(height: 16.h),
                   Text(
-                    'No offers available',
+                    'no_offers_available'.tr(ref),
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
@@ -79,7 +80,7 @@ class _CustomerOffersPageState extends ConsumerState<CustomerOffersPage> {
                   ),
                   SizedBox(height: 8.h),
                   Text(
-                    'Check back later for new offers!',
+                    'check_back_later_offers'.tr(ref),
                     style: TextStyle(fontSize: 14.sp, color: Colors.grey[500]),
                   ),
                 ],
@@ -116,7 +117,7 @@ class _CustomerOffersPageState extends ConsumerState<CustomerOffersPage> {
                   Icon(Icons.local_offer_outlined, size: 80.sp, color: Colors.grey),
                   SizedBox(height: 16.h),
                   Text(
-                    'No $_selectedFilter offers',
+                    'no_offers_type'.tr(ref),
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
@@ -133,7 +134,7 @@ class _CustomerOffersPageState extends ConsumerState<CustomerOffersPage> {
             itemCount: offers.length,
             itemBuilder: (context, index) {
               final offer = offers[index];
-              return _buildOfferCard(offer);
+              return _buildOfferCard(offer, ref);
             },
           );
         },
@@ -141,13 +142,13 @@ class _CustomerOffersPageState extends ConsumerState<CustomerOffersPage> {
     );
   }
 
-  Widget _buildOfferCard(OfferModel offer) {
+  Widget _buildOfferCard(OfferModel offer, WidgetRef ref) {
     return Card(
       margin: EdgeInsets.only(bottom: 16.h),
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
       child: InkWell(
-        onTap: () => _showOfferDetails(offer),
+        onTap: () => _showOfferDetails(offer, ref),
         borderRadius: BorderRadius.circular(12.r),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -167,7 +168,7 @@ class _CustomerOffersPageState extends ConsumerState<CustomerOffersPage> {
                   Icon(_getTypeIcon(offer.type), size: 16.sp, color: _getTypeColor(offer.type)),
                   SizedBox(width: 4.w),
                   Text(
-                    _getTypeName(offer.type),
+                    _getTypeName(offer.type, ref),
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
@@ -183,7 +184,7 @@ class _CustomerOffersPageState extends ConsumerState<CustomerOffersPage> {
                         borderRadius: BorderRadius.circular(8.r),
                       ),
                       child: Text(
-                        '${offer.discountPercentage}% OFF',
+                        '${offer.discountPercentage}% ${'discount_off'.tr(ref)}',
                         style: TextStyle(
                           fontSize: 10.sp,
                           fontWeight: FontWeight.bold,
@@ -224,7 +225,7 @@ class _CustomerOffersPageState extends ConsumerState<CustomerOffersPage> {
                       Icon(Icons.calendar_today, size: 14.sp, color: Colors.grey),
                       SizedBox(width: 4.w),
                       Text(
-                        'Valid from ${DateFormat('MMM dd, yyyy').format(offer.startDate)}',
+                        '${'valid_from'.tr(ref)} ${DateFormat('MMM dd, yyyy').format(offer.startDate)}',
                         style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
                       ),
                     ],
@@ -236,7 +237,7 @@ class _CustomerOffersPageState extends ConsumerState<CustomerOffersPage> {
                         Icon(Icons.event, size: 14.sp, color: Colors.grey),
                         SizedBox(width: 4.w),
                         Text(
-                          'Expires ${DateFormat('MMM dd, yyyy').format(offer.endDate!)}',
+                          '${'expires'.tr(ref)} ${DateFormat('MMM dd, yyyy').format(offer.endDate!)}',
                           style: TextStyle(fontSize: 12.sp, color: Colors.red[600]),
                         ),
                       ],
@@ -251,7 +252,7 @@ class _CustomerOffersPageState extends ConsumerState<CustomerOffersPage> {
     );
   }
 
-  void _showOfferDetails(OfferModel offer) {
+  void _showOfferDetails(OfferModel offer, WidgetRef ref) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -273,7 +274,7 @@ class _CustomerOffersPageState extends ConsumerState<CustomerOffersPage> {
                     Icon(_getTypeIcon(offer.type), size: 16.sp, color: _getTypeColor(offer.type)),
                     SizedBox(width: 4.w),
                     Text(
-                      _getTypeName(offer.type),
+                      _getTypeName(offer.type, ref),
                       style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
@@ -298,7 +299,7 @@ class _CustomerOffersPageState extends ConsumerState<CustomerOffersPage> {
                   child: Column(
                     children: [
                       Text(
-                        'DISCOUNT',
+                        'discounts'.tr(ref).toUpperCase(),
                         style: TextStyle(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
@@ -307,7 +308,7 @@ class _CustomerOffersPageState extends ConsumerState<CustomerOffersPage> {
                       ),
                       SizedBox(height: 4.h),
                       Text(
-                        '${offer.discountPercentage}% OFF',
+                        '${offer.discountPercentage}% ${'discount_off'.tr(ref)}',
                         style: TextStyle(
                           fontSize: 24.sp,
                           fontWeight: FontWeight.bold,
@@ -327,7 +328,7 @@ class _CustomerOffersPageState extends ConsumerState<CustomerOffersPage> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'Code: ',
+                                '${'code_label'.tr(ref)} ',
                                 style: TextStyle(
                                   fontSize: 12.sp,
                                   color: Colors.grey[700],
@@ -347,7 +348,7 @@ class _CustomerOffersPageState extends ConsumerState<CustomerOffersPage> {
                         ),
                         SizedBox(height: 4.h),
                         Text(
-                          'Enter this code when booking to get the discount',
+                          'enter_code_booking_desc'.tr(ref),
                           style: TextStyle(
                             fontSize: 10.sp,
                             color: Colors.grey[600],
@@ -361,23 +362,23 @@ class _CustomerOffersPageState extends ConsumerState<CustomerOffersPage> {
                 SizedBox(height: 16.h),
               ],
               Text(
-                'Valid Period:',
+                'valid_period'.tr(ref),
                 style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 4.h),
               Text(
-                'From: ${DateFormat('MMMM dd, yyyy').format(offer.startDate)}',
+                '${'from'.tr(ref)}: ${DateFormat('MMMM dd, yyyy').format(offer.startDate)}',
                 style: TextStyle(fontSize: 12.sp),
               ),
               if (offer.endDate != null)
                 Text(
-                  'Until: ${DateFormat('MMMM dd, yyyy').format(offer.endDate!)}',
+                  '${'until'.tr(ref)}: ${DateFormat('MMMM dd, yyyy').format(offer.endDate!)}',
                   style: TextStyle(fontSize: 12.sp),
                 ),
               if (offer.terms != null && offer.terms!.isNotEmpty) ...[
                 SizedBox(height: 16.h),
                 Text(
-                  'Terms & Conditions:',
+                  'terms_conditions'.tr(ref),
                   style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 4.h),
@@ -392,7 +393,7 @@ class _CustomerOffersPageState extends ConsumerState<CustomerOffersPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Close', style: TextStyle(fontSize: 14.sp)),
+            child: Text('close'.tr(ref), style: TextStyle(fontSize: 14.sp)),
           ),
         ],
       ),
@@ -425,16 +426,16 @@ class _CustomerOffersPageState extends ConsumerState<CustomerOffersPage> {
     }
   }
 
-  String _getTypeName(OfferType type) {
+  String _getTypeName(OfferType type, WidgetRef ref) {
     switch (type) {
       case OfferType.announcement:
-        return 'ANNOUNCEMENT';
+        return 'announcements'.tr(ref).toUpperCase();
       case OfferType.discount:
-        return 'DISCOUNT';
+        return 'discounts'.tr(ref).toUpperCase();
       case OfferType.promotion:
-        return 'PROMOTION';
+        return 'promotions'.tr(ref).toUpperCase();
       case OfferType.news:
-        return 'NEWS';
+        return 'news'.tr(ref).toUpperCase();
     }
   }
 }

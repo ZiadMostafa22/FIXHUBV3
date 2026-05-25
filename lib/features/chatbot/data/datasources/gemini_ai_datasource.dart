@@ -20,7 +20,7 @@ class GeminiAIDatasource {
   }
 
   /// Get AI response for a message using OpenRouter API
-  Future<String> getResponse(String message, List<ChatMessageEntity> conversationHistory) async {
+  Future<String> getResponse(String message, List<ChatMessageEntity> conversationHistory, {String? base64Image, bool isTechnician = false}) async {
     try {
       print('📤 Sending request to OpenRouter API with model: $_model');
       
@@ -30,7 +30,7 @@ class GeminiAIDatasource {
       // Add system message (only once, contains all context)
       messages.add({
         'role': 'system',
-        'content': _getSystemPrompt(),
+        'content': isTechnician ? _getTechnicianSystemPrompt() : _getSystemPrompt(),
       });
       
       // Only add last 2-3 messages from conversation history to keep context short
@@ -41,24 +41,58 @@ class GeminiAIDatasource {
       
       // Add recent conversation history (last 2-3 exchanges)
       for (var msg in recentHistory) {
+        dynamic content = msg.text;
+        
+        // If history message has an image, we need to format it properly
+        if (msg.base64Image != null && msg.base64Image!.isNotEmpty) {
+          content = [
+            {
+              'type': 'text',
+              'text': msg.text,
+            },
+            {
+              'type': 'image_url',
+              'image_url': {
+                'url': 'data:image/jpeg;base64,${msg.base64Image}',
+              }
+            }
+          ];
+        }
+
         messages.add({
           'role': msg.type == MessageType.user ? 'user' : 'assistant',
-          'content': msg.text,
+          'content': content,
         });
       }
       
       // Add current user message
+      dynamic currentUserContent = message;
+      if (base64Image != null && base64Image.isNotEmpty) {
+        currentUserContent = [
+          {
+            'type': 'text',
+            'text': message,
+          },
+          {
+            'type': 'image_url',
+            'image_url': {
+              'url': 'data:image/jpeg;base64,$base64Image',
+            }
+          }
+        ];
+      }
+
       messages.add({
         'role': 'user',
-        'content': message,
+        'content': currentUserContent,
       });
 
       // Prepare request body
-      // Set max_tokens to 12000 to stay well within free tier limit
+      // Set max_tokens to 2000 to avoid credit limit issues
       final requestBody = {
         'model': _model,
         'messages': messages,
-        'max_tokens': 12000, // Limit tokens to stay within free tier (safe margin)
+        'max_tokens': 2000, 
       };
 
       print('📝 Request body: ${jsonEncode(requestBody)}');
@@ -98,7 +132,10 @@ class GeminiAIDatasource {
         throw Exception('Empty response content from AI model');
       }
 
-      return messageContent.toString();
+      // Remove markdown stars as requested by user
+      final cleanText = messageContent.toString().replaceAll('*', '');
+
+      return cleanText;
     } catch (e) {
       // Log the full error for debugging
       print('OpenRouter API Error Details: $e');
@@ -197,6 +234,8 @@ class GeminiAIDatasource {
 تعليمات الرد (مهم جداً):
 - ممنوع تماماً استخدام أي علامات نجمية (*) أو تنسيق مميز في الرد
 - ممنوع استخدام القوائم المميزة أو النقاط المميزة
+- ممنوع تماماً تشخيص أعطال السيارات أو إعطاء نصائح ميكانيكية أو كهربائية. إذا سألك العميل عن عطل، اعتذر بلطف وأخبره أنك مساعد لخدمة العملاء فقط، واطلب منه حجز موعد لفحص السيارة في المركز.
+- لا تجب على أي أسئلة خارج نطاق خدمات المركز وأسعاره ومواعيد العمل.
 - اكتب الرد بشكل طبيعي تماماً كأنك بني آدم عادي بيكلم صاحبه
 - استخدم لغة محادثة عادية وبسيطة - لا تنسق الكلام بشكل مفرط
 - رد بالعربية الفصحى أو العامية حسب سياق السؤال
@@ -227,6 +266,21 @@ class GeminiAIDatasource {
 الرد الصحيح: "عندنا صيانة دورية زي تغيير الزيت والفلتر، وفحص شامل للسيارة، وإصلاحات، وخدمة طوارئ. عايز تفاصيل عن خدمة معينة؟"
 
 تذكر: أنت هنا لمساعدة العملاء وليس لاستبدال الاستشارة المهنية. في حالة المشاكل المعقدة، شجع العميل على زيارة المركز.''';
+  }
+  /// System prompt specifically for the technician
+  String _getTechnicianSystemPrompt() {
+    return '''أنت مساعد ذكي متخصص في صيانة السيارات وميكانيكا وكهرباء السيارات. 
+مهمتك الأساسية هي مساعدة الفني في تشخيص الأعطال، تحليل الصور التي يرسلها لك (مثل صور لوحة العدادات، المحرك، الأجزاء التالفة)، واقتراح الحلول والإصلاحات الممكنة.
+
+تعليمات الرد للفني (مهم جداً):
+- تحدث بلغة تقنية احترافية ومباشرة.
+- إذا قام الفني بإرسال صورة لعطل أو كود خطأ (OBD-II)، قم بتحليلها بدقة واذكر المشكلة المحتملة.
+- اذكر الاحتمالات المختلفة لسبب العطل.
+- اقترح خطوات الفحص والحلول بالترتيب المنطقي.
+- لا تستخدم مقدمات طويلة، ادخل في صلب الموضوع الفني مباشرة.
+- يمكنك استخدام المصطلحات الفنية المعتادة في ورش الصيانة (بالعربية أو الإنجليزية).
+- إذا كانت الصورة غير واضحة أو تحتاج لمزيد من المعلومات، اطلب من الفني توضيح الأمر أو إرسال صورة أفضل.
+''';
   }
 }
 

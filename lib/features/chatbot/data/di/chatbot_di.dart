@@ -13,7 +13,7 @@ void _verifyApiKey() {
   if (_geminiApiKey.isEmpty || _geminiApiKey == 'YOUR_GEMINI_API_KEY_HERE') {
     throw Exception('Gemini API Key is not configured in chatbot_di.dart');
   }
-  print('✅ Gemini API Key loaded: ${_geminiApiKey.substring(0, 10)}...${_geminiApiKey.substring(_geminiApiKey.length - 5)}');
+  print('Gemini API Key loaded: ${_geminiApiKey.substring(0, 10)}...${_geminiApiKey.substring(_geminiApiKey.length - 5)}');
 }
 
 /// Gemini AI Datasource Provider

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Calibri, Arial, sans-serif;
+            background-color: #f4f7f6;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #4472C4;
+            padding-bottom: 10px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #bdc3c7;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .header-row {
+            background-color: #4472C4;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9em;
+        }
+
+        .phase-row {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+
+        .status-completed {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .status-progress {
+            color: #e67e22;
+            font-weight: bold;
+        }
+
+        .status-planned {
+            color: #7f8c8d;
+        }
+
+        .duration {
+            text-align: center;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Fix-Hub: Detailed Project Development Timeline</h2>
+        <p><i>Project Span: July 2024 - May 2025 | Implementation Start: Jan 20, 2025</i></p>
+
+        <table>
+            <tr class="header-row">
+                <th>Phase</th>
+                <th>Task Description</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Duration</th>
+                <th>Status</th>
+            </tr>
+
+            <!-- 1. Analysis -->
+            <tr class="phase-row">
+                <td colspan="6">1. Analysis & Research Phase</td>
+            </tr>
+            <tr>
+                <td>Analysis</td>
+                <td>Problem Definition & Market Study</td>
+                <td>2024-07-01</td>
+                <td>2024-07-15</td>
+                <td class="duration">15 Days</td>
+                <td class="status-completed">Completed</td>
+            </tr>
+            <tr>
+                <td>Analysis</td>
+                <td>Literature Review & Existing Systems</td>
+                <td>2024-07-15</td>
+                <td>2024-07-30</td>
+                <td class="duration">15 Days</td>
+                <td class="status-completed">Completed</td>
+            </tr>
+            <tr>
+                <td>Analysis</td>
+                <td>Functional Requirements Gathering</td>
+                <td>2024-08-01</td>
+                <td>2024-08-15</td>
+                <td class="duration">15 Days</td>
+                <td class="status-completed">Completed</td>
+            </tr>
+            <tr>
+                <td>Analysis</td>
+                <td>Non-Functional Requirements Identification</td>
+                <td>2024-08-15</td>
+                <td>2024-08-25</td>
+                <td class="duration">10 Days</td>
+                <td class="status-completed">Completed</td>
+            </tr>
+            <tr>
+                <td>Analysis</td>
+                <td>Technical Feasibility Study</td>
+                <td>2024-08-25</td>
+                <td>2024-09-04</td>
+                <td class="duration">10 Days</td>
+                <td class="status-completed">Completed</td>
+            </tr>
+
+            <!-- 2. Design -->
+            <tr class="phase-row">
+                <td colspan="6">2. System Design Phase</td>
+            </tr>
+            <tr>
+                <td>Design</td>
+                <td>System Architecture (MVVM) Design</td>
+                <td>2024-09-15</td>
+                <td>2024-10-05</td>
+                <td class="duration">20 Days</td>
+                <td class="status-completed">Completed</td>
+            </tr>
+            <tr>
+                <td>Design</td>
+                <td>Database Schema & ERD Design</td>
+                <td>2024-10-05</td>
+                <td>2024-10-20</td>
+                <td class="duration">15 Days</td>
+                <td class="status-completed">Completed</td>
+            </tr>
+            <tr>
+                <td>Design</td>
+                <td>Use Case & Actor Identification</td>
+                <td>2024-10-15</td>
+                <td>2024-10-30</td>
+                <td class="duration">15 Days</td>
+                <td class="status-completed">Completed</td>
+            </tr>
+            <tr>
+                <td>Design</td>
+                <td>Activity & Sequence Diagrams</td>
+                <td>2024-10-30</td>
+                <td>2024-11-19</td>
+                <td class="duration">20 Days</td>
+                <td class="status-completed">Completed</td>
+            </tr>
+            <tr>
+                <td>Design</td>
+                <td>State & Class Diagrams</td>
+                <td>2024-11-19</td>
+                <td>2024-12-04</td>
+                <td class="duration">15 Days</td>
+                <td class="status-completed">Completed</td>
+            </tr>
+            <tr>
+                <td>Design</td>
+                <td>Final Design Documentation</td>
+                <td>2024-12-04</td>
+                <td>2024-12-14</td>
+                <td class="duration">10 Days</td>
+                <td class="status-completed">Completed</td>
+            </tr>
+
+            <!-- 3. Preparation -->
+            <tr class="phase-row">
+                <td colspan="6">3. Preparation & UI/UX Phase</td>
+            </tr>
+            <tr>
+                <td>Preparation</td>
+                <td>Tech Stack Configuration</td>
+                <td>2024-12-15</td>
+                <td>2024-12-25</td>
+                <td class="duration">10 Days</td>
+                <td class="status-completed">Completed</td>
+            </tr>
+            <tr>
+                <td>Preparation</td>
+                <td>UI Branding & Color Palette</td>
+                <td>2024-12-25</td>
+                <td>2025-01-04</td>
+                <td class="duration">10 Days</td>
+                <td class="status-completed">Completed</td>
+            </tr>
+            <tr>
+                <td>Preparation</td>
+                <td>Low-Fidelity Wireframing</td>
+                <td>2025-01-01</td>
+                <td>2025-01-11</td>
+                <td class="duration">10 Days</td>
+                <td class="status-completed">Completed</td>
+            </tr>
+            <tr>
+                <td>Preparation</td>
+                <td>High-Fidelity UI Design (Figma)</td>
+                <td>2025-01-11</td>
+                <td>2025-01-21</td>
+                <td class="duration">10 Days</td>
+                <td class="status-completed">Completed</td>
+            </tr>
+
+            <!-- 4. Implementation -->
+            <tr class="phase-row">
+                <td colspan="6">4. Core Implementation (Development)</td>
+            </tr>
+            <tr>
+                <td>Implementation</td>
+                <td>Firebase Setup & Security Rules</td>
+                <td>2025-01-20</td>
+                <td>2025-01-27</td>
+                <td class="duration">7 Days</td>
+                <td class="status-progress">In Progress</td>
+            </tr>
+            <tr>
+                <td>Implementation</td>
+                <td>Auth System (Roles & Invitations)</td>
+                <td>2025-01-27</td>
+                <td>2025-02-06</td>
+                <td class="duration">10 Days</td>
+                <td class="status-planned">Planned</td>
+            </tr>
+            <tr>
+                <td>Implementation</td>
+                <td>Customer: Car & Profile Management</td>
+                <td>2025-02-06</td>
+                <td>2025-02-20</td>
+                <td class="duration">14 Days</td>
+                <td class="status-planned">Planned</td>
+            </tr>
+            <tr>
+                <td>Implementation</td>
+                <td>Customer: Booking & Scheduling Flow</td>
+                <td>2025-02-20</td>
+                <td>2025-03-06</td>
+                <td class="duration">14 Days</td>
+                <td class="status-planned">Planned</td>
+            </tr>
+            <tr>
+                <td>Implementation</td>
+                <td>Technician: Job Queue & Workspace</td>
+                <td>2025-03-06</td>
+                <td>2025-03-21</td>
+                <td class="duration">15 Days</td>
+                <td class="status-planned">Planned</td>
+            </tr>
+            <tr>
+                <td>Implementation</td>
+                <td>Inventory & Stock Management</td>
+                <td>2025-03-21</td>
+                <td>2025-04-05</td>
+                <td class="duration">15 Days</td>
+                <td class="status-planned">Planned</td>
+            </tr>
+            <tr>
+                <td>Implementation</td>
+                <td>Cashier: Payments & Invoicing</td>
+                <td>2025-04-05</td>
+                <td>2025-04-17</td>
+                <td class="duration">12 Days</td>
+                <td class="status-planned">Planned</td>
+            </tr>
+            <tr>
+                <td>Implementation</td>
+                <td>Admin: Analytics & Management</td>
+                <td>2025-04-17</td>
+                <td>2025-05-02</td>
+                <td class="duration">15 Days</td>
+                <td class="status-planned">Planned</td>
+            </tr>
+            <tr>
+                <td>Implementation</td>
+                <td>AI Assistant (Gemini) Integration</td>
+                <td>2025-05-02</td>
+                <td>2025-05-12</td>
+                <td class="duration">10 Days</td>
+                <td class="status-planned">Planned</td>
+            </tr>
+
+            <!-- 5. Testing -->
+            <tr class="phase-row">
+                <td colspan="6">5. Testing & Delivery Phase</td>
+            </tr>
+            <tr>
+                <td>Testing</td>
+                <td>Unit & Widget Testing</td>
+                <td>2025-05-01</td>
+                <td>2025-05-11</td>
+                <td class="duration">10 Days</td>
+                <td class="status-planned">Planned</td>
+            </tr>
+            <tr>
+                <td>Testing</td>
+                <td>Integration & End-to-End Testing</td>
+                <td>2025-05-11</td>
+                <td>2025-05-21</td>
+                <td class="duration">10 Days</td>
+                <td class="status-planned">Planned</td>
+            </tr>
+            <tr>
+                <td>Testing</td>
+                <td>Documentation & User Guide</td>
+                <td>2025-05-15</td>
+                <td>2025-05-25</td>
+                <td class="duration">10 Days</td>
+                <td class="status-planned">Planned</td>
+            </tr>
+            <tr>
+                <td>Delivery</td>
+                <td>Final Submission & Presentation</td>
+                <td>2025-05-30</td>
+                <td>2025-05-30</td>
+                <td class="duration">0 Days</td>
+                <td class="status-planned">Planned</td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+
+</html>

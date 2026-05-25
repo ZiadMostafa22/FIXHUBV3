@@ -18,8 +18,10 @@ class ChatbotRepositoryImpl implements ChatbotRepository {
   Future<String> sendMessage(
     String userId,
     String message,
-    List<ChatMessageEntity> conversationHistory,
-  ) async {
+    List<ChatMessageEntity> conversationHistory, {
+    String? base64Image,
+    bool isTechnician = false,
+  }) async {
     try {
       // Save user message
       final userMessage = ChatMessageEntity(
@@ -27,11 +29,12 @@ class ChatbotRepositoryImpl implements ChatbotRepository {
         text: message,
         type: MessageType.user,
         timestamp: DateTime.now(),
+        base64Image: base64Image,
       );
       await saveMessage(userId, userMessage);
 
       // Get AI response
-      final aiResponse = await geminiDatasource.getResponse(message, conversationHistory);
+      final aiResponse = await geminiDatasource.getResponse(message, conversationHistory, base64Image: base64Image, isTechnician: isTechnician);
 
       // Save AI response
       final assistantMessage = ChatMessageEntity(

@@ -6,6 +6,7 @@ import 'package:car_maintenance_system_new/features/auth/presentation/viewmodels
 import 'package:car_maintenance_system_new/features/booking/presentation/viewmodels/booking_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/car/presentation/viewmodels/car_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/booking/domain/entities/booking_entity.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 
 class CustomerBookingsPage extends ConsumerStatefulWidget {
   const CustomerBookingsPage({super.key});
@@ -65,12 +66,12 @@ class _CustomerBookingsPageState extends ConsumerState<CustomerBookingsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Bookings'),
+        title: Text('my_bookings'.tr(ref)),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _refreshData,
-            tooltip: 'Refresh',
+            tooltip: 'retry'.tr(ref),
           ),
           IconButton(
             icon: const Icon(Icons.add),
@@ -93,26 +94,26 @@ class _CustomerBookingsPageState extends ConsumerState<CustomerBookingsPage> {
               color: Colors.grey,
             ),
                       const SizedBox(height: 16),
-                      const Text(
-              'No bookings yet',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey,
-              ),
-            ),
+                      Text(
+                        'no_bookings_yet'.tr(ref),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                        ),
+                      ),
                       const SizedBox(height: 8),
-                      const Text(
-              'Book your first service',
-              style: TextStyle(
-                color: Colors.grey,
-              ),
-            ),
+                      Text(
+                        'book_first_service'.tr(ref),
+                        style: const TextStyle(
+                          color: Colors.grey,
+                        ),
+                      ),
                       const SizedBox(height: 24),
                       ElevatedButton.icon(
                         onPressed: () => context.go('/customer/new-booking'),
                         icon: const Icon(Icons.add),
-                        label: const Text('New Booking'),
+                        label: Text('new_booking'.tr(ref)),
                       ),
                     ],
                   ),
@@ -125,7 +126,7 @@ class _CustomerBookingsPageState extends ConsumerState<CustomerBookingsPage> {
                     
                     // Get car info
                     final car = carState.cars.where((c) => c.id == booking.carId).firstOrNull;
-                    final carName = car != null ? '${car.make} ${car.model}' : 'Loading...';
+                    final carName = car != null ? '${car.make} ${car.model}' : 'loading'.tr(ref);
                     
                     return Card(
                       margin: const EdgeInsets.only(bottom: 16),
@@ -144,7 +145,7 @@ class _CustomerBookingsPageState extends ConsumerState<CustomerBookingsPage> {
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      _getMaintenanceTypeName(booking.maintenanceType),
+                                      _getMaintenanceTypeName(booking.maintenanceType, ref),
                                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -159,7 +160,7 @@ class _CustomerBookingsPageState extends ConsumerState<CustomerBookingsPage> {
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Text(
-                                      _getStatusName(booking.status),
+                                      _getStatusName(booking.status, ref),
                                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                         color: _getStatusColor(booking.status),
                                         fontWeight: FontWeight.bold,
@@ -225,7 +226,7 @@ class _CustomerBookingsPageState extends ConsumerState<CustomerBookingsPage> {
                                     TextButton.icon(
                                       onPressed: () => _cancelBooking(booking.id),
                                       icon: const Icon(Icons.cancel, size: 16),
-                                      label: const Text('Cancel'),
+                                      label: Text('cancel'.tr(ref)),
                                       style: TextButton.styleFrom(
                                         foregroundColor: Colors.red,
                                       ),
@@ -247,29 +248,29 @@ class _CustomerBookingsPageState extends ConsumerState<CustomerBookingsPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(_getMaintenanceTypeName(booking.maintenanceType)),
+        title: Text(_getMaintenanceTypeName(booking.maintenanceType, ref)),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildDetailRow('Car', carName),
-              _buildDetailRow('Date', DateFormat('MMM dd, yyyy').format(booking.scheduledDate)),
-              _buildDetailRow('Time', booking.timeSlot),
-              _buildDetailRow('Status', _getStatusName(booking.status)),
+              _buildDetailRow('vehicle'.tr(ref), carName),
+              _buildDetailRow('date'.tr(ref), DateFormat('MMM dd, yyyy').format(booking.scheduledDate)),
+              _buildDetailRow('time'.tr(ref), booking.timeSlot),
+              _buildDetailRow('status'.tr(ref), _getStatusName(booking.status, ref)),
               if (booking.description != null && booking.description!.isNotEmpty)
-                _buildDetailRow('Description', booking.description!),
+                _buildDetailRow('description'.tr(ref), booking.description!),
               if (booking.notes != null && booking.notes!.isNotEmpty)
-                _buildDetailRow('Notes', booking.notes!),
+                _buildDetailRow('notes'.tr(ref), booking.notes!),
               if (booking.completedAt != null)
-                _buildDetailRow('Completed', DateFormat('MMM dd, yyyy').format(booking.completedAt!)),
+                _buildDetailRow('completion_time'.tr(ref), DateFormat('MMM dd, yyyy').format(booking.completedAt!)),
             ],
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text('close'.tr(ref)),
           ),
         ],
       ),
@@ -307,17 +308,17 @@ class _CustomerBookingsPageState extends ConsumerState<CustomerBookingsPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Cancel Booking'),
-        content: const Text('Are you sure you want to cancel this booking?'),
+        title: Text('cancel_booking'.tr(ref)),
+        content: Text('cancel_booking_confirm'.tr(ref)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('No'),
+            child: Text('no'.tr(ref)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Yes, Cancel'),
+            child: Text('yes'.tr(ref)),
           ),
         ],
       ),
@@ -329,40 +330,40 @@ class _CustomerBookingsPageState extends ConsumerState<CustomerBookingsPage> {
       // Use the captured ScaffoldMessenger instead of context
       scaffoldMessenger.showSnackBar(
         SnackBar(
-          content: Text(success ? 'Booking cancelled' : 'Failed to cancel booking'),
+          content: Text(success ? 'booking_cancelled'.tr(ref) : 'failed_cancel_booking'.tr(ref)),
           backgroundColor: success ? Colors.green : Colors.red,
         ),
       );
     }
   }
 
-  String _getMaintenanceTypeName(MaintenanceType type) {
+  String _getMaintenanceTypeName(MaintenanceType type, WidgetRef ref) {
     switch (type) {
       case MaintenanceType.regular:
-        return 'Regular Maintenance';
+        return 'regular_maintenance'.tr(ref);
       case MaintenanceType.inspection:
-        return 'Inspection';
+        return 'inspection'.tr(ref);
       case MaintenanceType.repair:
-        return 'Repair Service';
+        return 'repair_service'.tr(ref);
       case MaintenanceType.emergency:
-        return 'Emergency Service';
+        return 'emergency_service'.tr(ref);
     }
   }
 
-  String _getStatusName(BookingStatus status) {
+  String _getStatusName(BookingStatus status, WidgetRef ref) {
     switch (status) {
       case BookingStatus.pending:
-        return 'Pending';
+        return 'pending'.tr(ref);
       case BookingStatus.confirmed:
-        return 'Confirmed';
+        return 'confirmed'.tr(ref);
       case BookingStatus.inProgress:
-        return 'In Progress';
+        return 'service_in_progress'.tr(ref);
       case BookingStatus.completedPendingPayment:
-        return 'Awaiting Payment';
+        return 'awaiting_payment'.tr(ref);
       case BookingStatus.completed:
-        return 'Completed';
+        return 'completed'.tr(ref);
       case BookingStatus.cancelled:
-        return 'Cancelled';
+        return 'was_cancelled'.tr(ref);
     }
   }
 

@@ -78,14 +78,14 @@ class DiscountValidator {
       }
 
       // Offer is valid
-      print('✅ Discount code valid! ${offer.discountPercentage}% off');
+      print('Discount code valid! ${offer.discountPercentage}% off');
       return {
         'valid': true,
         'message': 'Discount code applied successfully! ${offer.discountPercentage}% off',
         'offer': offer,
       };
     } catch (e) {
-      print('❌ Error validating code: $e');
+      print('Error validating code: $e');
       return {
         'valid': false,
         'message': 'Error: ${e.toString()}',

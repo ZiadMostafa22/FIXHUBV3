@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:car_maintenance_system_new/features/chatbot/presentation/viewmodels/chatbot_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/chatbot/presentation/widgets/chat_message_bubble.dart';
 import 'package:car_maintenance_system_new/features/chatbot/presentation/widgets/chat_input_field.dart';
 import 'package:car_maintenance_system_new/features/auth/presentation/viewmodels/auth_viewmodel.dart';
-import 'package:car_maintenance_system_new/features/customer/presentation/widgets/customer_bottom_nav_bar.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 
 class ChatbotPage extends ConsumerStatefulWidget {
   const ChatbotPage({super.key});
@@ -53,18 +53,15 @@ class _ChatbotPageState extends ConsumerState<ChatbotPage> {
   Widget build(BuildContext context) {
     final chatbotState = ref.watch(chatbotViewModelProvider);
     final user = ref.watch(authViewModelProvider).user;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Scroll to bottom when new messages arrive
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToBottom();
     });
 
-    final defaultFont = GoogleFonts.rubik();
-
-    return DefaultTextStyle(
-      style: defaultFont.copyWith(color: Colors.black87),
-      child: Scaffold(
-      backgroundColor: Colors.grey[100],
+    return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF0F170F) : Colors.grey[50],
       appBar: AppBar(
         title: Row(
           children: [
@@ -72,7 +69,7 @@ class _ChatbotPageState extends ConsumerState<ChatbotPage> {
               width: 40.w,
               height: 40.w,
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withOpacity(0.2),
+                color: Colors.white24,
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -86,17 +83,18 @@ class _ChatbotPageState extends ConsumerState<ChatbotPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'المساعد الذكي',
-                  style: GoogleFonts.rubik(
-                    fontSize: 18.sp,
+                  'chatbot_title'.tr(ref),
+                  style: TextStyle(
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
-                  'متصل الآن',
-                  style: GoogleFonts.rubik(
-                    fontSize: 12.sp,
+                  'online_now'.tr(ref),
+                  style: TextStyle(
+                    fontSize: 10.sp,
                     fontWeight: FontWeight.normal,
+                    color: Colors.white70,
                   ),
                 ),
               ],
@@ -113,7 +111,7 @@ class _ChatbotPageState extends ConsumerState<ChatbotPage> {
                       .clearConversation(user.id);
                 }
               },
-              tooltip: 'مسح المحادثة',
+              tooltip: 'clear_conversation'.tr(ref),
             ),
         ],
       ),
@@ -143,21 +141,23 @@ class _ChatbotPageState extends ConsumerState<ChatbotPage> {
                             ),
                             SizedBox(height: 24.h),
                             Text(
-                              'مرحباً! كيف يمكنني مساعدتك؟',
-                              style: GoogleFonts.rubik(
+                              user?.role == 'technician' ? 'tech_chatbot_welcome'.tr(ref) : 'customer_chatbot_welcome'.tr(ref),
+                              style: TextStyle(
                                 fontSize: 18.sp,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.grey[800],
+                                color: isDark ? Colors.grey[300] : Colors.grey[800],
                               ),
                             ),
                             SizedBox(height: 8.h),
                             Padding(
                               padding: EdgeInsets.symmetric(horizontal: 32.w),
                               child: Text(
-                                'اسألني عن خدماتنا، الأسعار، أو أي استفسار آخر',
-                                style: GoogleFonts.rubik(
+                                user?.role == 'technician' 
+                                    ? 'tech_chatbot_hint'.tr(ref) 
+                                    : 'customer_chatbot_hint'.tr(ref),
+                                style: TextStyle(
                                   fontSize: 14.sp,
-                                  color: Colors.grey[600],
+                                  color: isDark ? Colors.grey[500] : Colors.grey[600],
                                 ),
                                 textAlign: TextAlign.center,
                               ),
@@ -166,9 +166,7 @@ class _ChatbotPageState extends ConsumerState<ChatbotPage> {
                         ),
                       )
                     : Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                        ),
+                        color: isDark ? const Color(0xFF0F170F) : Colors.grey[50],
                         child: ListView.builder(
                           controller: _scrollController,
                           padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 8.w),
@@ -185,16 +183,16 @@ class _ChatbotPageState extends ConsumerState<ChatbotPage> {
           if (chatbotState.error != null)
             Container(
               padding: EdgeInsets.all(8.w),
-              color: Colors.red[50],
+              color: isDark ? Colors.red.shade900.withOpacity(0.3) : Colors.red[50],
               child: Row(
                 children: [
-                  Icon(Icons.error_outline, color: Colors.red[700], size: 20.sp),
+                  Icon(Icons.error_outline, color: isDark ? Colors.redAccent : Colors.red[700], size: 20.sp),
                   SizedBox(width: 8.w),
                   Expanded(
                     child: Text(
                       chatbotState.error!,
-                      style: GoogleFonts.rubik(
-                        color: Colors.red[700],
+                      style: TextStyle(
+                        color: isDark ? Colors.redAccent : Colors.red[700],
                         fontSize: 12.sp,
                       ),
                     ),
@@ -206,16 +204,26 @@ class _ChatbotPageState extends ConsumerState<ChatbotPage> {
           ChatInputField(
             onSend: (message) {
               if (user != null) {
+                // Determine if user is technician
+                final isTechnician = ref.read(authViewModelProvider).userRole == 'technician';
                 ref.read(chatbotViewModelProvider.notifier)
-                    .sendMessage(user.id, message);
+                    .sendMessage(user.id, message, isTechnician: isTechnician);
               }
             },
             isLoading: chatbotState.isSending,
+            selectedImage: chatbotState.selectedImage,
+            onCameraTap: user?.role == 'technician' ? () {
+              ref.read(chatbotViewModelProvider.notifier).pickImage(ImageSource.camera);
+            } : null,
+            onGalleryTap: user?.role == 'technician' ? () {
+              ref.read(chatbotViewModelProvider.notifier).pickImage(ImageSource.gallery);
+            } : null,
+            onRemoveImage: user?.role == 'technician' ? () {
+              ref.read(chatbotViewModelProvider.notifier).removeSelectedImage();
+            } : null,
           ),
         ],
       ),
-      bottomNavigationBar: CustomerBottomNavBar(context: context),
-    ),
     );
   }
 }

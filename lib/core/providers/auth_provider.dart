@@ -145,8 +145,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       
       if (!doc.exists) {
         if (kDebugMode) {
-          debugPrint('❌ Firestore document not found!');
-          debugPrint('❌ User profile data has been deleted');
+          debugPrint('Firestore document not found!');
+          debugPrint('User profile data has been deleted');
         }
         
         // User exists in Firebase Auth but not in Firestore
@@ -173,7 +173,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       if (!userData.isActive) {
         await FirebaseService.auth.signOut();
         if (kDebugMode) {
-          debugPrint('❌ Account is disabled');
+          debugPrint('Account is disabled');
         }
         throw 'Your account has been disabled by the administrator. Please contact support for assistance.';
       }
@@ -181,7 +181,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       // Verify role matches (or auto-login if role doesn't match but exists)
       if (userRoleString != role) {
         if (kDebugMode) {
-          debugPrint('⚠️ Role mismatch: Selected $role, but user is $userRoleString');
+          debugPrint('Role mismatch: Selected $role, but user is $userRoleString');
           debugPrint('🔄 Logging in with correct role: $userRoleString');
         }
         
@@ -201,13 +201,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
       
       if (kDebugMode) {
-        debugPrint('✅ Login successful: ${userData.name} as $userRoleString');
+        debugPrint('Login successful: ${userData.name} as $userRoleString');
       }
       
       return true;
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ Login error: $e');
+        debugPrint('Login error: $e');
       }
       await FirebaseService.auth.signOut();
       
@@ -273,7 +273,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       if (role == 'technician' || role == 'admin' || role == 'cashier') {
         if (inviteCode == null || inviteCode.isEmpty) {
           if (kDebugMode) {
-            debugPrint('⚠️ Security: Attempted to register as $role without invite code. Forcing customer role.');
+            debugPrint('Security: Attempted to register as $role without invite code. Forcing customer role.');
           }
           validatedRole = 'customer';
         } else {
@@ -441,7 +441,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       if (kDebugMode) {
         debugPrint('✓ State updated!');
         debugPrint('═══════════════════════════════════════════════');
-        debugPrint('✅ REGISTRATION SUCCESSFUL!');
+        debugPrint('REGISTRATION SUCCESSFUL!');
         debugPrint('User: $name ($email)');
         debugPrint('Role: $role');
         debugPrint('UID: ${userCredential.user!.uid}');
@@ -452,7 +452,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         debugPrint('═══════════════════════════════════════════════');
-        debugPrint('❌ REGISTRATION FAILED!');
+        debugPrint('REGISTRATION FAILED!');
         debugPrint('Error: $e');
         debugPrint('Stack trace: $stackTrace');
         debugPrint('═══════════════════════════════════════════════');
@@ -466,7 +466,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         }
       } catch (cleanupError) {
         if (kDebugMode) {
-          debugPrint('⚠️ Cleanup error: $cleanupError');
+          debugPrint('Cleanup error: $cleanupError');
         }
       }
       

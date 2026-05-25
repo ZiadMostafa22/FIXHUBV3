@@ -96,7 +96,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (isLoggedIn) {
         if (currentPath == '/splash' || currentPath == '/login' || currentPath == '/register') {
           if (kDebugMode) {
-            debugPrint('✅ User authenticated as $userRole, redirecting from: $currentPath');
+            debugPrint('User authenticated as $userRole, redirecting from: $currentPath');
           }
           switch (userRole) {
             case 'customer':
@@ -116,28 +116,28 @@ final routerProvider = Provider<GoRouter>((ref) {
         if (userRole == 'customer' && !currentPath.startsWith('/customer')) {
           if (currentPath.startsWith('/technician') || currentPath.startsWith('/admin')) {
             if (kDebugMode) {
-              debugPrint('⚠️ Customer trying to access non-customer route: $currentPath');
+              debugPrint('Customer trying to access non-customer route: $currentPath');
             }
             return '/customer';
           }
         } else if (userRole == 'technician' && !currentPath.startsWith('/technician')) {
           if (currentPath.startsWith('/customer') || currentPath.startsWith('/admin')) {
             if (kDebugMode) {
-              debugPrint('⚠️ Technician trying to access non-technician route: $currentPath');
+              debugPrint('Technician trying to access non-technician route: $currentPath');
             }
             return '/technician';
           }
         } else if (userRole == 'admin' && !currentPath.startsWith('/admin')) {
           if (currentPath.startsWith('/customer') || currentPath.startsWith('/technician') || currentPath.startsWith('/cashier')) {
             if (kDebugMode) {
-              debugPrint('⚠️ Admin trying to access non-admin route: $currentPath');
+              debugPrint('Admin trying to access non-admin route: $currentPath');
             }
             return '/admin';
           }
         } else if (userRole == 'cashier' && !currentPath.startsWith('/cashier')) {
           if (currentPath.startsWith('/customer') || currentPath.startsWith('/technician') || currentPath.startsWith('/admin')) {
             if (kDebugMode) {
-              debugPrint('⚠️ Cashier trying to access non-cashier route: $currentPath');
+              debugPrint('Cashier trying to access non-cashier route: $currentPath');
             }
             return '/cashier';
           }
@@ -230,6 +230,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'notifications',
             builder: (context, state) => const NotificationsPage(),
+          ),
+          GoRoute(
+            path: 'chatbot',
+            builder: (context, state) => const ChatbotPage(),
           ),
         ],
       ),

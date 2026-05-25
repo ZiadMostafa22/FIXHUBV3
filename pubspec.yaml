@@ -82,5 +82,17 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^3.0.1
 
+  # Testing & Mocking
+  mockito: ^5.4.4
+  build_runner: ^2.4.9
+
+  # Fake Firebase for unit tests (no Firebase connection needed)
+  fake_cloud_firestore: ^3.0.2
+  firebase_auth_mocks: ^0.14.1
+
+  # Integration Testing
+  integration_test:
+    sdk: flutter
+
 flutter:
   uses-material-design: true

@@ -6,8 +6,8 @@ class SendMessageUseCase {
 
   SendMessageUseCase(this.repository);
 
-  Future<String> call(String userId, String message, List<ChatMessageEntity> conversationHistory) async {
-    return await repository.sendMessage(userId, message, conversationHistory);
+  Future<String> call(String userId, String message, List<ChatMessageEntity> conversationHistory, {String? base64Image, bool isTechnician = false}) async {
+    return await repository.sendMessage(userId, message, conversationHistory, base64Image: base64Image, isTechnician: isTechnician);
   }
 }
 

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:car_maintenance_system_new/features/booking/presentation/viewmodels/booking_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/car/presentation/viewmodels/car_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/booking/domain/entities/booking_entity.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 
 class MissedAppointments extends ConsumerStatefulWidget {
   const MissedAppointments({super.key});
@@ -76,7 +77,7 @@ class _MissedAppointmentsState extends ConsumerState<MissedAppointments> {
             ),
             SizedBox(width: 8.w),
             Text(
-              'Missed Appointments',
+              'missed_appointments'.tr(ref),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 fontSize: 18.sp,
@@ -103,7 +104,7 @@ class _MissedAppointmentsState extends ConsumerState<MissedAppointments> {
         ),
         SizedBox(height: 12.h),
         Text(
-          'You missed these appointments. Please reschedule or cancel them.',
+          'missed_appointments_desc'.tr(ref),
           style: TextStyle(
             color: Colors.red.shade600,
             fontSize: 12.sp,
@@ -113,15 +114,15 @@ class _MissedAppointmentsState extends ConsumerState<MissedAppointments> {
         
         ...displayBookings.map((booking) {
           final car = carState.cars.where((c) => c.id == booking.carId).firstOrNull;
-          final carName = car != null ? '${car.make} ${car.model}' : 'Loading...';
+          final carName = car != null ? '${car.make} ${car.model}' : 'loading'.tr(ref);
           
           // Calculate how long ago it was missed
           final missedDuration = now.difference(booking.scheduledDate);
           final missedText = missedDuration.inDays > 0
-              ? '${missedDuration.inDays} day${missedDuration.inDays > 1 ? 's' : ''} ago'
+              ? '${missedDuration.inDays} ${missedDuration.inDays > 1 ? 'days_only'.tr(ref) : 'day_only'.tr(ref)}'
               : missedDuration.inHours > 0
-                  ? '${missedDuration.inHours} hour${missedDuration.inHours > 1 ? 's' : ''} ago'
-                  : 'Recently';
+                  ? '${missedDuration.inHours} ${missedDuration.inHours > 1 ? 'hours_only'.tr(ref) : 'hour_only'.tr(ref)}'
+                  : 'recently'.tr(ref);
           
           return Card(
             margin: EdgeInsets.only(bottom: 12.h),
@@ -152,7 +153,7 @@ class _MissedAppointmentsState extends ConsumerState<MissedAppointments> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _getMaintenanceTypeName(booking.maintenanceType),
+                              _getMaintenanceTypeName(booking.maintenanceType, ref),
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 15.sp,
@@ -176,7 +177,7 @@ class _MissedAppointmentsState extends ConsumerState<MissedAppointments> {
                           borderRadius: BorderRadius.circular(12.r),
                         ),
                         child: Text(
-                          'MISSED',
+                          'missed_status'.tr(ref),
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 10.sp,
@@ -199,7 +200,7 @@ class _MissedAppointmentsState extends ConsumerState<MissedAppointments> {
                         Icon(Icons.schedule, size: 14.sp, color: Colors.red.shade700),
                         SizedBox(width: 6.w),
                         Text(
-                          'Was scheduled: ${DateFormat('MMM dd, yyyy').format(booking.scheduledDate)} at ${booking.timeSlot}',
+                          '${'was_scheduled'.tr(ref)}: ${DateFormat('MMM dd, yyyy').format(booking.scheduledDate)} ${'at'.tr(ref)} ${booking.timeSlot}',
                           style: TextStyle(
                             fontSize: 12.sp,
                             color: Colors.red.shade700,
@@ -214,7 +215,7 @@ class _MissedAppointmentsState extends ConsumerState<MissedAppointments> {
                       Icon(Icons.access_time, size: 14.sp, color: Colors.grey),
                       SizedBox(width: 6.w),
                       Text(
-                        'Missed $missedText',
+                        '${'missed_ago'.tr(ref)} $missedText',
                         style: TextStyle(
                           fontSize: 11.sp,
                           color: Colors.grey[600],
@@ -232,7 +233,7 @@ class _MissedAppointmentsState extends ConsumerState<MissedAppointments> {
                             context.push('/customer/new-booking');
                           },
                           icon: Icon(Icons.refresh, size: 16.sp),
-                          label: const Text('Reschedule'),
+                          label: Text('reschedule'.tr(ref)),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.blue,
                             padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 8.w),
@@ -270,8 +271,8 @@ class _MissedAppointmentsState extends ConsumerState<MissedAppointments> {
                                   SnackBar(
                                     content: Text(
                                       success 
-                                        ? 'Appointment cancelled successfully'
-                                        : 'Failed to cancel appointment. Please try again.',
+                                        ? 'appointment_cancelled_success'.tr(ref)
+                                        : 'failed_cancel_appointment'.tr(ref),
                                     ),
                                     backgroundColor: success ? Colors.green : Colors.red,
                                     duration: const Duration(seconds: 2),
@@ -279,7 +280,7 @@ class _MissedAppointmentsState extends ConsumerState<MissedAppointments> {
                                 );
                               }
                             } catch (e) {
-                              print('❌ Cancellation error: $e');
+                              print('Cancellation error: $e');
                               
                               // Close loading immediately
                               if (context.mounted) {
@@ -299,7 +300,7 @@ class _MissedAppointmentsState extends ConsumerState<MissedAppointments> {
                             }
                           },
                           icon: Icon(Icons.cancel, size: 16.sp),
-                          label: const Text('Cancel'),
+                          label: Text('cancel'.tr(ref)),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.red,
                             padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 8.w),
@@ -319,16 +320,16 @@ class _MissedAppointmentsState extends ConsumerState<MissedAppointments> {
     );
   }
 
-  String _getMaintenanceTypeName(MaintenanceType type) {
+  String _getMaintenanceTypeName(MaintenanceType type, WidgetRef ref) {
     switch (type) {
       case MaintenanceType.regular:
-        return 'Regular Maintenance';
+        return 'regular_maintenance'.tr(ref);
       case MaintenanceType.inspection:
-        return 'Inspection';
+        return 'inspection'.tr(ref);
       case MaintenanceType.repair:
-        return 'Repair Service';
+        return 'repair_service'.tr(ref);
       case MaintenanceType.emergency:
-        return 'Emergency Service';
+        return 'emergency_service'.tr(ref);
     }
   }
 }

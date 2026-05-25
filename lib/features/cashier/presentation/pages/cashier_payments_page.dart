@@ -8,6 +8,7 @@ import 'package:car_maintenance_system_new/features/booking/presentation/viewmod
 import 'package:car_maintenance_system_new/features/car/presentation/viewmodels/car_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/booking/domain/entities/booking_entity.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 
 class CashierPaymentsPage extends ConsumerStatefulWidget {
   const CashierPaymentsPage({super.key});
@@ -95,7 +96,7 @@ class _CashierPaymentsPageState extends ConsumerState<CashierPaymentsPage> with 
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Payments'),
+        title: Text('payments'.tr(ref)),
         bottom: TabBar(
           controller: _tabController,
           tabs: [
@@ -103,7 +104,7 @@ class _CashierPaymentsPageState extends ConsumerState<CashierPaymentsPage> with 
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Pending'),
+                  Text('pending'.tr(ref)),
                   SizedBox(width: 8.w),
                   if (pendingPayments.isNotEmpty)
                     CircleAvatar(
@@ -117,7 +118,7 @@ class _CashierPaymentsPageState extends ConsumerState<CashierPaymentsPage> with 
                 ],
               ),
             ),
-            const Tab(text: 'Completed'),
+            Tab(text: 'completed'.tr(ref)),
           ],
         ),
       ),
@@ -139,7 +140,7 @@ class _CashierPaymentsPageState extends ConsumerState<CashierPaymentsPage> with 
                         ),
                         SizedBox(height: 16.h),
                         Text(
-                          'No pending payments',
+                          'no_pending_payments'.tr(ref),
                           style: TextStyle(color: Colors.grey, fontSize: 16.sp),
                         ),
                       ],
@@ -170,7 +171,7 @@ class _CashierPaymentsPageState extends ConsumerState<CashierPaymentsPage> with 
                         ),
                         SizedBox(height: 16.h),
                         Text(
-                          'No completed payments',
+                          'no_completed_payments'.tr(ref),
                           style: TextStyle(color: Colors.grey, fontSize: 16.sp),
                         ),
                       ],
@@ -211,7 +212,7 @@ class _CashierPaymentsPageState extends ConsumerState<CashierPaymentsPage> with 
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Invoice #${booking.id.substring(0, 8)}',
+                          '${'invoice'.tr(ref)}${booking.id.substring(0, 8)}',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16.sp,
@@ -223,7 +224,7 @@ class _CashierPaymentsPageState extends ConsumerState<CashierPaymentsPage> with 
                           builder: (context, snapshot) {
                             final customerName = snapshot.data ?? 'Loading...';
                             return Text(
-                              'Customer: $customerName',
+                              '${'customer'.tr(ref)}$customerName',
                               style: TextStyle(
                                 fontSize: 13.sp,
                                 color: Colors.grey[700],
@@ -235,7 +236,7 @@ class _CashierPaymentsPageState extends ConsumerState<CashierPaymentsPage> with 
                         SizedBox(height: 4.h),
                         if (booking.completedAt != null)
                           Text(
-                            'Completed: ${DateFormat('dd/MM/yyyy HH:mm').format(booking.completedAt!)}',
+                            '${'completed_at'.tr(ref)}${DateFormat('dd/MM/yyyy HH:mm').format(booking.completedAt!)}',
                             style: TextStyle(fontSize: 12.sp, color: Colors.grey),
                           ),
                       ],
@@ -245,7 +246,7 @@ class _CashierPaymentsPageState extends ConsumerState<CashierPaymentsPage> with 
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        '\$${booking.totalCost.toStringAsFixed(2)}',
+                        '${booking.totalCost.toStringAsFixed(2)} ${'currency'.tr(ref)}',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 20.sp,
@@ -352,7 +353,7 @@ class _CashierPaymentsPageState extends ConsumerState<CashierPaymentsPage> with 
                       ),
                       SizedBox(width: 8.w),
                       Text(
-                        _getPaymentMethodName(booking.paymentMethod!),
+                        _getPaymentMethodName(booking.paymentMethod!, ref),
                         style: TextStyle(
                           color: Colors.green.shade700,
                           fontWeight: FontWeight.w500,
@@ -371,7 +372,7 @@ class _CashierPaymentsPageState extends ConsumerState<CashierPaymentsPage> with 
                       context.go('/cashier/payment/${booking.id}');
                     },
                     icon: const Icon(Icons.payment),
-                    label: const Text('Receive Payment'),
+                    label: Text('receive_payment'.tr(ref)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                     ),
@@ -395,14 +396,14 @@ class _CashierPaymentsPageState extends ConsumerState<CashierPaymentsPage> with 
     }
   }
 
-  String _getPaymentMethodName(PaymentMethod method) {
+  String _getPaymentMethodName(PaymentMethod method, WidgetRef ref) {
     switch (method) {
       case PaymentMethod.cash:
-        return 'Cash';
+        return 'cash'.tr(ref);
       case PaymentMethod.card:
-        return 'Card';
+        return 'card'.tr(ref);
       case PaymentMethod.digital:
-        return 'Digital Wallet';
+        return 'digital_wallet'.tr(ref);
     }
   }
 }

@@ -1,0 +1,29 @@
+Phase,Task Name,Start Date,End Date,Duration (Days),Status
+1. Analysis & Research,Problem Definition & Market Study,2024-07-01,2024-07-15,15,Completed
+1. Analysis & Research,Literature Review & Existing Systems,2024-07-15,2024-07-30,15,Completed
+1. Analysis & Research,Functional Requirements Gathering,2024-08-01,2024-08-15,15,Completed
+1. Analysis & Research,Non-Functional Requirements Identification,2024-08-15,2024-08-25,10,Completed
+1. Analysis & Research,Technical Feasibility Study,2024-08-25,2024-09-04,10,Completed
+2. System Design,System Architecture (MVVM) Design,2024-09-15,2024-10-05,20,Completed
+2. System Design,Database Schema & ERD Design,2024-10-05,2024-10-20,15,Completed
+2. System Design,Use Case & Actor Identification,2024-10-15,2024-10-30,15,Completed
+2. System Design,Activity & Sequence Diagrams,2024-10-30,2024-11-19,20,Completed
+2. System Design,State & Class Diagrams,2024-11-19,2024-12-04,15,Completed
+2. System Design,Final Design Documentation,2024-12-04,2024-12-14,10,Completed
+3. Preparation & UI/UX,Tech Stack Configuration,2024-12-15,2024-12-25,10,Completed
+3. Preparation & UI/UX,UI Branding & Color Palette,2024-12-25,2025-01-04,10,Completed
+3. Preparation & UI/UX,Low-Fidelity Wireframing,2025-01-01,2025-01-11,10,Completed
+3. Preparation & UI/UX,High-Fidelity UI Design (Figma),2025-01-11,2025-01-21,10,Completed
+4. Core Implementation,Firebase Setup & Security Rules,2025-01-20,2025-01-27,7,In Progress
+4. Core Implementation,Auth System (Roles & Invitations),2025-01-27,2025-02-06,10,Planned
+4. Core Implementation,Customer: Car & Profile Management,2025-02-06,2025-02-20,14,Planned
+4. Core Implementation,Customer: Booking & Scheduling Flow,2025-02-20,2025-03-06,14,Planned
+4. Core Implementation,Technician: Job Queue & Workspace,2025-03-06,2025-03-21,15,Planned
+4. Core Implementation,Inventory & Stock Management,2025-03-21,2025-04-05,15,Planned
+4. Core Implementation,Cashier: Payments & Invoicing,2025-04-05,2025-04-17,12,Planned
+4. Core Implementation,Admin: Analytics & Management,2025-04-17,2025-05-02,15,Planned
+4. Core Implementation,AI Assistant (Gemini) Integration,2025-05-02,2025-05-12,10,Planned
+5. Testing & Delivery,Unit & Widget Testing,2025-05-01,2025-05-11,10,Planned
+5. Testing & Delivery,Integration & End-to-End Testing,2025-05-11,2025-05-21,10,Planned
+5. Testing & Delivery,Documentation & User Guide,2025-05-15,2025-05-25,10,Planned
+5. Testing & Delivery,Final Submission & Presentation,2025-05-30,2025-05-30,0,Planned

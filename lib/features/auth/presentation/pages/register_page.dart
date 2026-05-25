@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:car_maintenance_system_new/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
@@ -48,15 +49,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       if (success && mounted) {
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Account created successfully! Redirecting...'),
+          SnackBar(
+            content: Text('account_created'.tr(ref)),
             backgroundColor: Colors.green,
             duration: Duration(seconds: 2),
           ),
         );
         // Navigation is handled automatically by the router
       } else if (mounted) {
-        final errorMessage = ref.read(authViewModelProvider).error ?? 'Registration failed. Please try again.';
+        final errorMessage = ref.read(authViewModelProvider).error ?? 'registration_failed'.tr(ref);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
@@ -81,7 +82,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Account'),
+        title: Text('create_account'.tr(ref)),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -111,7 +112,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     ),
                     SizedBox(height: screenHeight * 0.015),
                     Text(
-                      'Join Car Maintenance',
+                      'join_car_maintenance'.tr(ref),
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         fontSize: screenWidth * 0.055 < 18 ? 18.0 : (screenWidth * 0.055 > 24 ? 24.0 : screenWidth * 0.055),
@@ -120,7 +121,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     ),
                     SizedBox(height: screenHeight * 0.008),
                     Text(
-                      'Create your account to get started',
+                      'create_account_subtitle'.tr(ref),
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Colors.grey[600],
                         fontSize: screenWidth * 0.038 < 13 ? 13.0 : (screenWidth * 0.038 > 15 ? 15.0 : screenWidth * 0.038),
@@ -135,17 +136,17 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 // Name Field
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Full Name',
-                    prefixIcon: Icon(Icons.person),
+                  decoration: InputDecoration(
+                    labelText: 'full_name'.tr(ref),
+                    prefixIcon: const Icon(Icons.person),
                     isDense: true,
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your name';
+                      return 'enter_name_validation'.tr(ref);
                     }
                     if (value.length < 2) {
-                      return 'Name must be at least 2 characters';
+                      return 'name_min_length'.tr(ref);
                     }
                     return null;
                   },
@@ -156,17 +157,17 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: Icon(Icons.email),
+                  decoration: InputDecoration(
+                    labelText: 'email'.tr(ref),
+                    prefixIcon: const Icon(Icons.email),
                     isDense: true,
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
+                      return 'enter_email_validation'.tr(ref);
                     }
                     if (!value.contains('@')) {
-                      return 'Please enter a valid email';
+                      return 'invalid_email'.tr(ref);
                     }
                     return null;
                   },
@@ -177,17 +178,17 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 TextFormField(
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    labelText: 'Phone Number',
-                    prefixIcon: Icon(Icons.phone),
+                  decoration: InputDecoration(
+                    labelText: 'phone_number'.tr(ref),
+                    prefixIcon: const Icon(Icons.phone),
                     isDense: true,
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your phone number';
+                      return 'enter_phone_validation'.tr(ref);
                     }
                     if (value.length < 10) {
-                      return 'Please enter a valid phone number';
+                      return 'invalid_phone'.tr(ref);
                     }
                     return null;
                   },
@@ -203,8 +204,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   child: Column(
                     children: [
                       RadioListTile<String>(
-                        title: const Text('Customer Account'),
-                        subtitle: const Text('Book services and manage your vehicles'),
+                        title: Text('customer_account'.tr(ref)),
+                        subtitle: Text('customer_account_desc'.tr(ref)),
                         value: 'customer',
                         groupValue: _selectedRole,
                         onChanged: (value) {
@@ -216,8 +217,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       ),
                       const Divider(height: 1),
                       RadioListTile<String>(
-                        title: const Text('Technician Account'),
-                        subtitle: const Text('Requires an invite code from admin'),
+                        title: Text('technician_account'.tr(ref)),
+                        subtitle: Text('technician_account_desc'.tr(ref)),
                         value: 'technician',
                         groupValue: _selectedRole,
                         onChanged: (value) {
@@ -229,8 +230,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       ),
                       const Divider(height: 1),
                       RadioListTile<String>(
-                        title: const Text('Cashier Account'),
-                        subtitle: const Text('Requires an invite code from admin'),
+                        title: Text('cashier_account'.tr(ref)),
+                        subtitle: Text('cashier_account_desc'.tr(ref)),
                         value: 'cashier',
                         groupValue: _selectedRole,
                         onChanged: (value) {
@@ -252,19 +253,19 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     children: [
                       TextFormField(
                         controller: _inviteCodeController,
-                        decoration: const InputDecoration(
-                          labelText: 'Invite Code *',
-                          prefixIcon: Icon(Icons.vpn_key),
+                        decoration: InputDecoration(
+                          labelText: 'invite_code'.tr(ref),
+                          prefixIcon: const Icon(Icons.vpn_key),
                           isDense: true,
-                          helperText: 'Enter the invite code provided by the administrator',
+                          helperText: 'invite_code_hint'.tr(ref),
                           helperMaxLines: 2,
                         ),
                         validator: (value) {
                           if (_showInviteCode && (value == null || value.isEmpty)) {
-                            return 'Invite code is required for this account type';
+                            return 'invite_code_required'.tr(ref);
                           }
                           if (_showInviteCode && value!.length < 6) {
-                            return 'Invalid invite code format';
+                            return 'invalid_invite_code'.tr(ref);
                           }
                           return null;
                         },
@@ -278,7 +279,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   controller: _passwordController,
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
-                    labelText: 'Password',
+                    labelText: 'password'.tr(ref),
                     prefixIcon: const Icon(Icons.lock),
                     isDense: true,
                     suffixIcon: IconButton(
@@ -294,10 +295,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a password';
+                      return 'enter_password_validation'.tr(ref);
                     }
                     if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
+                      return 'password_min_length'.tr(ref);
                     }
                     return null;
                   },
@@ -309,7 +310,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   controller: _confirmPasswordController,
                   obscureText: _obscureConfirmPassword,
                   decoration: InputDecoration(
-                    labelText: 'Confirm Password',
+                    labelText: 'confirm_password'.tr(ref),
                     prefixIcon: const Icon(Icons.lock_outline),
                     isDense: true,
                     suffixIcon: IconButton(
@@ -325,10 +326,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please confirm your password';
+                      return 'confirm_password_validation'.tr(ref);
                     }
                     if (value != _passwordController.text) {
-                      return 'Passwords do not match';
+                      return 'passwords_dont_match'.tr(ref);
                     }
                     return null;
                   },
@@ -350,7 +351,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
-                        : const Text('Create Account'),
+                        : Text('create_account'.tr(ref)),
                   ),
                 ),
                 SizedBox(height: screenHeight * 0.02),
@@ -361,7 +362,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(
-                      'Already have an account? ',
+                      'already_have_account'.tr(ref),
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontSize: screenWidth * 0.035 < 13 ? 13.0 : (screenWidth * 0.035 > 15 ? 15.0 : screenWidth * 0.035),
@@ -370,7 +371,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     TextButton(
                       onPressed: () => context.go('/login'),
                       child: Text(
-                        'Sign In',
+                        'sign_in'.tr(ref),
                         style: TextStyle(
                           fontSize: screenWidth * 0.035 < 13 ? 13.0 : (screenWidth * 0.035 > 15 ? 15.0 : screenWidth * 0.035),
                         ),

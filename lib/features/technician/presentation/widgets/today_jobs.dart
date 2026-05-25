@@ -27,7 +27,7 @@ class _TodayJobsState extends ConsumerState<TodayJobs> {
     
     // Debug: Print all bookings with dates
     debugPrint('📅 Today is: ${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}');
-    debugPrint('📋 Total bookings: ${bookingState.bookings.length}');
+    debugPrint('Total bookings: ${bookingState.bookings.length}');
     
     final todayJobs = bookingState.bookings.where((booking) {
       final bookingDate = booking.scheduledDate;
@@ -46,7 +46,7 @@ class _TodayJobsState extends ConsumerState<TodayJobs> {
       debugPrint('  Booking ${booking.id}: ${bookingDate.year}-${bookingDate.month.toString().padLeft(2, '0')}-${bookingDate.day.toString().padLeft(2, '0')}, status: ${booking.status}, isToday: $isToday, isActive: $isActiveStatus');
       
       if (isToday && isActiveStatus) {
-        debugPrint('✅ Today\'s job found: ${booking.id}, status: ${booking.status}');
+        debugPrint('Today\'s job found: ${booking.id}, status: ${booking.status}');
       }
       
       return isToday && isActiveStatus;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 import 'package:car_maintenance_system_new/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/booking/presentation/viewmodels/booking_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/booking/domain/entities/booking_entity.dart';
@@ -91,8 +92,8 @@ class _TechnicianProfilePageState extends ConsumerState<TechnicianProfilePage> {
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profile updated successfully!'),
+          SnackBar(
+            content: Text('profile_updated'.tr(ref)),
             backgroundColor: Colors.green,
           ),
         );
@@ -102,7 +103,7 @@ class _TechnicianProfilePageState extends ConsumerState<TechnicianProfilePage> {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error updating profile: $e'),
+            content: Text('${'error_updating_profile'.tr(ref)}$e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -135,7 +136,7 @@ class _TechnicianProfilePageState extends ConsumerState<TechnicianProfilePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Profile'),
+        title: Text('profile'.tr(ref)),
         actions: [
           if (!_isEditing)
             IconButton(
@@ -188,7 +189,7 @@ class _TechnicianProfilePageState extends ConsumerState<TechnicianProfilePage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Personal Information',
+                            'personal_info'.tr(ref),
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -199,7 +200,7 @@ class _TechnicianProfilePageState extends ConsumerState<TechnicianProfilePage> {
                               onPressed: () {
                                 setState(() => _isEditing = true);
                               },
-                              tooltip: 'Edit Information',
+                              tooltip: 'edit_information'.tr(ref),
                             ),
                         ],
                       ),
@@ -210,7 +211,7 @@ class _TechnicianProfilePageState extends ConsumerState<TechnicianProfilePage> {
                         controller: _nameController,
                         enabled: _isEditing,
                         decoration: InputDecoration(
-                          labelText: 'Full Name',
+                          labelText: 'full_name'.tr(ref),
                           prefixIcon: const Icon(Icons.person),
                           border: const OutlineInputBorder(),
                           filled: !_isEditing,
@@ -218,10 +219,10 @@ class _TechnicianProfilePageState extends ConsumerState<TechnicianProfilePage> {
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Name is required';
+                            return 'name_required'.tr(ref);
                           }
                           if (value.trim().length < 2) {
-                            return 'Name must be at least 2 characters';
+                            return 'name_min_length'.tr(ref);
                           }
                           return null;
                         },
@@ -233,12 +234,12 @@ class _TechnicianProfilePageState extends ConsumerState<TechnicianProfilePage> {
                         initialValue: user?.email ?? '',
                         enabled: false,
                         decoration: InputDecoration(
-                          labelText: 'Email',
+                          labelText: 'email'.tr(ref),
                           prefixIcon: const Icon(Icons.email),
                           border: const OutlineInputBorder(),
                           filled: true,
                           fillColor: Colors.grey.shade100,
-                          helperText: 'Email cannot be changed',
+                          helperText: 'email_cannot_change'.tr(ref),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -249,7 +250,7 @@ class _TechnicianProfilePageState extends ConsumerState<TechnicianProfilePage> {
                         enabled: _isEditing,
                         keyboardType: TextInputType.phone,
                         decoration: InputDecoration(
-                          labelText: 'Phone Number',
+                          labelText: 'phone'.tr(ref),
                           prefixIcon: const Icon(Icons.phone),
                           border: const OutlineInputBorder(),
                           filled: !_isEditing,
@@ -258,7 +259,7 @@ class _TechnicianProfilePageState extends ConsumerState<TechnicianProfilePage> {
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Phone number is required';
+                            return 'phone_required'.tr(ref);
                           }
                           return null;
                         },
@@ -282,7 +283,7 @@ class _TechnicianProfilePageState extends ConsumerState<TechnicianProfilePage> {
                             Icon(Icons.build, color: Colors.blue.shade700, size: 20),
                             const SizedBox(width: 8),
                             Text(
-                              'TECHNICIAN',
+                              'technician'.tr(ref).toUpperCase(),
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.blue.shade700,
@@ -309,7 +310,7 @@ class _TechnicianProfilePageState extends ConsumerState<TechnicianProfilePage> {
                                     ),
                                   )
                                 : const Icon(Icons.save),
-                            label: Text(_isLoading ? 'Saving...' : 'Save Changes'),
+                            label: Text(_isLoading ? 'saving'.tr(ref) : 'save_changes'.tr(ref)),
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.all(16),
                               backgroundColor: Colors.green,
@@ -332,7 +333,7 @@ class _TechnicianProfilePageState extends ConsumerState<TechnicianProfilePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Performance Summary',
+                        'performance_summary'.tr(ref),
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -343,14 +344,14 @@ class _TechnicianProfilePageState extends ConsumerState<TechnicianProfilePage> {
                         children: [
                           _buildStatItem(
                             context,
-                            'Jobs Completed',
+                            'jobs_completed'.tr(ref),
                             completedJobs.toString(),
                             Icons.check_circle,
                             Colors.green,
                           ),
                           _buildStatItem(
                             context,
-                            'Hours Worked',
+                            'hours_worked'.tr(ref),
                             '${totalHoursWorked.toStringAsFixed(0)}h',
                             Icons.schedule,
                             Colors.blue,
@@ -372,7 +373,7 @@ class _TechnicianProfilePageState extends ConsumerState<TechnicianProfilePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Account Information',
+                        'account_info'.tr(ref),
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -380,11 +381,11 @@ class _TechnicianProfilePageState extends ConsumerState<TechnicianProfilePage> {
                       const SizedBox(height: 16),
                       ListTile(
                         leading: const Icon(Icons.calendar_today, color: Colors.blue),
-                        title: const Text('Member Since'),
+                        title: Text('member_since'.tr(ref)),
                         subtitle: Text(
                           _accountCreatedDate != null
-                              ? DateFormat('MMMM dd, yyyy').format(_accountCreatedDate!)
-                              : 'Loading...',
+                               ? DateFormat('MMMM dd, yyyy').format(_accountCreatedDate!)
+                               : 'loading'.tr(ref),
                           style: const TextStyle(
                             fontWeight: FontWeight.w500,
                             fontSize: 16,
@@ -406,12 +407,12 @@ class _TechnicianProfilePageState extends ConsumerState<TechnicianProfilePage> {
                     showDialog(
                       context: context,
                       builder: (dialogContext) => AlertDialog(
-                        title: const Text('Sign Out'),
-                        content: const Text('Are you sure you want to sign out?'),
+                        title: Text('sign_out'.tr(ref)),
+                        content: Text('sign_out_confirm'.tr(ref)),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(dialogContext),
-                            child: const Text('Cancel'),
+                            child: Text('cancel'.tr(ref)),
                           ),
                           ElevatedButton(
                             onPressed: () async {
@@ -427,14 +428,14 @@ class _TechnicianProfilePageState extends ConsumerState<TechnicianProfilePage> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.red,
                             ),
-                            child: const Text('Sign Out'),
+                            child: Text('sign_out'.tr(ref)),
                           ),
                         ],
                       ),
                     );
                   },
                   icon: const Icon(Icons.logout),
-                  label: const Text('Sign Out'),
+                  label: Text('sign_out'.tr(ref)),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.all(16),
                     foregroundColor: Colors.red,

@@ -14,6 +14,7 @@ import 'package:car_maintenance_system_new/features/car/presentation/viewmodels/
 import 'package:car_maintenance_system_new/core/services/notification_service.dart';
 import 'package:car_maintenance_system_new/core/repositories/service_repository.dart';
 import 'package:car_maintenance_system_new/core/constants/service_items_constants.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 
 /// Read-only stream provider for available services (used by technician)
 final availableServicesProvider = StreamProvider<List<ServiceItemEntity>>((ref) {
@@ -73,8 +74,8 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
       if (!mounted) return;
       if (found == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not load job details. Please try again.'),
+          SnackBar(
+            content: Text('could_not_load_job'.tr(ref)),
             backgroundColor: Colors.red,
           ),
         );
@@ -138,7 +139,7 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
         _technicianNotesController.text = _booking!.technicianNotes!;
       }
     } catch (e, stack) {
-      debugPrint('❌ _loadBookingDetails error: $e\n$stack');
+      debugPrint('_loadBookingDetails error: $e\n$stack');
     } finally {
       // Always rebuild — even on error, so we don't hang on loading screen
       if (mounted) setState(() {});
@@ -155,7 +156,7 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
       if (userDoc.exists) {
         final data = userDoc.data()!;
         return <String, String>{
-          'name': data['name']?.toString() ?? 'Unknown',
+          'name': data['name']?.toString() ?? 'unknown'.tr(ref),
           'phone': data['phone']?.toString() ?? 'N/A',
         };
       }
@@ -181,7 +182,7 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
   Widget build(BuildContext context) {
     if (_booking == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Job Details')),
+        appBar: AppBar(title: Text('job_details'.tr(ref))),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -202,7 +203,7 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Complete Job'),
+          title: Text('complete_job'.tr(ref)),
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -217,7 +218,7 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        _getMaintenanceTypeName(_booking!.maintenanceType),
+                        _getMaintenanceTypeName(_booking!.maintenanceType, ref),
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -226,23 +227,23 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
                       FutureBuilder<Map<String, String>>(
                         future: _getUserInfo(_booking!.userId),
                         builder: (context, snapshot) {
-                          final customerName = snapshot.data?['name'] ?? 'Loading...';
-                          return Text('Customer: $customerName');
+                          final customerName = snapshot.data?['name'] ?? 'loading'.tr(ref);
+                          return Text('${'customer'.tr(ref)}$customerName');
                         },
                       ),
                       if (_car != null) ...[
-                        Text('Car: ${_car!.make} ${_car!.model}'),
-                        Text('Plate: ${_car!.licensePlate}'),
+                        Text('${'vehicle'.tr(ref)}${_car!.make} ${_car!.model}'),
+                        Text('${'license_plate'.tr(ref)}${_car!.licensePlate}'),
                       ],
-                      Text('Date: ${DateFormat('MMM dd, yyyy').format(_booking!.scheduledDate)}'),
-                      Text('Time: ${_booking!.timeSlot}'),
+                      Text('${'date'.tr(ref)}${DateFormat('MMM dd, yyyy').format(_booking!.scheduledDate)}'),
+                      Text('${'time'.tr(ref)}${_booking!.timeSlot}'),
                       if (_booking!.description != null && _booking!.description!.isNotEmpty)
-                        Text('Description: ${_booking!.description}'),
+                        Text('${'description'.tr(ref)}${_booking!.description}'),
                       if (_booking!.startedAt != null)
-                        Text('Started: ${DateFormat('MMM dd, HH:mm').format(_booking!.startedAt!)}'),
+                        Text('${'started'.tr(ref)}${DateFormat('MMM dd, HH:mm').format(_booking!.startedAt!)}'),
                       if (_booking!.completedAt != null) ...[
-                        Text('Completed: ${DateFormat('MMM dd, HH:mm').format(_booking!.completedAt!)}'),
-                        Text('Hours Worked: ${hoursWorked.toStringAsFixed(2)}h',
+                        Text('${'completion_time'.tr(ref)}${DateFormat('MMM dd, HH:mm').format(_booking!.completedAt!)}'),
+                        Text('${'hours_worked'.tr(ref)}${hoursWorked.toStringAsFixed(2)}h',
                           style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
                       ],
                     ],
@@ -257,7 +258,7 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Service Items & Parts',
+                    'service_items_parts'.tr(ref),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -280,7 +281,7 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
                           const Icon(Icons.build, size: 48, color: Colors.grey),
                           const SizedBox(height: 8),
                           Text(
-                            'No items added yet',
+                            'no_items_added'.tr(ref),
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: Colors.grey,
                             ),
@@ -289,7 +290,7 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
                             TextButton.icon(
                               onPressed: _addServiceItem,
                               icon: const Icon(Icons.add),
-                              label: const Text('Add Item'),
+                              label: Text('add_item'.tr(ref)),
                             ),
                         ],
                       ),
@@ -315,17 +316,17 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Type: ${item.type.toString().split('.').last}'),
-                          Text('Price: \$${item.price.toStringAsFixed(2)} x ${item.quantity}'),
+                          Text('${'type'.tr(ref)}${item.type.toString().split('.').last}'),
+                          Text('${'price'.tr(ref)}${item.price.toStringAsFixed(2)} ${'currency'.tr(ref)} x ${item.quantity}'),
                           if (item.description != null && item.description!.isNotEmpty)
-                            Text('Note: ${item.description}'),
+                            Text('${'notes'.tr(ref)}${item.description}'),
                         ],
                       ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            '\$${item.totalPrice.toStringAsFixed(2)}',
+                            '${item.totalPrice.toStringAsFixed(2)} ${'currency'.tr(ref)}',
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: Theme.of(context).primaryColor,
@@ -347,7 +348,7 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
 
               // Labor Cost
               Text(
-                'Labor Cost',
+                'labor_cost'.tr(ref),
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -357,10 +358,10 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
                 controller: _laborCostController,
                 enabled: _booking!.status == BookingStatus.inProgress,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(
-                  labelText: 'Labor Cost',
-                  prefixText: '\$ ',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: 'labor_cost'.tr(ref),
+                  suffixText: 'currency'.tr(ref),
+                  border: const OutlineInputBorder(),
                   hintText: '0.00',
                 ),
                 onChanged: (value) {
@@ -374,7 +375,7 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
 
               // Technician Notes
               Text(
-                'Technician Notes',
+                'technician_notes'.tr(ref),
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -384,10 +385,10 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
                 controller: _technicianNotesController,
                 enabled: _booking!.status == BookingStatus.inProgress,
                 maxLines: 4,
-                decoration: const InputDecoration(
-                  labelText: 'Notes',
-                  border: OutlineInputBorder(),
-                  hintText: 'Add any notes about the service...',
+                decoration: InputDecoration(
+                  labelText: 'notes'.tr(ref),
+                  border: const OutlineInputBorder(),
+                  hintText: 'add_notes_hint'.tr(ref),
                 ),
                 onChanged: (value) {
                   setState(() {
@@ -411,7 +412,7 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Subtotal:',
+                            'subtotal'.tr(ref),
                             style: TextStyle(
                               color: Theme.of(context).brightness == Brightness.dark 
                                   ? Colors.white70 
@@ -419,7 +420,7 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
                             ),
                           ),
                           Text(
-                            '\$${subtotal.toStringAsFixed(2)}',
+                            '${subtotal.toStringAsFixed(2)} ${'currency'.tr(ref)}',
                             style: TextStyle(
                               color: Theme.of(context).brightness == Brightness.dark 
                                   ? Colors.white70 
@@ -433,7 +434,7 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Tax (10%):',
+                            '${'tax'.tr(ref)} (10%):',
                             style: TextStyle(
                               color: Theme.of(context).brightness == Brightness.dark 
                                   ? Colors.white70 
@@ -441,7 +442,7 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
                             ),
                           ),
                           Text(
-                            '\$${tax.toStringAsFixed(2)}',
+                            '${tax.toStringAsFixed(2)} ${'currency'.tr(ref)}',
                             style: TextStyle(
                               color: Theme.of(context).brightness == Brightness.dark 
                                   ? Colors.white70 
@@ -455,7 +456,7 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Total:',
+                            'total'.tr(ref),
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: Theme.of(context).brightness == Brightness.dark 
@@ -464,7 +465,7 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
                             ),
                           ),
                           Text(
-                            '\$${total.toStringAsFixed(2)}',
+                            '${total.toStringAsFixed(2)} ${'currency'.tr(ref)}',
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: Theme.of(context).brightness == Brightness.dark 
@@ -488,7 +489,7 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
                   child: ElevatedButton.icon(
                     onPressed: _startJob,
                     icon: const Icon(Icons.play_arrow),
-                    label: const Text('Start Job'),
+                    label: Text('start_job'.tr(ref)),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.all(16),
                     ),
@@ -502,7 +503,7 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
                       child: OutlinedButton.icon(
                         onPressed: _saveProgress,
                         icon: const Icon(Icons.save),
-                        label: const Text('Save Progress'),
+                        label: Text('save_progress'.tr(ref)),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.all(16),
                         ),
@@ -513,8 +514,8 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
                       child: OutlinedButton.icon(
                         onPressed: _saveAndComplete,
                         icon: const Icon(Icons.check_circle),
-                        label: const Text(
-                          'Complete Job',
+                        label: Text(
+                          'complete_job'.tr(ref),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                         ),
@@ -592,12 +593,12 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
         if (mounted) {
           _loadBookingDetails();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Job started!'), backgroundColor: Colors.green),
+            SnackBar(content: Text('job_started'.tr(ref)), backgroundColor: Colors.green),
           );
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to start job'), backgroundColor: Colors.red),
+          SnackBar(content: Text('failed_start_job'.tr(ref)), backgroundColor: Colors.red),
         );
       }
     }
@@ -632,12 +633,12 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
           });
           _loadBookingDetails();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Progress saved!'), backgroundColor: Colors.green),
+            SnackBar(content: Text('progress_saved'.tr(ref)), backgroundColor: Colors.green),
           );
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to save progress'), backgroundColor: Colors.red),
+          SnackBar(content: Text('failed_save_progress'.tr(ref)), backgroundColor: Colors.red),
         );
       }
     }
@@ -663,8 +664,8 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
     // Validate that service items or labor cost is added
     if (_serviceItems.isEmpty && (_laborCostController.text.isEmpty || double.tryParse(_laborCostController.text) == 0)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please add at least one service item or labor cost'),
+        SnackBar(
+          content: Text('please_add_item_labor'.tr(ref)),
           backgroundColor: Colors.orange,
         ),
       );
@@ -705,7 +706,7 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
           );
           debugPrint('📬 Service completed notification sent to customer');
         } catch (e) {
-          debugPrint('⚠️ Failed to send service completed notification: $e');
+          debugPrint('Failed to send service completed notification: $e');
         }
         
         // Reload bookings to reflect the update
@@ -716,28 +717,28 @@ class _JobDetailsPageState extends ConsumerState<JobDetailsPage> {
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Job completed successfully!'), backgroundColor: Colors.green),
+            SnackBar(content: Text('job_completed_successfully'.tr(ref)), backgroundColor: Colors.green),
           );
           context.pop();
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to complete job'), backgroundColor: Colors.red),
+          SnackBar(content: Text('failed_complete_job'.tr(ref)), backgroundColor: Colors.red),
         );
       }
     }
   }
 
-  String _getMaintenanceTypeName(MaintenanceType type) {
+  String _getMaintenanceTypeName(MaintenanceType type, WidgetRef ref) {
     switch (type) {
       case MaintenanceType.regular:
-        return 'Regular Maintenance';
+        return 'regular_maintenance'.tr(ref);
       case MaintenanceType.inspection:
-        return 'Inspection';
+        return 'inspection'.tr(ref);
       case MaintenanceType.repair:
-        return 'Repair Service';
+        return 'repair_service'.tr(ref);
       case MaintenanceType.emergency:
-        return 'Emergency Service';
+        return 'emergency_service'.tr(ref);
     }
   }
 
@@ -796,14 +797,14 @@ class _ServiceItemDialogState extends ConsumerState<_ServiceItemDialog> {
     final servicesAsync = ref.watch(availableServicesProvider);
 
     return AlertDialog(
-      title: Text('Add Items to Invoice', style: TextStyle(fontSize: 18.sp)),
+      title: Text('add_items_to_invoice'.tr(ref), style: TextStyle(fontSize: 18.sp)),
       contentPadding: EdgeInsets.fromLTRB(12.w, 16.h, 12.w, 0),
       content: SizedBox(
         width: 0.9.sw,
         height: 0.6.sh,
         child: servicesAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('Error: $e')),
+          error: (e, _) => Center(child: Text('${'error'.tr(ref)}$e')),
           data: (allItems) {
             final items = allItems
                 .where((s) =>
@@ -814,7 +815,7 @@ class _ServiceItemDialogState extends ConsumerState<_ServiceItemDialog> {
             if (items.isEmpty) {
               return Center(
                 child: Text(
-                  'No catalog items available for this maintenance type.\nAsk admin to add services.',
+                  'no_catalog_items'.tr(ref),
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.grey.shade600, fontSize: 13.sp),
                 ),
@@ -863,7 +864,7 @@ class _ServiceItemDialogState extends ConsumerState<_ServiceItemDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('Cancel', style: TextStyle(fontSize: 14.sp)),
+          child: Text('cancel'.tr(ref), style: TextStyle(fontSize: 14.sp)),
         ),
         ElevatedButton.icon(
           onPressed: _selectedCount == 0
@@ -887,8 +888,8 @@ class _ServiceItemDialogState extends ConsumerState<_ServiceItemDialog> {
           icon: const Icon(Icons.check),
           label: Text(
             _selectedCount == 0
-                ? 'Add Selected'
-                : 'Add $_selectedCount Item${_selectedCount > 1 ? 's' : ''}',
+                ? 'add_selected'.tr(ref)
+                : '${'add'.tr(ref)}$_selectedCount${'items_count'.tr(ref)}',
             style: TextStyle(fontSize: 14.sp),
           ),
         ),
@@ -898,7 +899,7 @@ class _ServiceItemDialogState extends ConsumerState<_ServiceItemDialog> {
 }
 
 /// Single row inside the multi-item dialog
-class _ItemRow extends StatelessWidget {
+class _ItemRow extends ConsumerWidget {
   final _ItemSelection sel;
   final ValueChanged<bool> onToggle;
   final ValueChanged<int> onQtyChanged;
@@ -910,7 +911,7 @@ class _ItemRow extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
       margin: EdgeInsets.symmetric(vertical: 3.h),
@@ -952,7 +953,7 @@ class _ItemRow extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${sel.item.price.toStringAsFixed(0)} EGP / unit',
+                      '${sel.item.price.toStringAsFixed(0)} ${'currency'.tr(ref)} / ${'unit'.tr(ref)}',
                       style: TextStyle(
                         fontSize: 12.sp,
                         color: Colors.grey.shade600,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 import 'package:car_maintenance_system_new/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/booking/presentation/viewmodels/booking_viewmodel.dart';
 import 'package:car_maintenance_system_new/features/car/presentation/viewmodels/car_viewmodel.dart';
@@ -9,6 +10,8 @@ import 'package:car_maintenance_system_new/features/shared/presentation/pages/se
 import 'package:car_maintenance_system_new/features/technician/presentation/widgets/today_jobs.dart';
 import 'package:car_maintenance_system_new/features/technician/presentation/widgets/performance_stats.dart';
 import 'package:car_maintenance_system_new/features/shared/presentation/pages/notifications_page.dart';
+
+import 'package:car_maintenance_system_new/features/shared/presentation/widgets/app_drawer.dart';
 
 class TechnicianDashboard extends ConsumerStatefulWidget {
   const TechnicianDashboard({super.key});
@@ -57,64 +60,12 @@ class _TechnicianDashboardState extends ConsumerState<TechnicianDashboard> {
     final user = authState.user;
 
     return Scaffold(
+      drawer: const AppDrawer(role: 'technician'),
       appBar: AppBar(
         title: Text(
-          'Welcome, ${user?.name ?? 'Technician'}',
+          '${'welcome_technician'.tr(ref)}${user?.name ?? 'technician'.tr(ref)}',
           style: TextStyle(fontSize: 18.sp),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.settings, size: 22.sp),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsPage()),
-              );
-            },
-          ),
-          // Notification bell with unread count
-          Consumer(
-            builder: (context, ref, child) {
-              final unreadAsync = ref.watch(unreadCountProvider);
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.notifications, size: 22.sp),
-                    onPressed: () {
-                      context.push('/technician/notifications');
-                    },
-                  ),
-                  unreadAsync.when(
-                    data: (count) => count > 0
-                        ? Positioned(
-                            right: 8,
-                            top: 8,
-                            child: Container(
-                              padding: EdgeInsets.all(4.w),
-                              decoration: const BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Text(
-                                count > 9 ? '9+' : '$count',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10.sp,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          )
-                        : const SizedBox.shrink(),
-                    loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const SizedBox.shrink(),
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
       ),
       body: RefreshIndicator(
         onRefresh: _refreshData,
@@ -131,7 +82,7 @@ class _TechnicianDashboardState extends ConsumerState<TechnicianDashboard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Good ${_getGreeting()}!',
+                      _getGreeting(ref),
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         fontSize: 20.sp,
@@ -139,7 +90,7 @@ class _TechnicianDashboardState extends ConsumerState<TechnicianDashboard> {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'Ready to start your day?',
+                      'ready_start_day'.tr(ref),
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Colors.grey[600],
                         fontSize: 14.sp,
@@ -154,7 +105,7 @@ class _TechnicianDashboardState extends ConsumerState<TechnicianDashboard> {
             
             // Performance Stats
             Text(
-              'Performance',
+              'performance'.tr(ref),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 fontSize: 18.sp,
@@ -167,7 +118,7 @@ class _TechnicianDashboardState extends ConsumerState<TechnicianDashboard> {
             
             // Today's Jobs
             Text(
-              "Today's Jobs",
+              "todays_jobs".tr(ref),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 fontSize: 18.sp,
@@ -179,51 +130,17 @@ class _TechnicianDashboardState extends ConsumerState<TechnicianDashboard> {
         ),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: 0,
-        selectedFontSize: 12.sp,
-        unselectedFontSize: 10.sp,
-        iconSize: 24.sp,
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              // Already on dashboard
-              break;
-            case 1:
-              context.go('/technician/jobs');
-              break;
-            case 2:
-              context.go('/technician/profile');
-              break;
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: 'Dashboard',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.work),
-            label: 'Jobs',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-      ),
     );
   }
 
-  String _getGreeting() {
+  String _getGreeting(WidgetRef ref) {
     final hour = DateTime.now().hour;
     if (hour < 12) {
-      return 'Morning';
+      return 'good_morning'.tr(ref);
     } else if (hour < 17) {
-      return 'Afternoon';
+      return 'good_afternoon'.tr(ref);
     } else {
-      return 'Evening';
+      return 'good_evening'.tr(ref);
     }
   }
 }

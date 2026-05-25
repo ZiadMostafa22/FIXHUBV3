@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:car_maintenance_system_new/core/localization/app_localizations.dart';
 
-class CustomerBottomNavBar extends StatelessWidget {
+class CustomerBottomNavBar extends ConsumerWidget {
   final BuildContext context;
 
   const CustomerBottomNavBar({
@@ -10,8 +12,8 @@ class CustomerBottomNavBar extends StatelessWidget {
     required this.context,
   });
 
-  int _getCurrentIndex() {
-    final location = GoRouterState.of(context).uri.toString();
+  int _getCurrentIndex(BuildContext ctx) {
+    final location = GoRouterState.of(ctx).uri.toString();
     if (location == '/customer' || location == '/customer/') {
       return 0;
     } else if (location.startsWith('/customer/cars')) {
@@ -20,17 +22,15 @@ class CustomerBottomNavBar extends StatelessWidget {
       return 2;
     } else if (location.startsWith('/customer/chatbot')) {
       return 3;
-    } else if (location.startsWith('/customer/profile')) {
-      return 4;
     }
     return 0;
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext buildContext, WidgetRef ref) {
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
-      currentIndex: _getCurrentIndex(),
+      currentIndex: _getCurrentIndex(context),
       selectedFontSize: 12.sp,
       unselectedFontSize: 10.sp,
       iconSize: 24.sp,
@@ -48,31 +48,24 @@ class CustomerBottomNavBar extends StatelessWidget {
           case 3:
             context.go('/customer/chatbot');
             break;
-          case 4:
-            context.go('/customer/profile');
-            break;
         }
       },
-      items: const [
+      items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.dashboard),
-          label: 'Dashboard',
+          icon: const Icon(Icons.dashboard),
+          label: 'dashboard'.tr(ref),
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.directions_car),
-          label: 'My Cars',
+          icon: const Icon(Icons.directions_car),
+          label: 'my_cars'.tr(ref),
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.local_offer),
-          label: 'Offers',
+          icon: const Icon(Icons.local_offer),
+          label: 'offers'.tr(ref),
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.chat_bubble),
-          label: 'Chat',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: 'Profile',
+          icon: const Icon(Icons.chat_bubble),
+          label: 'chat'.tr(ref),
         ),
       ],
     );
